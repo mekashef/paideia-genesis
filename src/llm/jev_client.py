@@ -356,6 +356,7 @@ class JevClient:
         diag = self.run_system_one(state, questions)
         score_ans = diag.answers.get("recall_quality", {})
         score_val = score_ans.get("score", 0)
+        score_int = int(round(score_val)) if isinstance(score_val, (int, float)) else 0
         confidence = score_ans.get("confidence", 0.9)
 
         # Map Level 0..4 to SuperMemo-2 rating (1: Again, 2: Hard, 3: Good, 4: Easy)
@@ -363,13 +364,13 @@ class JevClient:
         # Level 2 -> 2 (Hard)
         # Level 3 -> 3 (Good)
         # Level 4 -> 4 (Easy)
-        if score_val <= 1:
+        if score_int <= 1:
             sm2_rating = 1
             feedback_label = "Again (Needs Review)"
-        elif score_val == 2:
+        elif score_int == 2:
             sm2_rating = 2
             feedback_label = "Hard (Partial Mechanism Recalled)"
-        elif score_val == 3:
+        elif score_int == 3:
             sm2_rating = 3
             feedback_label = "Good (Solid Recall)"
         else:
@@ -379,7 +380,8 @@ class JevClient:
         return {
             "success": True,
             "sm2_rating": sm2_rating,
-            "rubric_level": score_val,
+            "rubric_level": score_int,
+            "raw_score": score_val,
             "confidence": confidence,
             "feedback_label": feedback_label,
             "latency_ms": diag.latency_ms,

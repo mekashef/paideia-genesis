@@ -1,13 +1,24 @@
 """Configuration manager for Paideia Genesis."""
 import os
+import sys
 from pathlib import Path
 from dotenv import load_dotenv
 
 # Load .env if present
 load_dotenv()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
+# Detect if running as a compiled PyInstaller / frozen binary
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    BUNDLE_DIR = Path(sys._MEIPASS)
+else:
+    BUNDLE_DIR = Path(__file__).resolve().parent.parent
+
+BASE_DIR = BUNDLE_DIR
+DEMO_DATA_DIR = BUNDLE_DIR / "demo_data"
+STATIC_DIR = BUNDLE_DIR / "static"
+
+# Writable user runtime data directory (defaults to ./data relative to execution CWD)
+DATA_DIR = Path(os.getenv("DATA_DIR", Path.cwd() / "data"))
 
 # Subdirectories
 RAW_SOURCES_DIR = DATA_DIR / "raw_sources"

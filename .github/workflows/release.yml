@@ -1,0 +1,132 @@
+name: Release Multi-Platform Binaries
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.os == 'windows-latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux-x86_64
+            binary_name: paideia-genesis
+            archive_name: paideia-genesis-linux-x86_64.tar.gz
+          - os: macos-14
+            platform: macos-arm64
+            binary_name: paideia-genesis
+            archive_name: paideia-genesis-macos-arm64.tar.gz
+          - os: windows-latest
+            platform: windows-x64
+            binary_name: paideia-genesis.exe
+            archive_name: paideia-genesis-windows-x64.zip
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Dependencies & PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+
+      - name: Build Standalone Binary
+        run: |
+          pyinstaller --clean paideia-genesis.spec
+
+      - name: Package Binary (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          tar -czvf ${{ matrix.archive_name }} -C dist ${{ matrix.binary_name }}
+
+      - name: Package Binary (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path dist\${{ matrix.binary_name }} -DestinationPath ${{ matrix.archive_name }}
+
+      - name: Upload Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}-binary
+          path: ${{ matrix.archive_name }}
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download All Platform Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: List Release Assets
+        run: |
+          ls -la release-assets/
+
+      - name: Create or Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          name: "Paideia Genesis ${{ github.ref_name }} — Autonomous Living Medical Teacher"
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          body: |
+            ### ⚕ Paideia Genesis v0.0.1 Release ⚕
+            **Autonomous Living Medical Teacher & Compounding LLM-Wiki Engine**
+
+            This release includes precompiled, standalone binary executables for **Linux**, **macOS**, and **Windows**. No Python installation or source code required.
+
+            #### 📦 Download & Quickstart
+
+            ##### Linux (Ubuntu / Debian / Fedora x86_64)
+            ```bash
+            tar -xvf paideia-genesis-linux-x86_64.tar.gz
+            chmod +x paideia-genesis
+            ./paideia-genesis
+            ```
+
+            ##### macOS (Apple Silicon arm64)
+            ```bash
+            tar -xvf paideia-genesis-macos-arm64.tar.gz
+            chmod +x paideia-genesis
+            ./paideia-genesis
+            ```
+
+            ##### Windows (x64)
+            - Extract `paideia-genesis-windows-x64.zip`
+            - Double-click `paideia-genesis.exe`
+
+            Once launched, open your web browser to:
+            👉 **`http://localhost:8000`**
+
+            ---
+            #### 🌟 What's Included in v0.0.1
+            - **Compounding Karpathy LLM-Wiki**: Preloaded with MIT HST.121 (20 sessions, 28 entities, 6 differentials, 3 traps) and Cardiopulmonary block.
+            - **Biomimetic Cognitive Brain Graph**: Multi-foci anatomical clustering with HippoRAG spreading activation.
+            - **High-Precision KaTeX Math Engine**: Perfect rendering of clinical formulas ($$\text{Stool Osmotic Gap}$$, $$\text{SAAG}$$, $$\text{MELD}$$).
+            - **Socratic Living Teacher**: Step-1 clinical vignette generator with reasoning diagnostic probes and misconception ledgers.
+            - **Spaced-Repetition Active Recall**: 117+ high-yield cloze deletion flashcards with SuperMemo-2 in-browser player, `.apkg` export, and 1-click AnkiConnect sync.

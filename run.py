@@ -7,10 +7,11 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(BASE_DIR))
 
-from src.config import HOST, PORT, WIKI_DIR
+from src.config import HOST, PORT, WIKI_DIR, DEMO_DATA_DIR
 from src.wiki.schema import init_wiki_structure
 from src.wiki.compiler import WikiCompiler
 from src.wiki.indexer import WikiIndexer
+from src.api.server import app
 
 def main():
     print("=" * 70)
@@ -26,7 +27,7 @@ def main():
     concepts_dir = WIKI_DIR / "concepts"
     if not any(concepts_dir.glob("*.md")):
         print("[2/3] Seeding starter medical curricula (Cardiology & MIT HST.121)...")
-        demo_lecture = BASE_DIR / "demo_data" / "Cardiology_Block_Lecture_4_Heart_Failure_and_Diuretics.md"
+        demo_lecture = DEMO_DATA_DIR / "Cardiology_Block_Lecture_4_Heart_Failure_and_Diuretics.md"
         if demo_lecture.exists():
             compiler = WikiCompiler()
             compiler.ingest_source(
@@ -57,7 +58,7 @@ def main():
     print(f"      Dashboard: http://localhost:{PORT}")
     print("=" * 70)
 
-    uvicorn.run("src.api.server:app", host=HOST, port=PORT, log_level="info")
+    uvicorn.run(app, host=HOST, port=PORT, log_level="info")
 
 if __name__ == "__main__":
     main()

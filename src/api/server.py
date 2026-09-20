@@ -9,7 +9,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 
-from src.config import WIKI_DIR, RAW_SOURCES_DIR, ANKI_EXPORT_DIR, LLM_PROVIDER
+from src.config import (
+    WIKI_DIR, RAW_SOURCES_DIR, ANKI_EXPORT_DIR, LLM_PROVIDER,
+    STATIC_DIR, DEMO_DATA_DIR
+)
 from src.wiki.schema import init_wiki_structure
 from src.wiki.indexer import WikiIndexer, parse_markdown_file
 from src.wiki.compiler import WikiCompiler
@@ -41,8 +44,7 @@ def ensure_wiki_bootstrapped():
     """Auto-seed medical curricula if running on a fresh clone or empty database."""
     sessions_dir = WIKI_DIR / "course_sessions"
     if not any(sessions_dir.glob("*.md")):
-        from src.config import BASE_DIR
-        demo_lecture = BASE_DIR / "demo_data" / "Cardiology_Block_Lecture_4_Heart_Failure_and_Diuretics.md"
+        demo_lecture = DEMO_DATA_DIR / "Cardiology_Block_Lecture_4_Heart_Failure_and_Diuretics.md"
         if demo_lecture.exists():
             try:
                 compiler.ingest_source(
@@ -59,10 +61,6 @@ def ensure_wiki_bootstrapped():
             pass
 
 ensure_wiki_bootstrapped()
-
-# Ensure static directory exists
-STATIC_DIR = Path(__file__).resolve().parent.parent.parent / "static"
-STATIC_DIR.mkdir(parents=True, exist_ok=True)
 
 class AnswerSubmission(BaseModel):
     vignette: Dict[str, Any]

@@ -286,6 +286,9 @@ function setupEventListeners() {
     const ankiMastery = document.getElementById("ankiMasteryFilter");
     if (ankiMastery) ankiMastery.addEventListener("change", () => loadAnkiCards());
 
+    const ankiClozeMode = document.getElementById("ankiClozeModeFilter");
+    if (ankiClozeMode) ankiClozeMode.addEventListener("change", () => loadAnkiCards());
+
     const ankiSearch = document.getElementById("ankiSearchInput");
     if (ankiSearch) {
         ankiSearch.addEventListener("input", () => {
@@ -1243,6 +1246,7 @@ async function loadAnkiCards() {
         const system = document.getElementById("ankiSystemFilter")?.value || "all";
         const cardType = document.getElementById("ankiTypeFilter")?.value || "all";
         const mastery = document.getElementById("ankiMasteryFilter")?.value || "all";
+        const clozeMode = document.getElementById("ankiClozeModeFilter")?.value || "atomic";
         const query = document.getElementById("ankiSearchInput")?.value || "";
 
         const params = new URLSearchParams();
@@ -1250,6 +1254,7 @@ async function loadAnkiCards() {
         if (system !== "all") params.set("system", system);
         if (cardType !== "all") params.set("card_type", cardType);
         if (mastery !== "all") params.set("mastery", mastery);
+        if (clozeMode) params.set("cloze_mode", clozeMode);
         if (query.trim()) params.set("query", query.trim());
 
         const resp = await fetch("/api/anki/cards?" + params.toString());
@@ -1374,12 +1379,18 @@ function renderAnkiCardGrid(cards) {
             </button>
         ` : '';
 
+        // Atomic subtitle/pill
+        const atomicPillHtml = card.subtitle ? `
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">${card.subtitle}</span>
+        ` : (card.is_atomic ? `<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">🎯 Single Unknown</span>` : '');
+
         cardEl.innerHTML = `
             <div>
                 <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center gap-1.5">
+                    <div class="flex items-center gap-1.5 flex-wrap">
                         <span class="system-pill ${sysClass}">${sys}</span>
                         <span class="text-[10px] font-mono text-slate-400 uppercase">${card.type || "cloze"}</span>
+                        ${atomicPillHtml}
                         <span class="text-[10px] text-amber-400 font-mono">${stars}</span>
                     </div>
                     <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${masteryBadgeClass}">${masteryLabel}</span>
@@ -1470,6 +1481,19 @@ function renderCurrentStudyCard() {
     const diff = card.difficulty || 2;
     document.getElementById("studyCardDifficulty").textContent = diff === 1 ? "★☆☆" : diff === 2 ? "★★☆" : "★★★";
 
+    // Atomic / Single-Unknown Badge
+    const atomicBadge = document.getElementById("studyCardAtomicBadge");
+    if (atomicBadge) {
+        if (card.is_atomic || card.cloze_count === 1) {
+            atomicBadge.classList.remove("hidden");
+            atomicBadge.textContent = (card.cloze_index && card.total_clozes > 1)
+                ? `🎯 Unknown ${card.cloze_index} of ${card.total_clozes}`
+                : `🎯 Single Unknown`;
+        } else {
+            atomicBadge.classList.add("hidden");
+        }
+    }
+
     const masteryBadge = document.getElementById("studyCardMasteryBadge");
     const mastery = card.mastery || "unreviewed";
     masteryBadge.className = `text-xs font-semibold px-2.5 py-0.5 rounded-full mastery-badge-${mastery}`;
@@ -1489,7 +1513,14 @@ function renderCurrentStudyCard() {
 
     // Reset Jev Active Recall Input and Telemetry Badge
     const recallInput = document.getElementById("studyRecallInput");
-    if (recallInput) recallInput.value = "";
+    if (recallInput) {
+        recallInput.value = "";
+        if (card.is_atomic && card.total_clozes > 1) {
+            recallInput.placeholder = `Type the target blank (Unknown ${card.cloze_index} of ${card.total_clozes}) from memory...`;
+        } else {
+            recallInput.placeholder = "Type the physiological mechanism, drug target, or clinical pearl from memory...";
+        }
+    }
     const recallBadge = document.getElementById("jevRecallFeedbackBadge");
     if (recallBadge) {
         recallBadge.classList.add("hidden");
@@ -1616,10 +1647,14 @@ function openWikiFromCard(wikiSlug) {
 async function recompileAnkiFromWiki() {
     showToast("Recompiling high-yield cards across all wiki files...", "info");
     try {
-        const resp = await fetch("/api/anki/compile_from_wiki", { method: "POST" });
+        const resp = await fetch("/api/anki/compile_from_wiki", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ atomic: false }) // Preserves base Anki format in storage, derives on-the-fly
+        });
         const data = await resp.json();
         if (data.success) {
-            showToast(`Recompiled ${data.total_cards} flashcards from Wiki!`, "success");
+            showToast(`Recompiled ${data.total_cards} cards from Wiki!`, "success");
             await loadAnkiCards();
             await loadStatus();
         } else {
@@ -1630,11 +1665,18 @@ async function recompileAnkiFromWiki() {
     }
 }
 
-// Download .apkg deck (respecting active course filter)
+// Download .apkg deck (respecting active course and cloze focus mode)
 function downloadAnkiDeck() {
     const course = document.getElementById("ankiCourseFilter")?.value || "all";
-    showToast(`Compiling ${course !== "all" ? course.toUpperCase() : "Master"} high-yield .apkg deck...`, "info");
-    const url = course !== "all" ? `/api/anki/export?course=${encodeURIComponent(course)}` : "/api/anki/export";
+    const clozeMode = document.getElementById("ankiClozeModeFilter")?.value || "atomic";
+    const isAtomic = clozeMode === "atomic";
+    showToast(`Compiling ${course !== "all" ? course.toUpperCase() : "Master"} ${isAtomic ? "Single-Unknown" : "Combined"} .apkg deck...`, "info");
+    
+    const params = new URLSearchParams();
+    if (course !== "all") params.set("course", course);
+    if (isAtomic) params.set("atomic", "true");
+
+    const url = "/api/anki/export?" + params.toString();
     window.location.href = url;
 }
 

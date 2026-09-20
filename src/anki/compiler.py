@@ -17,11 +17,85 @@ def get_clean_text(s: str) -> str:
     s = re.sub(r'\*(.*?)\*', r'\1', s)
     return s.strip()
 
+def atomize_card(card: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Atomizes a multi-cloze card into distinct single-unknown cards while preserving Anki cloze syntax.
+    
+    Adheres to Piotr Wozniak's Minimum Information Principle for spaced repetition:
+    each derived card tests strictly 1 unknown topic/blank, while preserving all other
+    variables as revealed plain text for surrounding grammatical and clinical context.
+    
+    If the card already contains <= 1 cloze deletion or is standard Q&A, it is returned as-is.
+    """
+    text = card.get("text") or card.get("front") or ""
+    cloze_pattern = re.compile(r'\{\{c(\d+)::([^}]+)\}\}')
+    matches = list(cloze_pattern.finditer(text))
+
+    if len(matches) <= 1:
+        single_card = dict(card)
+        single_card["is_atomic"] = True
+        single_card["cloze_count"] = len(matches)
+        single_card["cloze_index"] = 1 if len(matches) == 1 else 0
+        single_card["total_clozes"] = len(matches)
+        if len(matches) == 1:
+            single_card["target_unknown"] = matches[0].group(2).split("::")[0]
+        return [single_card]
+
+    atomic_cards = []
+    base_id = card.get("id", "card")
+    base_tags = list(card.get("tags", []))
+    if "Atomic" not in base_tags:
+        base_tags.append("Atomic")
+    if "Single-Unknown" not in base_tags:
+        base_tags.append("Single-Unknown")
+
+    atomic_states = card.get("atomic_states", {})
+
+    for idx, match in enumerate(matches, 1):
+        def repl(m):
+            if m.start() == match.start():
+                # Keep target cloze as valid Anki cloze c1
+                return f"{{{{c1::{m.group(2)}}}}}"
+            else:
+                # Reveal surrounding context cloze as plain text (strip hint if any)
+                return m.group(2).split("::")[0]
+
+        single_text = cloze_pattern.sub(repl, text)
+        target_answer = match.group(2).split("::")[0]
+        child_id = f"{base_id}-c{idx}"
+
+        child = dict(card)
+        child["id"] = child_id
+        child["parent_id"] = base_id
+        child["text"] = single_text
+        if "front" in child and card.get("front"):
+            child["front"] = single_text
+        child["target_unknown"] = target_answer
+        child["cloze_index"] = idx
+        child["total_clozes"] = len(matches)
+        child["is_atomic"] = True
+        child["cloze_count"] = 1
+        child["tags"] = list(base_tags)
+        child["subtitle"] = f"Unknown {idx} of {len(matches)}: {target_answer[:35]}"
+
+        # If child card has its own recorded review in parent's atomic_states, apply it
+        if child_id in atomic_states:
+            st = atomic_states[child_id]
+            child["repetitions"] = st.get("repetitions", 0)
+            child["interval"] = st.get("interval", 1)
+            child["ease_factor"] = st.get("ease_factor", 2.5)
+            child["due_date"] = st.get("due_date", datetime.date.today().isoformat())
+            child["last_reviewed"] = st.get("last_reviewed", None)
+            child["mastery"] = st.get("mastery", "unreviewed")
+
+        atomic_cards.append(child)
+
+    return atomic_cards
+
 class WikiFlashcardCompiler:
     def __init__(self, wiki_dir: Path):
         self.wiki_dir = wiki_dir
 
-    def compile_all(self, existing_cards: Optional[List[Dict[str, Any]]] = None) -> List[Dict[str, Any]]:
+    def compile_all(self, existing_cards: Optional[List[Dict[str, Any]]] = None, atomic_cards: bool = False) -> List[Dict[str, Any]]:
         """Compiles cards from all wiki sources and preserves review state of existing cards."""
         existing_map = {}
         if existing_cards:
@@ -65,6 +139,8 @@ class WikiFlashcardCompiler:
                 card["mastery"] = old.get("mastery", "unreviewed")
                 if "id" in old:
                     card["id"] = old["id"]
+                if "atomic_states" in old:
+                    card["atomic_states"] = old["atomic_states"]
             else:
                 card["repetitions"] = 0
                 card["interval"] = 1
@@ -87,6 +163,12 @@ class WikiFlashcardCompiler:
         for idx, card in enumerate(merged, start=1):
             if not card.get("id"):
                 card["id"] = f"card-{idx:03d}"
+
+        if atomic_cards:
+            derived_atomic: List[Dict[str, Any]] = []
+            for card in merged:
+                derived_atomic.extend(atomize_card(card))
+            return derived_atomic
 
         return merged
 

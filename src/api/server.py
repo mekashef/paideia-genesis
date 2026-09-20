@@ -95,6 +95,9 @@ class GradeRecallRequest(BaseModel):
     card_id: str
     student_answer: str
 
+class CompileCardsRequest(BaseModel):
+    atomic: bool = False
+
 
 @app.get("/api/status")
 def get_status():
@@ -344,14 +347,16 @@ def get_staged_anki_cards(
     system: Optional[str] = None,
     card_type: Optional[str] = None,
     mastery: Optional[str] = None,
-    query: Optional[str] = None
+    query: Optional[str] = None,
+    cloze_mode: Optional[str] = None
 ):
     return anki_manager.get_filtered_cards(
         course=course,
         system=system,
         card_type=card_type,
         mastery=mastery,
-        search=query
+        search=query,
+        cloze_mode=cloze_mode
     )
 
 @app.post("/api/anki/cards/review")
@@ -405,14 +410,15 @@ def grade_anki_recall(req: GradeRecallRequest):
     }
 
 @app.post("/api/anki/compile_from_wiki")
-def compile_cards_from_wiki():
-    result = anki_manager.recompile_from_wiki()
-    result["stats"] = anki_manager.get_filtered_cards()["stats"]
+def compile_cards_from_wiki(req: Optional[CompileCardsRequest] = None, atomic: bool = False):
+    is_atomic = req.atomic if req else atomic
+    result = anki_manager.recompile_from_wiki(atomic=is_atomic)
+    result["stats"] = anki_manager.get_filtered_cards(cloze_mode="atomic" if is_atomic else None)["stats"]
     return result
 
 @app.get("/api/anki/export")
-def download_anki_deck(course: Optional[str] = None, system: Optional[str] = None):
-    apkg_file = anki_manager.generate_apkg(course=course, system=system)
+def download_anki_deck(course: Optional[str] = None, system: Optional[str] = None, atomic: bool = False):
+    apkg_file = anki_manager.generate_apkg(course=course, system=system, atomic=atomic)
     return FileResponse(
         str(apkg_file),
         media_type="application/octet-stream",

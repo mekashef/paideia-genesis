@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 from src.config import (
     WIKI_DIR, RAW_SOURCES_DIR, ANKI_EXPORT_DIR, LLM_PROVIDER,
-    STATIC_DIR, DEMO_DATA_DIR
+    STATIC_DIR, DEMO_DATA_DIR, ENABLE_JEV_SYSTEM_ONE, TYPESAFE_API_KEY
 )
 from src.wiki.schema import init_wiki_structure
 from src.wiki.indexer import WikiIndexer, parse_markdown_file
@@ -91,6 +91,13 @@ class CardReviewRequest(BaseModel):
     card_id: str
     rating: int
 
+class GradeRecallRequest(BaseModel):
+    card_id: str
+    student_answer: str
+
+class CompileCardsRequest(BaseModel):
+    atomic: bool = False
+
 
 @app.get("/api/status")
 def get_status():
@@ -100,6 +107,11 @@ def get_status():
     return {
         "status": "online",
         "llm_provider": LLM_PROVIDER,
+        "system_one": {
+            "model": "jev",
+            "enabled": ENABLE_JEV_SYSTEM_ONE,
+            "has_api_key": bool(TYPESAFE_API_KEY)
+        },
         "total_wiki_pages": len(all_pages),
         "days_to_exam": schedule.get("days_remaining", 0),
         "target_exam": schedule.get("target_exam", "Medical Board"),
@@ -335,14 +347,16 @@ def get_staged_anki_cards(
     system: Optional[str] = None,
     card_type: Optional[str] = None,
     mastery: Optional[str] = None,
-    query: Optional[str] = None
+    query: Optional[str] = None,
+    cloze_mode: Optional[str] = None
 ):
     return anki_manager.get_filtered_cards(
         course=course,
         system=system,
         card_type=card_type,
         mastery=mastery,
-        search=query
+        search=query,
+        cloze_mode=cloze_mode
     )
 
 @app.post("/api/anki/cards/review")
@@ -368,15 +382,43 @@ def review_anki_card(req: CardReviewRequest):
         "stats": stats
     }
 
+@app.post("/api/anki/cards/grade_recall")
+def grade_anki_recall(req: GradeRecallRequest):
+    result = anki_manager.grade_student_recall(req.card_id, req.student_answer)
+    if not result:
+        raise HTTPException(status_code=404, detail="Flashcard not found")
+
+    updated_card = result["card"]
+    sm2_rating = result["grading"]["sm2_rating"]
+
+    # Sync mastery to student profile
+    system_tag = updated_card.get("system", "Pharmacology")
+    is_correct = (sm2_rating >= 3)
+    student_profile.record_attempt(
+        topic=system_tag,
+        is_correct=is_correct,
+        error_type="SPACED_REPETITION_SLIP" if not is_correct else None,
+        details=f"Jev auto-graded card drill: {updated_card.get('source', req.card_id)}"
+    )
+
+    stats = anki_manager.get_filtered_cards()["stats"]
+    return {
+        "success": True,
+        "card": updated_card,
+        "grading": result["grading"],
+        "stats": stats
+    }
+
 @app.post("/api/anki/compile_from_wiki")
-def compile_cards_from_wiki():
-    result = anki_manager.recompile_from_wiki()
-    result["stats"] = anki_manager.get_filtered_cards()["stats"]
+def compile_cards_from_wiki(req: Optional[CompileCardsRequest] = None, atomic: bool = False):
+    is_atomic = req.atomic if req else atomic
+    result = anki_manager.recompile_from_wiki(atomic=is_atomic)
+    result["stats"] = anki_manager.get_filtered_cards(cloze_mode="atomic" if is_atomic else None)["stats"]
     return result
 
 @app.get("/api/anki/export")
-def download_anki_deck(course: Optional[str] = None, system: Optional[str] = None):
-    apkg_file = anki_manager.generate_apkg(course=course, system=system)
+def download_anki_deck(course: Optional[str] = None, system: Optional[str] = None, atomic: bool = False):
+    apkg_file = anki_manager.generate_apkg(course=course, system=system, atomic=atomic)
     return FileResponse(
         str(apkg_file),
         media_type="application/octet-stream",

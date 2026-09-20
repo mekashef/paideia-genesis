@@ -286,6 +286,9 @@ function setupEventListeners() {
     const ankiMastery = document.getElementById("ankiMasteryFilter");
     if (ankiMastery) ankiMastery.addEventListener("change", () => loadAnkiCards());
 
+    const ankiClozeMode = document.getElementById("ankiClozeModeFilter");
+    if (ankiClozeMode) ankiClozeMode.addEventListener("change", () => loadAnkiCards());
+
     const ankiSearch = document.getElementById("ankiSearchInput");
     if (ankiSearch) {
         ankiSearch.addEventListener("input", () => {
@@ -1206,6 +1209,26 @@ async function submitAnswer() {
             document.getElementById("feedbackCardBack").textContent = cardCand.back;
         }
 
+        // Render Jev System 1 telemetry if present
+        const jevBadge = document.getElementById("feedbackJevBadge");
+        if (evalData.jev_system_one && jevBadge) {
+            jevBadge.classList.remove("hidden");
+            const jev = evalData.jev_system_one;
+            document.getElementById("jevLatencyBadge").textContent = `${jev.latency_ms}ms (Jev)`;
+            document.getElementById("jevTaxonomyVal").textContent = jev.error_taxonomy || "REASONING_GAP";
+            document.getElementById("jevConfidenceVal").textContent = `${Math.round(jev.confidence * 100)}%`;
+            const trapEl = document.getElementById("jevTrapVal");
+            if (jev.board_trap_triggered) {
+                trapEl.textContent = "TRIGGERED (High Risk)";
+                trapEl.className = "font-mono font-bold text-rose-400";
+            } else {
+                trapEl.textContent = "Not Triggered (Clean)";
+                trapEl.className = "font-mono font-bold text-emerald-400";
+            }
+        } else if (jevBadge) {
+            jevBadge.classList.add("hidden");
+        }
+
         showToast(evalData.is_correct ? "Correct! Mastery updated." : "Missed trap recorded in Wiki & Anki queued.", evalData.is_correct ? "success" : "info");
         await loadStatus();
         await loadWikiTree();
@@ -1223,6 +1246,7 @@ async function loadAnkiCards() {
         const system = document.getElementById("ankiSystemFilter")?.value || "all";
         const cardType = document.getElementById("ankiTypeFilter")?.value || "all";
         const mastery = document.getElementById("ankiMasteryFilter")?.value || "all";
+        const clozeMode = document.getElementById("ankiClozeModeFilter")?.value || "atomic";
         const query = document.getElementById("ankiSearchInput")?.value || "";
 
         const params = new URLSearchParams();
@@ -1230,6 +1254,7 @@ async function loadAnkiCards() {
         if (system !== "all") params.set("system", system);
         if (cardType !== "all") params.set("card_type", cardType);
         if (mastery !== "all") params.set("mastery", mastery);
+        if (clozeMode) params.set("cloze_mode", clozeMode);
         if (query.trim()) params.set("query", query.trim());
 
         const resp = await fetch("/api/anki/cards?" + params.toString());
@@ -1354,12 +1379,18 @@ function renderAnkiCardGrid(cards) {
             </button>
         ` : '';
 
+        // Atomic subtitle/pill
+        const atomicPillHtml = card.subtitle ? `
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">${card.subtitle}</span>
+        ` : (card.is_atomic ? `<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">🎯 Single Unknown</span>` : '');
+
         cardEl.innerHTML = `
             <div>
                 <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center gap-1.5">
+                    <div class="flex items-center gap-1.5 flex-wrap">
                         <span class="system-pill ${sysClass}">${sys}</span>
                         <span class="text-[10px] font-mono text-slate-400 uppercase">${card.type || "cloze"}</span>
+                        ${atomicPillHtml}
                         <span class="text-[10px] text-amber-400 font-mono">${stars}</span>
                     </div>
                     <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${masteryBadgeClass}">${masteryLabel}</span>
@@ -1450,6 +1481,19 @@ function renderCurrentStudyCard() {
     const diff = card.difficulty || 2;
     document.getElementById("studyCardDifficulty").textContent = diff === 1 ? "★☆☆" : diff === 2 ? "★★☆" : "★★★";
 
+    // Atomic / Single-Unknown Badge
+    const atomicBadge = document.getElementById("studyCardAtomicBadge");
+    if (atomicBadge) {
+        if (card.is_atomic || card.cloze_count === 1) {
+            atomicBadge.classList.remove("hidden");
+            atomicBadge.textContent = (card.cloze_index && card.total_clozes > 1)
+                ? `🎯 Unknown ${card.cloze_index} of ${card.total_clozes}`
+                : `🎯 Single Unknown`;
+        } else {
+            atomicBadge.classList.add("hidden");
+        }
+    }
+
     const masteryBadge = document.getElementById("studyCardMasteryBadge");
     const mastery = card.mastery || "unreviewed";
     masteryBadge.className = `text-xs font-semibold px-2.5 py-0.5 rounded-full mastery-badge-${mastery}`;
@@ -1466,6 +1510,22 @@ function renderCurrentStudyCard() {
     // Show reveal button, hide rating bar
     document.getElementById("studyRevealContainer").classList.remove("hidden");
     document.getElementById("studyAnswerContainer").classList.add("hidden");
+
+    // Reset Jev Active Recall Input and Telemetry Badge
+    const recallInput = document.getElementById("studyRecallInput");
+    if (recallInput) {
+        recallInput.value = "";
+        if (card.is_atomic && card.total_clozes > 1) {
+            recallInput.placeholder = `Type the target blank (Unknown ${card.cloze_index} of ${card.total_clozes}) from memory...`;
+        } else {
+            recallInput.placeholder = "Type the physiological mechanism, drug target, or clinical pearl from memory...";
+        }
+    }
+    const recallBadge = document.getElementById("jevRecallFeedbackBadge");
+    if (recallBadge) {
+        recallBadge.classList.add("hidden");
+        recallBadge.textContent = "";
+    }
 }
 
 // Reveal Cloze Answer & Clinical Pearl in Study Mode
@@ -1482,6 +1542,53 @@ function revealStudyAnswer() {
     // Toggle reveal button and answer rating bar
     document.getElementById("studyRevealContainer").classList.add("hidden");
     document.getElementById("studyAnswerContainer").classList.remove("hidden");
+}
+
+// Auto-Grade Active Recall using Jev System 1 Decision Model
+async function gradeActiveCardWithJev() {
+    if (ankiCurrentCards.length === 0) return;
+    const card = ankiCurrentCards[ankiActiveCardIndex];
+    const inputEl = document.getElementById("studyRecallInput");
+    const studentAnswer = inputEl ? inputEl.value.trim() : "";
+
+    if (!studentAnswer) {
+        showToast("Type your recall in the box before auto-grading.", "info");
+        return;
+    }
+
+    showToast("Evaluating active recall with Jev System 1...", "info");
+    try {
+        const resp = await fetch("/api/anki/cards/grade_recall", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                card_id: card.id,
+                student_answer: studentAnswer
+            })
+        });
+        const data = await resp.json();
+        if (data.success && data.grading) {
+            const g = data.grading;
+            const badge = document.getElementById("jevRecallFeedbackBadge");
+            if (badge) {
+                badge.classList.remove("hidden");
+                badge.textContent = `⚡ Jev: ${g.feedback_label} (${g.latency_ms}ms, ${Math.round(g.confidence * 100)}% conf)`;
+                badge.className = g.sm2_rating >= 3
+                    ? "text-xs font-mono font-bold px-2.5 py-1 rounded bg-emerald-950 text-emerald-300 border border-emerald-700"
+                    : "text-xs font-mono font-bold px-2.5 py-1 rounded bg-rose-950 text-rose-300 border border-rose-700";
+            }
+
+            // Update local card state and stats
+            ankiCurrentCards[ankiActiveCardIndex] = data.card;
+            updateAnkiStats(data.stats, ankiCurrentCards.length);
+
+            // Reveal the answer so student can compare their recall with gold-standard pearl
+            revealStudyAnswer();
+            showToast(`Jev rated: ${g.feedback_label} in ${g.latency_ms}ms`, g.sm2_rating >= 3 ? "success" : "info");
+        }
+    } catch (e) {
+        showToast("Jev auto-grading failed: " + e, "error");
+    }
 }
 
 // Record SM-2 review rating for active study card
@@ -1540,10 +1647,14 @@ function openWikiFromCard(wikiSlug) {
 async function recompileAnkiFromWiki() {
     showToast("Recompiling high-yield cards across all wiki files...", "info");
     try {
-        const resp = await fetch("/api/anki/compile_from_wiki", { method: "POST" });
+        const resp = await fetch("/api/anki/compile_from_wiki", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ atomic: false }) // Preserves base Anki format in storage, derives on-the-fly
+        });
         const data = await resp.json();
         if (data.success) {
-            showToast(`Recompiled ${data.total_cards} flashcards from Wiki!`, "success");
+            showToast(`Recompiled ${data.total_cards} cards from Wiki!`, "success");
             await loadAnkiCards();
             await loadStatus();
         } else {
@@ -1554,11 +1665,18 @@ async function recompileAnkiFromWiki() {
     }
 }
 
-// Download .apkg deck (respecting active course filter)
+// Download .apkg deck (respecting active course and cloze focus mode)
 function downloadAnkiDeck() {
     const course = document.getElementById("ankiCourseFilter")?.value || "all";
-    showToast(`Compiling ${course !== "all" ? course.toUpperCase() : "Master"} high-yield .apkg deck...`, "info");
-    const url = course !== "all" ? `/api/anki/export?course=${encodeURIComponent(course)}` : "/api/anki/export";
+    const clozeMode = document.getElementById("ankiClozeModeFilter")?.value || "atomic";
+    const isAtomic = clozeMode === "atomic";
+    showToast(`Compiling ${course !== "all" ? course.toUpperCase() : "Master"} ${isAtomic ? "Single-Unknown" : "Combined"} .apkg deck...`, "info");
+    
+    const params = new URLSearchParams();
+    if (course !== "all") params.set("course", course);
+    if (isAtomic) params.set("atomic", "true");
+
+    const url = "/api/anki/export?" + params.toString();
     window.location.href = url;
 }
 

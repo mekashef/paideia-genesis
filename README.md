@@ -17,11 +17,13 @@
 
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
+[![System 1: Jev](https://img.shields.io/badge/System%201-Jev%20by%20TypeSafe%20AI-7952b3.svg)](#-kahneman-dual-process-cognitive-architecture-system-1-jev--system-2-gemini--llama)
+[![System 2: Gemini](https://img.shields.io/badge/System%202-Google%20Gemini%20%2F%20Local%20LLM-4285F4.svg)](#-kahneman-dual-process-cognitive-architecture-system-1-jev--system-2-gemini--llama)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Curriculum](https://img.shields.io/badge/Curriculum-MIT%20HST.121%20%7C%20Cardiopulmonary-orange.svg)](#curriculum-architecture)
 [![USMLE](https://img.shields.io/badge/Target-USMLE%20Step%201%20%26%20Step%202%20CK-red.svg)](#socratic-living-teacher)
 
-*Built on Andrej Karpathy's LLM-Wiki architecture, integrating HippoRAG associative retrieval, Socratic clinical reasoning diagnosis, and SuperMemo-2 active recall.*
+*Built on Andrej Karpathy's LLM-Wiki architecture, integrating Daniel Kahneman Dual-Process AI (Jev System 1 + Gemini System 2), HippoRAG associative retrieval, and SuperMemo-2 active recall.*
 
 </div>
 
@@ -33,10 +35,11 @@ Medical education is overwhelmed by fragmented resources: 100+ lecture decks wee
 
 **Paideia Genesis transforms this experience into a compounding cognitive engine:**
 1. **From Static RAG to Compounding LLM-Wiki**: Ingests syllabi and lecture slides to build an evolving, hyperlinked medical knowledge base (`course_sessions/`, `concepts/`, `entities/`, `differentials/`, `exam_traps/`).
-2. **Cognitive Biomimetic Brain Graph**: Visualizes disease mechanisms as multi-foci organ-system constellations (Hepatology, Luminal GI, Gastroduodenal, Pancreaticobiliary, Cardiorenal) with interactive 1-hop and 2-hop biological pathway spotlighting.
-3. **Socratic Living Teacher**: Evaluates clinical reasoning, diagnoses why mistakes happen (e.g. `CLINICAL_CONTRAINDICATION`), and automatically generates remedial flashcards.
-4. **Active Recall & Spaced Repetition**: 117+ high-yield USMLE cloze deletion flashcards, in-browser interactive Study Mode with SuperMemo-2 (SM-2) intervals, 1-click AnkiConnect synchronization, and downloadable `.apkg` packages.
-5. **High-Precision KaTeX Math Engine**: Flawless rendering of clinical equations ($$\text{Stool Osmotic Gap}$$, $$\text{SAAG}$$, $$\text{MELD}$$) without markdown token corruption.
+2. **Kahneman Dual-Process Cognitive Architecture**: Integrates **Jev (TypeSafe AI)** as ultra-fast **System 1** (<100ms machine-native decision primitives: `Choice`, `Score`, `Noul`) coupled with **Gemini / Local LLMs** as analytical **System 2** for deep Socratic dialogue and clinical vignette synthesis.
+3. **Cognitive Biomimetic Brain Graph**: Visualizes disease mechanisms as multi-foci organ-system constellations (Hepatology, Luminal GI, Gastroduodenal, Pancreaticobiliary, Cardiorenal) with interactive 1-hop and 2-hop biological pathway spotlighting.
+4. **Socratic Living Teacher & Diagnostic Reflex**: Evaluates clinical reasoning in under 500ms, diagnoses why mistakes happen (e.g. `CLINICAL_CONTRAINDICATION` with 98% confidence), and steers generative dialogue.
+5. **Objective AI-Graded Spaced Repetition**: Eliminates student self-assessment bias. Students type active recall in free text; Jev grades the explanation against gold-standard clinical rubrics in ~180ms and updates SuperMemo-2 (SM-2) intervals automatically.
+6. **High-Precision KaTeX Math Engine**: Flawless rendering of clinical equations ($$\text{Stool Osmotic Gap}$$, $$\text{SAAG}$$, $$\text{MELD}$$) without markdown token corruption.
 
 ---
 
@@ -69,7 +72,7 @@ flowchart TD
     end
 ```
 
-### 2. Socratic Clinical Diagnostic Flow
+### 2. Dual-Process Socratic Diagnostic Flow (System 1 + System 2)
 
 ```mermaid
 sequenceDiagram
@@ -77,28 +80,22 @@ sequenceDiagram
     actor Student as Medical Student
     participant WebUI as Paideia Web UI
     participant Tutor as Socratic Engine
-    participant Wiki as LLM-Wiki & HippoRAG
+    participant Jev as ⚡ Jev (System 1 Reflex)
+    participant LLM as 🧠 Gemini/Llama (System 2)
     participant Anki as Flashcard Manager
     participant Profile as Misconception Ledger
 
-    Student->>WebUI: Request Clinical Vignette (e.g. HST.121 Hepatology)
-    WebUI->>Tutor: POST /api/tutor/generate_vignette
-    Tutor->>Wiki: Query concept mechanisms & traps
-    Wiki-->>Tutor: Clinical context (Cirrhosis, Ascites, SBP)
-    Tutor-->>WebUI: USMLE Clinical Stem + 4 Management Choices
-    WebUI-->>Student: Display vignette & reasoning input box
-
-    Student->>WebUI: Selects option + Submits Diagnostic Rationale
+    Student->>WebUI: Selects option + Submits Clinical Rationale
     WebUI->>Tutor: POST /api/tutor/evaluate
-    Tutor->>Tutor: Diagnostic evaluation of pathophysiologic rationale
-    alt Sound Diagnostic Reasoning
-        Tutor-->>WebUI: Mechanistic affirmation & pearl reinforcement
-        Tutor->>Profile: Increment organ-system mastery score
-    else Misconception or Clinical Contraindication Identified
-        Tutor-->>WebUI: Socratic guidance (challenges false premise)
-        Tutor->>Profile: Record error taxonomy (e.g. CLINICAL_CONTRAINDICATION)
-        Tutor->>Anki: Auto-synthesize & queue targeted remedial cloze card
-    end
+    Note over Tutor,Jev: Step 1: System 1 Fast Diagnostic Triage (~80ms)
+    Tutor->>Jev: Evaluate state (stem, option, reasoning) with Choice/Score/Noul
+    Jev-->>Tutor: error_taxonomy: CLINICAL_CONTRAINDICATION (98%), trap: true, score: 1.0
+    Note over Tutor,LLM: Step 2: System 2 Socratic Synthesis (guided by Jev diagnosis)
+    Tutor->>LLM: Generate targeted Socratic dialogue focusing on diagnosed misconception
+    LLM-->>Tutor: Socratic critique + physiological mechanism + remedial card candidate
+    Tutor-->>WebUI: Return feedback + Jev System 1 telemetry (latency: 180ms, confidence: 98%)
+    Tutor->>Profile: Record error taxonomy & update organ-system mastery
+    Tutor->>Anki: Auto-synthesize & queue targeted remedial cloze card
 ```
 
 ### 3. Biomimetic Organ-System Multi-Foci Graph Topology
@@ -179,12 +176,44 @@ Open your browser to:
 python3 -m unittest discover tests/
 ```
 ```
-..............................................................
-----------------------------------------------------------------------
-Ran 62 tests in 31.645s
+Ran 69 tests in 27.057s
 
 OK
 ```
+
+---
+
+## ⚡ Kahneman Dual-Process Cognitive Architecture: System 1 (Jev) + System 2 (Gemini / Llama)
+
+Traditional LLM applications fail because they force heavy generative models (System 2) to perform basic classifications and judgments. In medicine, this causes high latency (3–5 seconds), schema fragility, and runaway token costs.
+
+Paideia Genesis implements a **Biomimetic Dual-Process Architecture** inspired by Daniel Kahneman (*Thinking, Fast and Slow*):
+
+```
+                                  [Medical Student Input]
+                                             │
+                        ┌────────────────────┴────────────────────┐
+                        ▼                                         ▼
+            System 1: Jev Decision Engine             System 2: Gemini / Local LLM
+                   (TypeSafe AI)                           (Generative Tutor)
+            ─────────────────────────────             ────────────────────────────
+            • Latency: 70ms – 400ms                   • Latency: 2s – 4s
+            • Primitives: Choice / Score / Noul       • Deep Socratic inquiry
+            • Typed decisions without prose           • Adaptive clinical vignette writing
+            • Free output tokens ($0.042/1M input)    • Pathophysiological synthesis
+                        │                                         ▲
+                        └───────── Steers Diagnostic Ground Truth ┘
+```
+
+### 1. Sub-100ms Socratic Diagnostic Triage
+- **`Choice` (Categorical)**: Classifies student errors into `CLINICAL_CONTRAINDICATION`, `MECHANISM_GAP`, `DISCRIMINATOR_CONFUSION`, or `READING_SLIP` with calibrated confidence scores (e.g. 98%).
+- **`Score` (Rubric)**: Rates the student's pathophysiological reasoning depth on an ordered scale (e.g. `Level 1.0`: *"Superficial buzzword recall without mechanistic grounding"*).
+- **`Noul` (Hypothesis Testing)**: Tests whether the student fell for an explicit USMLE distractor trap ($p \in [0.0, 1.0]$).
+
+### 2. Objective AI-Graded Free-Text Active Recall (SM-2)
+- **Eliminates Self-Assessment Bias**: Medical students routinely suffer from the *"recognition vs. recall"* illusion when self-scoring flashcards ("Again/Hard/Good/Easy").
+- **Typed Active Recall**: In Study Mode, students type their clinical mechanism from memory.
+- **Jev Rubric Scoring**: Evaluates the typed response against the gold-standard pearl in **~180ms**, maps the rubric level to the SuperMemo-2 quality scale, and updates the card's interval and ease factor objectively.
 
 ---
 
@@ -375,7 +404,8 @@ paideia-genesis/
 │   ├── api/
 │   │   └── server.py               # FastAPI application & RESTful endpoints
 │   ├── llm/
-│   │   └── client.py               # LLM abstraction (Mock, Gemini, OpenAI/Ollama)
+│   │   ├── client.py               # LLM abstraction (Mock, Gemini, OpenAI/Ollama)
+│   │   └── jev_client.py           # TypeSafe AI Jev System 1 decision engine
 │   ├── tutor/
 │   │   ├── socratic_engine.py      # Vignette generator & clinical reasoning evaluator
 │   │   └── student_profile.py      # Mastery tracking & misconception ledger
@@ -393,7 +423,7 @@ paideia-genesis/
 │   ├── app.js                      # Application controller, D3 simulation, KaTeX engine
 │   ├── index.html                  # Mission Control UI, study player, graph canvas
 │   └── style.css                   # Dark mode styling, callouts, and animations
-├── tests/                          # 62 automated unit & integration tests
+├── tests/                          # 69 automated unit & integration tests
 │   ├── test_anki_compiler.py
 │   ├── test_anki_export.py
 │   ├── test_api_endpoints.py
@@ -402,6 +432,7 @@ paideia-genesis/
 │   ├── test_equation_formatting.py # KaTeX math syntax & LaTeX delimiters
 │   ├── test_graph_memory.py
 │   ├── test_hipporag_activation.py # HippoRAG spreading activation & cross-bridges
+│   ├── test_jev_system_one.py      # Jev System 1 primitives & SM-2 auto-grading tests
 │   ├── test_knowledge_puller.py
 │   ├── test_llm_client.py          # Zero-cost offline mock LLM client & factory
 │   ├── test_sm2_algorithm.py       # SuperMemo-2 mathematical scheduling engine
@@ -424,7 +455,7 @@ paideia-genesis/
 
 | Endpoint | Method | Description |
 |---|---|---|
-| `/api/status` | `GET` | Health check, total wiki page count, days to exam, flashcard count |
+| `/api/status` | `GET` | Health check, Jev System 1 status, total wiki page count, flashcard count |
 | `/api/wiki/tree` | `GET` | Course-filtered hierarchical tree of sessions, concepts, entities, and traps |
 | `/api/wiki/page` | `GET`, `PUT` | Read and live-edit any markdown note in the Compounding Wiki |
 | `/api/wiki/brain_graph` | `GET` | Multi-foci brain graph nodes and links (supports `?course=` and `?layer=`) |
@@ -433,9 +464,10 @@ paideia-genesis/
 | `/api/wiki/pull_external` | `POST` | On-the-fly clinical knowledge pull and synthesis |
 | `/api/course/import_url` | `POST` | Ingest and compile MIT OpenCourseWare syllabus |
 | `/api/tutor/generate_vignette`| `POST` | Generate adaptive Step-1 clinical vignette |
-| `/api/tutor/evaluate` | `POST` | Socratic diagnosis of student reasoning and auto-remediation |
+| `/api/tutor/evaluate` | `POST` | Socratic diagnosis with Jev System 1 triage & telemetry |
 | `/api/anki/cards` | `GET` | Filtered flashcards with deck retention statistics |
 | `/api/anki/cards/review` | `POST` | Record SuperMemo-2 review rating (`Again`, `Hard`, `Good`, `Easy`) |
+| `/api/anki/cards/grade_recall` | `POST` | Auto-grade free-text active recall with Jev System 1 & update SM-2 |
 | `/api/anki/compile_from_wiki` | `POST` | Trigger full automated compilation across wiki modules |
 | `/api/anki/export` | `GET` | Download compiled `.apkg` deck (supports `?course=`) |
 | `/api/anki/sync_ankiconnect` | `POST` | 1-click sync to local Anki Desktop instance |

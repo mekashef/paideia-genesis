@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional
 from src.config import WIKI_DIR
 from src.llm.client import get_llm_client, BaseLLMClient
+from src.llm.jev_client import jev_client
 from src.tutor.student_profile import StudentProfile
 from src.wiki.indexer import WikiIndexer
 
@@ -54,6 +55,16 @@ Respond strictly in JSON format with keys: vignette_id, topic, stem, options (ar
         is_correct = (selected_option_id.strip().upper() == correct_id.strip().upper())
         topic = vignette.get("topic", "Cardiovascular")
 
+        # Step 1: Jev System 1 Diagnostic Triage (<100ms fast, typed decision)
+        jev_diag = jev_client.diagnose_vignette_reasoning(vignette, selected_option_id, student_reasoning)
+        tax_ans = jev_diag.answers.get("error_taxonomy", {})
+        jev_error_type = tax_ans.get("choice", "REASONING_GAP")
+        jev_confidence = tax_ans.get("confidence", 0.9)
+        jev_trap_prob = jev_diag.answers.get("board_trap_triggered", {}).get("noul", 0.0)
+        jev_trap_triggered = jev_trap_prob > 0.5
+        jev_soundness = jev_diag.answers.get("reasoning_soundness", {}).get("score", 1)
+
+        # Step 2: System 2 Socratic dialogue generation (guided by Jev's diagnosis)
         prompt = f"""You are a Socratic Medical Educator.
 Evaluate this student's response to a clinical vignette.
 
@@ -67,20 +78,38 @@ Correct Option: {correct_id}
 Student Selected: {selected_option_id}
 Student's Stated Reasoning: {student_reasoning if student_reasoning else "No reasoning provided."}
 
+System 1 (Jev Decision Engine) Diagnostic Triage:
+- Classified Misconception: {jev_error_type} (Confidence: {int(jev_confidence * 100)}%)
+- Board Distractor Trap Triggered: {jev_trap_triggered} (p={jev_trap_prob})
+- Pathophysiological Reasoning Depth: Level {jev_soundness}/2
+
 Task:
-1. Determine if student was correct ({is_correct}).
-2. If incorrect, classify error into one of: 'MECHANISM_GAP', 'DISCRIMINATOR_CONFUSION', 'CLINICAL_CONTRAINDICATION', 'READING_SLIP'.
-3. Provide a Socratic critique (ask a targeted question that helps them discover why their choice was flawed, rather than just spoon-feeding the answer).
-4. Provide the physiological mechanism explanation.
+1. Student correctness is {is_correct}.
+2. Use error taxonomy: '{jev_error_type}'.
+3. Provide a Socratic critique (ask a targeted probe that guides them to uncover why their reasoning led to this specific misconception).
+4. Provide the concise physiological mechanism explanation.
 5. Provide a candidate high-yield Anki flashcard (cloze deletion format {{c1::...}}).
 
 Respond strictly in JSON with keys: is_correct (bool), error_taxonomy, socratic_critique, mechanism_explanation, remediation_action, anki_card_candidate (with front and back)."""
 
         evaluation = self.llm.generate_json(prompt, system_prompt="You are a Socratic clinical educator.")
         evaluation["is_correct"] = is_correct
+        if not evaluation.get("error_taxonomy") or evaluation.get("error_taxonomy") == "REASONING_GAP":
+            evaluation["error_taxonomy"] = jev_error_type
+
+        # Attach Jev System 1 telemetry to evaluation
+        evaluation["jev_system_one"] = {
+            "active": True,
+            "latency_ms": jev_diag.latency_ms,
+            "model": jev_diag.model,
+            "error_taxonomy": jev_error_type,
+            "confidence": jev_confidence,
+            "board_trap_triggered": jev_trap_triggered,
+            "reasoning_soundness": jev_soundness
+        }
 
         # 1. Update Student Profile
-        error_type = evaluation.get("error_taxonomy", "REASONING_GAP")
+        error_type = evaluation.get("error_taxonomy", jev_error_type)
         details = evaluation.get("mechanism_explanation", "Student missed discriminator.")
         self.student_profile.record_attempt(topic, is_correct, error_type=error_type, details=details)
 

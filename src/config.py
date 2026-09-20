@@ -40,6 +40,11 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL", "llama3.1:8b")
 # AnkiConnect configuration
 ANKI_CONNECT_URL = os.getenv("ANKI_CONNECT_URL", "http://127.0.0.1:8765")
 
+# TypeSafe AI / Jev "System One" Configuration
+TYPESAFE_API_KEY = os.getenv("TYPESAFE_API_KEY", "")
+ENABLE_JEV_SYSTEM_ONE = os.getenv("ENABLE_JEV_SYSTEM_ONE", "true").lower() in ("true", "1", "yes")
+
 # Server settings
 HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", "8000"))
+

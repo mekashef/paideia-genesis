@@ -8,7 +8,7 @@ from typing import Dict, Any, List, Optional
 import requests
 import genanki
 from src.config import ANKI_EXPORT_DIR, ANKI_CONNECT_URL, WIKI_DIR
-from src.anki.compiler import WikiFlashcardCompiler
+from src.anki.compiler import WikiFlashcardCompiler, atomize_card
 
 CARDS_STORAGE_FILE = ANKI_EXPORT_DIR / "staged_cards.json"
 
@@ -110,7 +110,7 @@ class AnkiManager:
             except Exception:
                 self.recompile_from_wiki()
 
-    def recompile_from_wiki(self) -> Dict[str, Any]:
+    def recompile_from_wiki(self, atomic: bool = False) -> Dict[str, Any]:
         """Compiles cards across all wiki files, merging with existing review histories."""
         existing = []
         if self.cards_file.exists():
@@ -120,7 +120,7 @@ class AnkiManager:
                 existing = []
 
         compiler = WikiFlashcardCompiler(self.wiki_dir)
-        compiled_cards = compiler.compile_all(existing_cards=existing)
+        compiled_cards = compiler.compile_all(existing_cards=existing, atomic_cards=atomic)
         self.cards_file.write_text(json.dumps(compiled_cards, indent=2), encoding="utf-8")
         return {
             "success": True,
@@ -142,13 +142,24 @@ class AnkiManager:
         system: Optional[str] = None,
         card_type: Optional[str] = None,
         mastery: Optional[str] = None,
-        search: Optional[str] = None
+        search: Optional[str] = None,
+        cloze_mode: Optional[str] = None
     ) -> Dict[str, Any]:
-        """Filters cards based on course, organ system, card type, mastery, and search keyword."""
+        """Filters cards based on course, organ system, card type, mastery, search keyword, and cloze derivation mode."""
         all_cards = self.get_staged_cards()
         today_str = datetime.date.today().isoformat()
 
-        # Compute global stats first
+        # Handle Cloze Derivation Mode (Atomic 1-by-1 vs Combined Multi-Cloze)
+        if cloze_mode == "atomic":
+            derived_pool = []
+            for c in all_cards:
+                derived_pool.extend(atomize_card(c))
+            all_cards = derived_pool
+        elif cloze_mode == "combined":
+            # Filter out derived child cards if present in storage, preserving base multi-cloze format
+            all_cards = [c for c in all_cards if "parent_id" not in c]
+
+        # Compute global stats
         stats = {
             "total": len(all_cards),
             "due": sum(1 for c in all_cards if c.get("due_date", today_str) <= today_str or c.get("mastery") == "unreviewed"),
@@ -211,6 +222,7 @@ class AnkiManager:
                     c.get("pearl", ""),
                     c.get("system", ""),
                     c.get("source", ""),
+                    c.get("target_unknown", ""),
                     " ".join(c.get("tags", []))
                 ]
                 return any(q in f.lower() for f in fields)
@@ -224,6 +236,7 @@ class AnkiManager:
 
     def record_review(self, card_id: str, rating: int) -> Optional[Dict[str, Any]]:
         """Updates spaced repetition state of a card using the SM-2 algorithm.
+        Supports both base Anki cards and derived atomic single-unknown cards.
         Rating:
           1: Again (< 10 min / Struggling)
           2: Hard (1 day / Difficult)
@@ -239,6 +252,22 @@ class AnkiManager:
                 target_card = c
                 target_idx = idx
                 break
+
+        # Check if card_id is a derived atomic child card (e.g. card-002-c1)
+        parent_card = None
+        parent_idx = -1
+        if not target_card and "-c" in card_id:
+            parent_id = card_id.rsplit("-c", 1)[0]
+            for idx, c in enumerate(cards):
+                if c.get("id") == parent_id:
+                    parent_card = c
+                    parent_idx = idx
+                    atomic_children = atomize_card(c)
+                    for child in atomic_children:
+                        if child.get("id") == card_id:
+                            target_card = child
+                            break
+                    break
 
         if not target_card:
             return None
@@ -285,9 +314,60 @@ class AnkiManager:
         target_card["last_reviewed"] = today.isoformat()
         target_card["mastery"] = mastery
 
-        cards[target_idx] = target_card
+        if target_idx >= 0:
+            cards[target_idx] = target_card
+        elif parent_card is not None and parent_idx >= 0:
+            # Store atomic child review state in parent card's atomic_states dictionary
+            parent_card.setdefault("atomic_states", {})[card_id] = {
+                "repetitions": repetitions,
+                "interval": interval,
+                "ease_factor": round(ease_factor, 2),
+                "due_date": next_due,
+                "last_reviewed": today.isoformat(),
+                "mastery": mastery
+            }
+            parent_card["last_reviewed"] = today.isoformat()
+            cards[parent_idx] = parent_card
+
         self.cards_file.write_text(json.dumps(cards, indent=2), encoding="utf-8")
         return target_card
+
+    def grade_student_recall(self, card_id: str, student_answer: str) -> Optional[Dict[str, Any]]:
+        """Evaluates student's free-text active recall with Jev System 1 and updates SM-2.
+        Supports both base Anki cards and derived atomic single-unknown cards.
+        """
+        cards = self.get_staged_cards()
+        target_card = None
+        for c in cards:
+            if c.get("id") == card_id:
+                target_card = c
+                break
+
+        if not target_card and "-c" in card_id:
+            parent_id = card_id.rsplit("-c", 1)[0]
+            for c in cards:
+                if c.get("id") == parent_id:
+                    atomic_children = atomize_card(c)
+                    for child in atomic_children:
+                        if child.get("id") == card_id:
+                            target_card = child
+                            break
+                    break
+
+        if not target_card:
+            return None
+
+        from src.llm.jev_client import jev_client
+        grade_result = jev_client.grade_free_text_recall(target_card, student_answer)
+        sm2_rating = grade_result["sm2_rating"]
+
+        # Update card repetition via SM-2
+        updated_card = self.record_review(card_id, sm2_rating)
+
+        return {
+            "card": updated_card,
+            "grading": grade_result
+        }
 
     def add_card(self, card_data: Dict[str, Any]) -> Dict[str, Any]:
         """Adds or deduplicates a single flashcard."""
@@ -299,7 +379,8 @@ class AnkiManager:
                 if existing_text == new_text:
                     return existing
 
-        card_data["id"] = f"card-{len(cards)+1:03d}"
+        if not card_data.get("id"):
+            card_data["id"] = f"card-{len(cards)+1:03d}"
         if "repetitions" not in card_data:
             card_data["repetitions"] = 0
             card_data["interval"] = 1
@@ -316,19 +397,21 @@ class AnkiManager:
         self,
         course: Optional[str] = None,
         system: Optional[str] = None,
-        deck_name: Optional[str] = None
+        deck_name: Optional[str] = None,
+        atomic: bool = False
     ) -> Path:
-        """Compiles staged cards into a downloadable Anki .apkg file, supporting course filtering."""
-        filtered_result = self.get_filtered_cards(course=course, system=system)
+        """Compiles staged cards into a downloadable Anki .apkg file, supporting course filtering and atomic derivation."""
+        filtered_result = self.get_filtered_cards(course=course, system=system, cloze_mode="atomic" if atomic else None)
         cards = filtered_result["cards"]
 
         if not deck_name:
+            suffix = "_SingleUnknown" if atomic else ""
             if course and course.lower() in ["hst121", "hst-121"]:
-                deck_name = "PaideiaGenesis::MIT_HST121_Gastroenterology"
+                deck_name = f"PaideiaGenesis::MIT_HST121_Gastroenterology{suffix}"
             elif course and course.lower() in ["cardio", "cardiopulmonary"]:
-                deck_name = "PaideiaGenesis::Cardiopulmonary_Renal"
+                deck_name = f"PaideiaGenesis::Cardiopulmonary_Renal{suffix}"
             else:
-                deck_name = "PaideiaGenesis::Master_Medical_HighYield"
+                deck_name = f"PaideiaGenesis::Master_Medical_HighYield{suffix}"
 
         deck_id = random.randrange(1 << 30, 1 << 31)
         deck = genanki.Deck(deck_id, deck_name)

@@ -162,6 +162,26 @@ class MockMedicalLLMClient(BaseLLMClient):
                 "learning_pearl": "Remember the board pearl: Beta-blockers SAVE lives in stable chronic HFrEF, but KILL in acute pulmonary edema decompensation.",
                 "high_yield_tags": ["Heart Failure", "Pharmacology", "Contraindications", "USMLE Step 1"]
             })
+        if "synthesize" in prompt_lower or "concept page" in prompt_lower or "raw material" in prompt_lower or "sglt2" in prompt_lower:
+            return json.dumps({
+                "slug": "sglt2-inhibitors-in-heart-failure",
+                "title": "SGLT2 Inhibitors (Empagliflozin, Dapagliflozin)",
+                "system": "Cardiovascular & Renal",
+                "summary": "Sodium-glucose cotransporter-2 inhibitors that reduce cardiovascular mortality and heart failure hospitalizations.",
+                "content": "### Mechanism of Action\nSGLT2 inhibitors block sodium-glucose reabsorption in the proximal convoluted tubule.\n\n### Clinical Trials & Pearls\nDAPA-HF and EMPEROR-Reduced demonstrated significant mortality benefits.\n\nRelated: [[concepts/loop-diuretics]], [[concepts/acute-decompensated-heart-failure]].",
+                "candidate_card": {
+                    "front": "What metabolic complication is uniquely associated with {{c1::SGLT2 inhibitors}}?",
+                    "back": "{{c1::Euglycemic Diabetic Ketoacidosis (euDKA)}}",
+                    "pearl": "Normal blood glucose (< 250 mg/dL) with profound anion-gap metabolic acidosis."
+                }
+            })
+
+        if (system_prompt and "json" in system_prompt.lower()) or "json" in prompt_lower or "question" in prompt_lower:
+            return json.dumps({
+                "status": "success",
+                "summary": "Mock medical synthesis completed successfully.",
+                "data": {"result": "ok"}
+            })
 
         return "Medical intelligence analysis complete."
 

@@ -179,9 +179,9 @@ Open your browser to:
 python3 -m unittest discover tests/
 ```
 ```
-....................................
+..............................................................
 ----------------------------------------------------------------------
-Ran 36 tests in 25.412s
+Ran 62 tests in 31.645s
 
 OK
 ```
@@ -393,16 +393,25 @@ paideia-genesis/
 │   ├── app.js                      # Application controller, D3 simulation, KaTeX engine
 │   ├── index.html                  # Mission Control UI, study player, graph canvas
 │   └── style.css                   # Dark mode styling, callouts, and animations
-├── tests/                          # 36 automated unit & integration tests
+├── tests/                          # 62 automated unit & integration tests
 │   ├── test_anki_compiler.py
 │   ├── test_anki_export.py
 │   ├── test_api_endpoints.py
 │   ├── test_course_importer.py
+│   ├── test_curriculum_integrity.py # 20 sessions, 28 entities, differentials, traps
+│   ├── test_equation_formatting.py # KaTeX math syntax & LaTeX delimiters
 │   ├── test_graph_memory.py
+│   ├── test_hipporag_activation.py # HippoRAG spreading activation & cross-bridges
 │   ├── test_knowledge_puller.py
+│   ├── test_llm_client.py          # Zero-cost offline mock LLM client & factory
+│   ├── test_sm2_algorithm.py       # SuperMemo-2 mathematical scheduling engine
 │   ├── test_socratic_engine.py
 │   ├── test_student_profile.py
+│   ├── test_wiki_compiler_extended.py
 │   └── test_wiki_indexer.py
+├── .github/
+│   └── workflows/
+│       └── unit-tests.yml          # GitHub Actions CI matrix (Python 3.11 & 3.12, 100% free)
 ├── .gitignore                      # Excludes runtime data/, *.db, *.apkg, and .venv/
 ├── LICENSE                         # MIT License
 ├── requirements.txt                # Python dependencies

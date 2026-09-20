@@ -14,7 +14,7 @@ class WikiCompiler:
         self.wiki_dir = wiki_dir
         self.llm = llm_client or get_llm_client()
         self.indexer = WikiIndexer(wiki_dir)
-        init_wiki_structure()
+        init_wiki_structure(self.wiki_dir)
 
     def extract_text_from_file(self, file_path: Path) -> str:
         """Extracts plain text from PDF or markdown/text files."""

@@ -2,6 +2,7 @@
 Adapted from Andrej Karpathy's LLM-Wiki specification.
 """
 from pathlib import Path
+from typing import Optional
 from src.config import RAW_SOURCES_DIR, WIKI_DIR, ANKI_EXPORT_DIR
 
 SCHEMA_CONTENT = """# Medical LLM-Wiki Schema
@@ -58,30 +59,38 @@ Append-only chronological record of all knowledge acquisitions, quiz drills, and
 ## [2026-09-18] system_init | Medical LLM-Wiki initialized with Karpathy schema
 """
 
-def init_wiki_structure():
+def init_wiki_structure(
+    wiki_dir: Optional[Path] = None,
+    raw_sources_dir: Optional[Path] = None,
+    anki_export_dir: Optional[Path] = None
+):
     """Create all required directories and base index/log files if not present."""
-    RAW_SOURCES_DIR.mkdir(parents=True, exist_ok=True)
-    (RAW_SOURCES_DIR / "lectures").mkdir(parents=True, exist_ok=True)
-    (RAW_SOURCES_DIR / "syllabus").mkdir(parents=True, exist_ok=True)
-    (RAW_SOURCES_DIR / "exam_logs").mkdir(parents=True, exist_ok=True)
+    target_wiki_dir = wiki_dir or WIKI_DIR
+    target_raw_dir = raw_sources_dir or RAW_SOURCES_DIR
+    target_anki_dir = anki_export_dir or ANKI_EXPORT_DIR
 
-    WIKI_DIR.mkdir(parents=True, exist_ok=True)
-    (WIKI_DIR / "course_sessions").mkdir(parents=True, exist_ok=True)
-    (WIKI_DIR / "concepts").mkdir(parents=True, exist_ok=True)
-    (WIKI_DIR / "entities").mkdir(parents=True, exist_ok=True)
-    (WIKI_DIR / "differentials").mkdir(parents=True, exist_ok=True)
-    (WIKI_DIR / "exam_traps").mkdir(parents=True, exist_ok=True)
-    (WIKI_DIR / "student_profile").mkdir(parents=True, exist_ok=True)
-    ANKI_EXPORT_DIR.mkdir(parents=True, exist_ok=True)
+    target_raw_dir.mkdir(parents=True, exist_ok=True)
+    (target_raw_dir / "lectures").mkdir(parents=True, exist_ok=True)
+    (target_raw_dir / "syllabus").mkdir(parents=True, exist_ok=True)
+    (target_raw_dir / "exam_logs").mkdir(parents=True, exist_ok=True)
 
-    schema_file = WIKI_DIR / "SCHEMA.md"
+    target_wiki_dir.mkdir(parents=True, exist_ok=True)
+    (target_wiki_dir / "course_sessions").mkdir(parents=True, exist_ok=True)
+    (target_wiki_dir / "concepts").mkdir(parents=True, exist_ok=True)
+    (target_wiki_dir / "entities").mkdir(parents=True, exist_ok=True)
+    (target_wiki_dir / "differentials").mkdir(parents=True, exist_ok=True)
+    (target_wiki_dir / "exam_traps").mkdir(parents=True, exist_ok=True)
+    (target_wiki_dir / "student_profile").mkdir(parents=True, exist_ok=True)
+    target_anki_dir.mkdir(parents=True, exist_ok=True)
+
+    schema_file = target_wiki_dir / "SCHEMA.md"
     if not schema_file.exists():
         schema_file.write_text(SCHEMA_CONTENT, encoding="utf-8")
 
-    index_file = WIKI_DIR / "index.md"
+    index_file = target_wiki_dir / "index.md"
     if not index_file.exists():
         index_file.write_text(INDEX_INITIAL_TEMPLATE, encoding="utf-8")
 
-    log_file = WIKI_DIR / "log.md"
+    log_file = target_wiki_dir / "log.md"
     if not log_file.exists():
         log_file.write_text(LOG_INITIAL_TEMPLATE, encoding="utf-8")

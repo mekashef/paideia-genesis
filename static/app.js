@@ -1206,6 +1206,26 @@ async function submitAnswer() {
             document.getElementById("feedbackCardBack").textContent = cardCand.back;
         }
 
+        // Render Jev System 1 telemetry if present
+        const jevBadge = document.getElementById("feedbackJevBadge");
+        if (evalData.jev_system_one && jevBadge) {
+            jevBadge.classList.remove("hidden");
+            const jev = evalData.jev_system_one;
+            document.getElementById("jevLatencyBadge").textContent = `${jev.latency_ms}ms (Jev)`;
+            document.getElementById("jevTaxonomyVal").textContent = jev.error_taxonomy || "REASONING_GAP";
+            document.getElementById("jevConfidenceVal").textContent = `${Math.round(jev.confidence * 100)}%`;
+            const trapEl = document.getElementById("jevTrapVal");
+            if (jev.board_trap_triggered) {
+                trapEl.textContent = "TRIGGERED (High Risk)";
+                trapEl.className = "font-mono font-bold text-rose-400";
+            } else {
+                trapEl.textContent = "Not Triggered (Clean)";
+                trapEl.className = "font-mono font-bold text-emerald-400";
+            }
+        } else if (jevBadge) {
+            jevBadge.classList.add("hidden");
+        }
+
         showToast(evalData.is_correct ? "Correct! Mastery updated." : "Missed trap recorded in Wiki & Anki queued.", evalData.is_correct ? "success" : "info");
         await loadStatus();
         await loadWikiTree();
@@ -1466,6 +1486,15 @@ function renderCurrentStudyCard() {
     // Show reveal button, hide rating bar
     document.getElementById("studyRevealContainer").classList.remove("hidden");
     document.getElementById("studyAnswerContainer").classList.add("hidden");
+
+    // Reset Jev Active Recall Input and Telemetry Badge
+    const recallInput = document.getElementById("studyRecallInput");
+    if (recallInput) recallInput.value = "";
+    const recallBadge = document.getElementById("jevRecallFeedbackBadge");
+    if (recallBadge) {
+        recallBadge.classList.add("hidden");
+        recallBadge.textContent = "";
+    }
 }
 
 // Reveal Cloze Answer & Clinical Pearl in Study Mode
@@ -1482,6 +1511,53 @@ function revealStudyAnswer() {
     // Toggle reveal button and answer rating bar
     document.getElementById("studyRevealContainer").classList.add("hidden");
     document.getElementById("studyAnswerContainer").classList.remove("hidden");
+}
+
+// Auto-Grade Active Recall using Jev System 1 Decision Model
+async function gradeActiveCardWithJev() {
+    if (ankiCurrentCards.length === 0) return;
+    const card = ankiCurrentCards[ankiActiveCardIndex];
+    const inputEl = document.getElementById("studyRecallInput");
+    const studentAnswer = inputEl ? inputEl.value.trim() : "";
+
+    if (!studentAnswer) {
+        showToast("Type your recall in the box before auto-grading.", "info");
+        return;
+    }
+
+    showToast("Evaluating active recall with Jev System 1...", "info");
+    try {
+        const resp = await fetch("/api/anki/cards/grade_recall", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                card_id: card.id,
+                student_answer: studentAnswer
+            })
+        });
+        const data = await resp.json();
+        if (data.success && data.grading) {
+            const g = data.grading;
+            const badge = document.getElementById("jevRecallFeedbackBadge");
+            if (badge) {
+                badge.classList.remove("hidden");
+                badge.textContent = `⚡ Jev: ${g.feedback_label} (${g.latency_ms}ms, ${Math.round(g.confidence * 100)}% conf)`;
+                badge.className = g.sm2_rating >= 3
+                    ? "text-xs font-mono font-bold px-2.5 py-1 rounded bg-emerald-950 text-emerald-300 border border-emerald-700"
+                    : "text-xs font-mono font-bold px-2.5 py-1 rounded bg-rose-950 text-rose-300 border border-rose-700";
+            }
+
+            // Update local card state and stats
+            ankiCurrentCards[ankiActiveCardIndex] = data.card;
+            updateAnkiStats(data.stats, ankiCurrentCards.length);
+
+            // Reveal the answer so student can compare their recall with gold-standard pearl
+            revealStudyAnswer();
+            showToast(`Jev rated: ${g.feedback_label} in ${g.latency_ms}ms`, g.sm2_rating >= 3 ? "success" : "info");
+        }
+    } catch (e) {
+        showToast("Jev auto-grading failed: " + e, "error");
+    }
 }
 
 // Record SM-2 review rating for active study card

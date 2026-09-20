@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 from src.config import (
     WIKI_DIR, RAW_SOURCES_DIR, ANKI_EXPORT_DIR, LLM_PROVIDER,
-    STATIC_DIR, DEMO_DATA_DIR
+    STATIC_DIR, DEMO_DATA_DIR, ENABLE_JEV_SYSTEM_ONE, TYPESAFE_API_KEY
 )
 from src.wiki.schema import init_wiki_structure
 from src.wiki.indexer import WikiIndexer, parse_markdown_file
@@ -91,6 +91,10 @@ class CardReviewRequest(BaseModel):
     card_id: str
     rating: int
 
+class GradeRecallRequest(BaseModel):
+    card_id: str
+    student_answer: str
+
 
 @app.get("/api/status")
 def get_status():
@@ -100,6 +104,11 @@ def get_status():
     return {
         "status": "online",
         "llm_provider": LLM_PROVIDER,
+        "system_one": {
+            "model": "jev",
+            "enabled": ENABLE_JEV_SYSTEM_ONE,
+            "has_api_key": bool(TYPESAFE_API_KEY)
+        },
         "total_wiki_pages": len(all_pages),
         "days_to_exam": schedule.get("days_remaining", 0),
         "target_exam": schedule.get("target_exam", "Medical Board"),
@@ -365,6 +374,33 @@ def review_anki_card(req: CardReviewRequest):
     return {
         "success": True,
         "card": updated_card,
+        "stats": stats
+    }
+
+@app.post("/api/anki/cards/grade_recall")
+def grade_anki_recall(req: GradeRecallRequest):
+    result = anki_manager.grade_student_recall(req.card_id, req.student_answer)
+    if not result:
+        raise HTTPException(status_code=404, detail="Flashcard not found")
+
+    updated_card = result["card"]
+    sm2_rating = result["grading"]["sm2_rating"]
+
+    # Sync mastery to student profile
+    system_tag = updated_card.get("system", "Pharmacology")
+    is_correct = (sm2_rating >= 3)
+    student_profile.record_attempt(
+        topic=system_tag,
+        is_correct=is_correct,
+        error_type="SPACED_REPETITION_SLIP" if not is_correct else None,
+        details=f"Jev auto-graded card drill: {updated_card.get('source', req.card_id)}"
+    )
+
+    stats = anki_manager.get_filtered_cards()["stats"]
+    return {
+        "success": True,
+        "card": updated_card,
+        "grading": result["grading"],
         "stats": stats
     }
 

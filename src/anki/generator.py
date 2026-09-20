@@ -289,6 +289,30 @@ class AnkiManager:
         self.cards_file.write_text(json.dumps(cards, indent=2), encoding="utf-8")
         return target_card
 
+    def grade_student_recall(self, card_id: str, student_answer: str) -> Optional[Dict[str, Any]]:
+        """Evaluates student's free-text active recall with Jev System 1 and updates SM-2."""
+        cards = self.get_staged_cards()
+        target_card = None
+        for c in cards:
+            if c.get("id") == card_id:
+                target_card = c
+                break
+
+        if not target_card:
+            return None
+
+        from src.llm.jev_client import jev_client
+        grade_result = jev_client.grade_free_text_recall(target_card, student_answer)
+        sm2_rating = grade_result["sm2_rating"]
+
+        # Update card repetition via SM-2
+        updated_card = self.record_review(card_id, sm2_rating)
+
+        return {
+            "card": updated_card,
+            "grading": grade_result
+        }
+
     def add_card(self, card_data: Dict[str, Any]) -> Dict[str, Any]:
         """Adds or deduplicates a single flashcard."""
         cards = self.get_staged_cards()

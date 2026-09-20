@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paideia Genesis | Living Medical Teacher & LLM-Wiki</title>
+    <!-- Tailwind CSS (via CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- KaTeX for High-Precision Medical & Scientific Math -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <!-- D3.js for Interactive Brain Graph -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-indigo-500 to-emerald-400 flex items-center justify-center font-black text-xl text-white shadow-md shadow-indigo-500/20">
+                    MΣ
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                        Paideia Genesis
+                        <span class="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30">Living Medical Teacher</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">HippoRAG & Socratic Adaptive Tutor</p>
+                </div>
+            </div>
+
+            <!-- Header Quick Stats & Actions -->
+            <div class="flex items-center space-x-3">
+                <div class="hidden lg:flex items-center bg-slate-900/60 border border-slate-700 px-3 py-1.5 rounded-lg text-xs space-x-3">
+                    <div>
+                        <span class="text-slate-400">Exam:</span>
+                        <span id="headerExamTitle" class="font-semibold text-amber-300 ml-1">Cardio Final</span>
+                    </div>
+                    <div class="h-4 w-px bg-slate-700"></div>
+                    <div>
+                        <span class="text-slate-400">Countdown:</span>
+                        <span id="headerDaysLeft" class="font-bold text-rose-400 ml-1">8 days</span>
+                    </div>
+                    <div class="h-4 w-px bg-slate-700"></div>
+                    <div>
+                        <span class="text-slate-400">Readiness:</span>
+                        <span id="headerReadiness" class="font-bold text-emerald-400 ml-1">65%</span>
+                    </div>
+                </div>
+
+                <!-- On-The-Fly Quick Action Buttons -->
+                <button id="btnOpenImportCourse" class="bg-amber-600/80 hover:bg-amber-500 text-amber-100 text-xs font-semibold px-3 py-2 rounded-lg transition border border-amber-500/40 flex items-center gap-1.5 shadow-sm">
+                    <span>📥</span> Import Course
+                </button>
+                <button id="btnOpenQuickCapture" class="bg-indigo-700/80 hover:bg-indigo-600 text-indigo-100 text-xs font-semibold px-3 py-2 rounded-lg transition border border-indigo-500/40 flex items-center gap-1.5 shadow-sm">
+                    <span>📝</span> Quick Capture
+                </button>
+                <button id="btnOpenPullKnowledge" class="bg-sky-700/80 hover:bg-sky-600 text-sky-100 text-xs font-semibold px-3 py-2 rounded-lg transition border border-sky-500/40 flex items-center gap-1.5 shadow-sm">
+                    <span>🌐</span> Pull-In Medical Concept
+                </button>
+                <button id="btnDownloadApkg" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1.5 shadow-sm">
+                    <span>⬇️</span> .apkg Deck
+                </button>
+            </div>
+        </div>
+
+        <!-- Sub Tabs -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-8 text-sm font-medium border-t border-slate-700/50 overflow-x-auto">
+            <button id="tabBtnWiki" class="tab-btn active text-indigo-400 border-b-2 border-indigo-400 py-2.5 px-1 flex items-center gap-2 whitespace-nowrap">
+                <span>📚</span> Compounding Wiki (Karpathy)
+            </button>
+            <button id="tabBtnGraph" class="tab-btn text-slate-400 hover:text-slate-200 border-b-2 border-transparent py-2.5 px-1 flex items-center gap-2 whitespace-nowrap">
+                <span>🧠</span> Brain Graph (HippoRAG)
+            </button>
+            <button id="tabBtnTutor" class="tab-btn text-slate-400 hover:text-slate-200 border-b-2 border-transparent py-2.5 px-1 flex items-center gap-2 whitespace-nowrap">
+                <span>🩺</span> Socratic Living Teacher (Drill)
+            </button>
+            <button id="tabBtnAnki" class="tab-btn text-slate-400 hover:text-slate-200 border-b-2 border-transparent py-2.5 px-1 flex items-center gap-2 whitespace-nowrap">
+                <span>🎴</span> Anki Flashcard Center (<span id="tabCardCount">6</span>)
+            </button>
+            <button id="tabBtnCurriculum" class="tab-btn text-slate-400 hover:text-slate-200 border-b-2 border-transparent py-2.5 px-1 flex items-center gap-2 whitespace-nowrap">
+                <span>🎯</span> Curriculum & Diagnostics
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+        <!-- ================= VIEW 1: COMPOUNDING WIKI EXPLORER ================= -->
+        <section id="viewWiki" class="view-panel grid grid-cols-1 md:grid-cols-12 gap-6">
+            <!-- Sidebar: Search & Tree -->
+            <div class="md:col-span-4 bg-slate-800 border border-slate-700 rounded-xl p-4 flex flex-col h-[750px]">
+                <!-- Course / Module Selector -->
+                <div class="mb-3.5 bg-slate-900/70 p-2.5 rounded-lg border border-slate-700/60">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Course / Module Focus</label>
+                        <span id="activeCourseCountBadge" class="text-[10px] font-mono bg-indigo-900/60 text-indigo-300 border border-indigo-700/50 px-1.5 py-0.5 rounded">All (89)</span>
+                    </div>
+                    <select id="wikiCourseFilter" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 font-medium cursor-pointer">
+                        <option value="all">🌐 All Curricula & Modules</option>
+                        <option value="hst121">🎓 MIT HST.121: Gastroenterology & Hepatology</option>
+                        <option value="cardio">❤️ Cardiopulmonary & Renal Block</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">FTS5 Medical Search</label>
+                    <div class="relative">
+                        <input id="wikiSearchInput" type="text" placeholder="Search concepts, drugs, mechanisms..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+                        <span class="absolute right-3 top-2.5 text-slate-500 text-xs">🔍</span>
+                    </div>
+                </div>
+
+                <!-- Tree Nav -->
+                <div class="flex-1 overflow-y-auto pr-1 space-y-3 text-sm" id="wikiTreeContainer">
+                    <!-- Core Files Section -->
+                    <div class="tree-section border-b border-slate-700/40 pb-2">
+                        <button class="w-full text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-between hover:text-slate-200 transition py-1 text-left" onclick="toggleTreeSection('sectionCore')">
+                            <span class="flex items-center gap-1.5">
+                                <span id="icon-sectionCore" class="text-[10px] transform transition-transform">▼</span>
+                                <span>📄 System Core Files</span>
+                            </span>
+                            <span class="text-[10px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded font-mono">3</span>
+                        </button>
+                        <ul id="sectionCore" class="space-y-1 pl-1">
+                            <li><button class="w-full text-left px-2 py-1 rounded hover:bg-slate-700 text-slate-300 font-medium text-xs flex items-center justify-between" onclick="loadWikiPage('index.md')"><span>Master Index (index.md)</span><span class="text-[10px] text-slate-500">→</span></button></li>
+                            <li><button class="w-full text-left px-2 py-1 rounded hover:bg-slate-700 text-slate-300 font-medium text-xs flex items-center justify-between" onclick="loadWikiPage('log.md')"><span>Chronological Log (log.md)</span><span class="text-[10px] text-slate-500">→</span></button></li>
+                            <li><button class="w-full text-left px-2 py-1 rounded hover:bg-slate-700 text-slate-300 font-medium text-xs flex items-center justify-between" onclick="loadWikiPage('SCHEMA.md')"><span>Wiki Schema (SCHEMA.md)</span><span class="text-[10px] text-slate-500">→</span></button></li>
+                        </ul>
+                    </div>
+
+                    <!-- Lectures Section -->
+                    <div class="tree-section border-b border-slate-700/40 pb-2">
+                        <button class="w-full text-xs font-bold text-amber-400 uppercase tracking-wider mb-1 flex items-center justify-between hover:text-amber-300 transition py-1 text-left" onclick="toggleTreeSection('listLectures')">
+                            <span class="flex items-center gap-1.5">
+                                <span id="icon-listLectures" class="text-[10px] transform transition-transform">▼</span>
+                                <span>🎓 Course Lectures</span>
+                            </span>
+                            <span id="countLectures" class="text-[10px] bg-amber-900/50 text-amber-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                        </button>
+                        <ul id="listLectures" class="space-y-1 pl-1"></ul>
+                    </div>
+
+                    <!-- Concepts Section -->
+                    <div class="tree-section border-b border-slate-700/40 pb-2">
+                        <button class="w-full text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1 flex items-center justify-between hover:text-indigo-300 transition py-1 text-left" onclick="toggleTreeSection('listConcepts')">
+                            <span class="flex items-center gap-1.5">
+                                <span id="icon-listConcepts" class="text-[10px] transform transition-transform">▼</span>
+                                <span>💡 Concepts & Mechanisms</span>
+                            </span>
+                            <span id="countConcepts" class="text-[10px] bg-indigo-900/50 text-indigo-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                        </button>
+                        <ul id="listConcepts" class="space-y-1 pl-1"></ul>
+                    </div>
+
+                    <!-- Entities Section -->
+                    <div class="tree-section border-b border-slate-700/40 pb-2">
+                        <button class="w-full text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1 flex items-center justify-between hover:text-emerald-300 transition py-1 text-left" onclick="toggleTreeSection('listEntities')">
+                            <span class="flex items-center gap-1.5">
+                                <span id="icon-listEntities" class="text-[10px] transform transition-transform">▼</span>
+                                <span>💊 Entities (Drugs & Bugs)</span>
+                            </span>
+                            <span id="countEntities" class="text-[10px] bg-emerald-900/50 text-emerald-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                        </button>
+                        <ul id="listEntities" class="space-y-1 pl-1"></ul>
+                    </div>
+
+                    <!-- Differentials Section -->
+                    <div class="tree-section border-b border-slate-700/40 pb-2">
+                        <button class="w-full text-xs font-bold text-sky-400 uppercase tracking-wider mb-1 flex items-center justify-between hover:text-sky-300 transition py-1 text-left" onclick="toggleTreeSection('listDifferentials')">
+                            <span class="flex items-center gap-1.5">
+                                <span id="icon-listDifferentials" class="text-[10px] transform transition-transform">▼</span>
+                                <span>⚖️ Comparative Differentials</span>
+                            </span>
+                            <span id="countDifferentials" class="text-[10px] bg-sky-900/50 text-sky-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                        </button>
+                        <ul id="listDifferentials" class="space-y-1 pl-1"></ul>
+                    </div>
+
+                    <!-- Traps Section -->
+                    <div class="tree-section pb-2">
+                        <button class="w-full text-xs font-bold text-rose-400 uppercase tracking-wider mb-1 flex items-center justify-between hover:text-rose-300 transition py-1 text-left" onclick="toggleTreeSection('listTraps')">
+                            <span class="flex items-center gap-1.5">
+                                <span id="icon-listTraps" class="text-[10px] transform transition-transform">▼</span>
+                                <span>⚠️ Board Traps & Pitfalls</span>
+                            </span>
+                            <span id="countTraps" class="text-[10px] bg-rose-900/50 text-rose-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                        </button>
+                        <ul id="listTraps" class="space-y-1 pl-1"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Reader / Live In-Place Editor -->
+            <div class="md:col-span-8 bg-slate-800 border border-slate-700 rounded-xl p-6 flex flex-col h-[750px] overflow-hidden">
+                <div class="border-b border-slate-700 pb-3 mb-3 flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span id="pageBadge" class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-900/60 text-indigo-300 border border-indigo-700">concept</span>
+                            <span id="pageCourseBadge" class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-700 text-slate-300 border border-slate-600">Core</span>
+                        </div>
+                        <h2 id="pageTitle" class="text-xl font-bold text-white mt-1">Medical Master Index</h2>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span id="pagePath" class="text-xs font-mono text-slate-400 mr-2">index.md</span>
+                        <button id="btnEditPage" class="bg-slate-700 hover:bg-slate-600 text-xs px-2.5 py-1 rounded text-slate-200 transition flex items-center gap-1">
+                            <span>✏️</span> Edit
+                        </button>
+                        <button id="btnSavePage" class="hidden bg-indigo-600 hover:bg-indigo-500 text-xs px-2.5 py-1 rounded text-white font-semibold transition flex items-center gap-1">
+                            <span>💾</span> Save & Reindex
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Markdown Viewer -->
+                <div id="pageBody" class="flex-1 overflow-y-auto pr-2 markdown-body text-slate-200">
+                    <!-- Rendered markdown inserted here -->
+                </div>
+
+                <!-- Live Editor Area (Hidden by default) -->
+                <div id="pageEditorContainer" class="flex-1 hidden flex-col">
+                    <textarea id="pageEditorTextarea" class="w-full flex-1 bg-slate-950 border border-slate-700 rounded-lg p-3 font-mono text-xs text-slate-200 focus:outline-none focus:border-indigo-500 resize-none leading-relaxed"></textarea>
+                </div>
+
+                <!-- HippoRAG Associative Spreading Recall Bar -->
+                <div id="associativeBar" class="mt-3 pt-3 border-t border-slate-700/60 flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2 overflow-x-auto py-1">
+                        <span class="text-indigo-400 font-bold uppercase text-[10px] tracking-wider flex items-center gap-1">
+                            <span>⚡</span> HippoRAG Associative Recall:
+                        </span>
+                        <div id="associativeTags" class="flex gap-1.5">
+                            <!-- Dynamic related concept badges -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= VIEW 2: BRAIN GRAPH (VISUAL CORTEX) ================= -->
+        <section id="viewGraph" class="view-panel hidden bg-slate-800 border border-slate-700 rounded-xl p-5 flex flex-col h-[750px] relative">
+            <!-- Graph Mission Control Header -->
+            <div class="border-b border-slate-700 pb-3 mb-2.5 z-10 flex flex-col gap-2.5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-base font-bold text-white flex items-center gap-2">
+                            <span>🧠</span> Cognitive Brain Graph (Biomimetic Neural Network)
+                            <span id="graphStatsBadge" class="text-xs font-mono bg-indigo-950 text-indigo-300 border border-indigo-700/60 px-2 py-0.5 rounded-full">84 Nodes • 168 Mechanism Links</span>
+                        </h2>
+                        <p class="text-xs text-slate-400">Organ-system multi-foci constellations. Click any node to spotlight its biological pathways.</p>
+                    </div>
+                    <div class="flex items-center space-x-2 text-xs">
+                        <button id="btnResetGraphZoom" class="bg-slate-700 hover:bg-slate-600 text-xs px-2.5 py-1.5 rounded text-slate-200 transition flex items-center gap-1">
+                            <span>🔍</span> Fit View
+                        </button>
+                        <button id="btnRefreshGraph" class="bg-indigo-600/80 hover:bg-indigo-600 text-xs px-2.5 py-1.5 rounded text-white font-medium transition flex items-center gap-1">
+                            <span>🔄</span> Re-Simulate
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Graph Filter & Mode Controls Toolbar -->
+                <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900/60 p-2 rounded-lg border border-slate-700/60 text-xs">
+                    <!-- Left: Filters & Color Mode -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <!-- Course Filter -->
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-slate-400 font-semibold">Course:</span>
+                            <select id="graphCourseFilter" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
+                                <option value="all">🌐 All Curricula</option>
+                                <option value="hst121">🎓 MIT HST.121 (GI & Liver)</option>
+                                <option value="cardio">❤️ Cardiopulmonary & Renal</option>
+                            </select>
+                        </div>
+
+                        <!-- Layer Mode Filter -->
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-slate-400 font-semibold">Layer:</span>
+                            <select id="graphLayerFilter" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
+                                <option value="mechanisms">⚡ Pure Pathophysiology (Diseases & Drugs)</option>
+                                <option value="all">🌐 Complete Network (with Lectures)</option>
+                                <option value="lectures">🎓 Lecture Milestones</option>
+                            </select>
+                        </div>
+
+                        <!-- Color Mode -->
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-slate-400 font-semibold">Coloring:</span>
+                            <select id="graphColorMode" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
+                                <option value="category">🎨 Category & Entity Type</option>
+                                <option value="mastery">📊 Student Readiness (Mastery)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Right: Search & Quick Jump -->
+                    <div class="flex items-center gap-2">
+                        <div class="relative">
+                            <input id="graphSearchInput" type="text" placeholder="Spotlight concept or drug..." class="bg-slate-800 border border-slate-700 rounded px-2.5 py-1 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 w-44">
+                            <span class="absolute right-2 top-1 text-slate-500 text-[10px]">🔍</span>
+                        </div>
+                        <button id="btnClearSpotlight" class="hidden text-[11px] text-rose-300 hover:text-white bg-rose-950/60 border border-rose-800/60 px-2 py-1 rounded transition">
+                            ✖ Reset Spotlight
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dynamic Legend Bar -->
+                <div id="graphLegendBar" class="flex flex-wrap items-center gap-4 text-[11px] text-slate-300 pt-0.5">
+                    <!-- Populated dynamically based on graphColorMode -->
+                </div>
+            </div>
+
+            <!-- SVG Container for D3 Force Simulation -->
+            <div class="flex-1 w-full h-full relative overflow-hidden bg-slate-950/80 rounded-lg border border-slate-700/60">
+                <svg id="brainGraphSvg" class="w-full h-full"></svg>
+                <div id="graphTooltip" class="absolute hidden bg-slate-900/95 backdrop-blur border border-indigo-700/60 p-3 rounded-lg text-xs pointer-events-none shadow-2xl z-20 max-w-xs"></div>
+            </div>
+        </section>
+
+        <!-- ================= VIEW 3: SOCRATIC LIVING TEACHER ARENA ================= -->
+        <section id="viewTutor" class="view-panel hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left: Clinical Vignette & Answer Arena -->
+            <div class="lg:col-span-7 bg-slate-800 border border-slate-700 rounded-xl p-6 flex flex-col space-y-5">
+                <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <h2 class="text-base font-bold text-white">USMLE Board-Style Clinical Vignette</h2>
+                    </div>
+                    <button id="btnNewVignette" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded-lg text-slate-200 font-medium transition">
+                        🔄 Generate Next Adaptive Vignette
+                    </button>
+                </div>
+
+                <!-- Topic & Stem -->
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span id="vignetteTopic" class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-900/40 text-amber-300 border border-amber-800/50">Cardiovascular Pharmacology</span>
+                        <span class="text-xs text-slate-400">USMLE Step 1 / 2 CK Format</span>
+                    </div>
+                    <div id="vignetteStem" class="bg-slate-900/80 border border-slate-700/80 rounded-lg p-4 text-sm text-slate-200 leading-relaxed font-normal">
+                        Loading clinical vignette...
+                    </div>
+                </div>
+
+                <!-- Multiple Choice Options -->
+                <div class="space-y-2.5">
+                    <label class="block text-xs font-semibold uppercase text-slate-400">Select Clinical Decision:</label>
+                    <div id="vignetteOptions" class="space-y-2">
+                        <!-- Options generated here -->
+                    </div>
+                </div>
+
+                <!-- Stated Reasoning -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Your Clinical Reasoning (Socratic Probe):</label>
+                    <textarea id="studentReasoningInput" rows="2" placeholder="Why did you pick this option? What physiological mechanism or contraindication guided you?" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <button id="btnSubmitAnswer" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-lg text-sm shadow-md shadow-indigo-600/20 transition flex items-center justify-center gap-2">
+                    <span>🩺</span> Submit Diagnosis to Living Teacher
+                </button>
+            </div>
+
+            <!-- Right: Socratic Diagnostic Feedback & Action -->
+            <div class="lg:col-span-5 bg-slate-800 border border-slate-700 rounded-xl p-6 flex flex-col space-y-4">
+                <div class="border-b border-slate-700 pb-3 flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                        <span>🧠</span> Teacher Diagnostic Feedback
+                    </h3>
+                    <span id="verdictBadge" class="hidden text-xs font-bold px-2 py-0.5 rounded">READY</span>
+                </div>
+
+                <div id="feedbackPlaceholder" class="flex-1 flex flex-col items-center justify-center text-center p-6 text-slate-500">
+                    <div class="text-4xl mb-2">🧑‍⚕️</div>
+                    <p class="text-xs">Select an option and submit your clinical reasoning to receive real-time Socratic feedback, error classification, and automatic flashcard remediation.</p>
+                </div>
+
+                <div id="feedbackContent" class="hidden space-y-4 text-xs">
+                    <!-- Socratic Critique -->
+                    <div class="bg-slate-900/80 border border-slate-700 rounded-lg p-3">
+                        <div class="font-bold text-indigo-300 mb-1 flex items-center gap-1">
+                            <span>💬</span> Socratic Critique:
+                        </div>
+                        <p id="feedbackCritique" class="text-slate-300 leading-relaxed"></p>
+                    </div>
+
+                    <!-- Mechanism Explanation -->
+                    <div class="bg-slate-900/80 border border-slate-700 rounded-lg p-3">
+                        <div class="font-bold text-emerald-400 mb-1 flex items-center gap-1">
+                            <span>🔬</span> Physiological Mechanism:
+                        </div>
+                        <p id="feedbackMechanism" class="text-slate-300 leading-relaxed"></p>
+                    </div>
+
+                    <!-- Error Taxonomy -->
+                    <div class="bg-rose-950/40 border border-rose-800/50 rounded-lg p-3">
+                        <div class="font-bold text-rose-400 mb-1 flex items-center gap-1">
+                            <span>⚠️</span> Error Classification:
+                        </div>
+                        <span id="feedbackTaxonomy" class="font-mono bg-rose-900/60 text-rose-200 px-2 py-0.5 rounded">CLINICAL_CONTRAINDICATION</span>
+                        <p id="feedbackRemediation" class="text-slate-300 mt-1.5 leading-relaxed"></p>
+                    </div>
+
+                    <!-- Auto-Generated Flashcard Card -->
+                    <div class="bg-slate-900 border border-indigo-500/40 rounded-lg p-3 shadow-sm">
+                        <div class="font-bold text-indigo-400 mb-1 flex items-center justify-between">
+                            <span>🎴 Auto-Generated Anki Card:</span>
+                            <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded">Queued for Export</span>
+                        </div>
+                        <div id="feedbackCardFront" class="text-slate-200 my-1 bg-slate-950 p-2 rounded border border-slate-800 font-mono text-[11px]"></div>
+                        <div id="feedbackCardBack" class="text-emerald-400 bg-slate-950 p-2 rounded border border-slate-800 font-mono text-[11px]"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= VIEW 4: ANKI FLASHCARD CENTER ================= -->
+        <section id="viewAnki" class="view-panel hidden space-y-5">
+            <!-- Header & Master Actions -->
+            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-base font-bold text-white flex items-center gap-2">
+                        <span>🎴</span> Medical Flashcard & Spaced-Repetition Center
+                        <span id="ankiStatsBadge" class="text-xs font-mono bg-indigo-950 text-indigo-300 border border-indigo-700/60 px-2 py-0.5 rounded-full">117 High-Yield Cards</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Active recall and SuperMemo-2 spaced repetition compiled across all MIT HST.121 and Cardiopulmonary wiki modules.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button id="btnRecompileAnki" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold px-3 py-2 rounded-lg transition border border-slate-600 flex items-center gap-1.5 shadow-sm">
+                        <span>🔄</span> Recompile Wiki
+                    </button>
+                    <button id="btnSyncAnkiConnect" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold px-3 py-2 rounded-lg transition border border-slate-600 flex items-center gap-1.5 shadow-sm">
+                        <span>⚡</span> 1-Click Sync
+                    </button>
+                    <button onclick="downloadAnkiDeck()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-1.5">
+                        <span>⬇️</span> Download .apkg
+                    </button>
+                </div>
+            </div>
+
+            <!-- Deck Mastery & Review Status Bar -->
+            <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 flex flex-col gap-3">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="font-bold text-slate-300 flex items-center gap-1.5">
+                        <span>📊</span> Deck Mastery & Retention:
+                        <span id="ankiStatPercent" class="text-emerald-400 font-mono font-extrabold text-sm ml-1">0%</span>
+                    </span>
+                    <div class="flex items-center gap-3 font-mono text-[11px]">
+                        <span class="text-slate-300"><strong id="ankiStatTotal" class="text-white">0</strong> Total</span>
+                        <span class="text-rose-400"><strong id="ankiStatDue" class="text-rose-300">0</strong> Due / New</span>
+                        <span class="text-amber-400"><strong id="ankiStatLearning" class="text-amber-300">0</strong> Learning</span>
+                        <span class="text-emerald-400"><strong id="ankiStatMastered" class="text-emerald-300">0</strong> Mastered</span>
+                    </div>
+                </div>
+                <!-- Segmented Progress Bar -->
+                <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden flex border border-slate-700/60">
+                    <div id="ankiBarMastered" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
+                    <div id="ankiBarLearning" class="bg-amber-500 h-full transition-all duration-500" style="width: 0%"></div>
+                    <div id="ankiBarStruggling" class="bg-rose-500 h-full transition-all duration-500" style="width: 0%"></div>
+                    <div id="ankiBarUnreviewed" class="bg-slate-700 h-full transition-all duration-500" style="width: 100%"></div>
+                </div>
+            </div>
+
+            <!-- Mission Control Toolbar -->
+            <div class="bg-slate-800 border border-slate-700 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <!-- Left: View Mode Toggle -->
+                <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg p-0.5">
+                    <button id="btnModeBrowseCards" class="px-3 py-1.5 rounded-md font-semibold text-xs transition bg-indigo-600 text-white shadow-sm flex items-center gap-1">
+                        <span>🗂</span> Browse Deck
+                    </button>
+                    <button id="btnModeStudyCards" class="px-3 py-1.5 rounded-md font-semibold text-xs transition text-slate-400 hover:text-white flex items-center gap-1">
+                        <span>🚀</span> Study Mode
+                    </button>
+                </div>
+
+                <!-- Middle Filters -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- Course Filter -->
+                    <div class="flex items-center gap-1">
+                        <span class="text-slate-400 font-medium">Course:</span>
+                        <select id="ankiCourseFilter" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
+                            <option value="all">🌐 All Curricula</option>
+                            <option value="hst121">🎓 MIT HST.121 (GI & Liver)</option>
+                            <option value="cardio">❤️ Cardiopulmonary & Renal</option>
+                        </select>
+                    </div>
+
+                    <!-- System Filter -->
+                    <div class="flex items-center gap-1">
+                        <span class="text-slate-400 font-medium">System:</span>
+                        <select id="ankiSystemFilter" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
+                            <option value="all">🧬 All Systems</option>
+                            <option value="Hepatology">Liver & Cirrhosis</option>
+                            <option value="Luminal GI">Luminal GI & IBD</option>
+                            <option value="Gastroduodenal">Gastroduodenal & PUD</option>
+                            <option value="Pancreaticobiliary">Pancreaticobiliary</option>
+                            <option value="Cardiology">Cardiology</option>
+                            <option value="Renal">Renal & Diuretics</option>
+                        </select>
+                    </div>
+
+                    <!-- Card Type Filter -->
+                    <div class="flex items-center gap-1">
+                        <span class="text-slate-400 font-medium">Type:</span>
+                        <select id="ankiTypeFilter" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
+                            <option value="all">All Types</option>
+                            <option value="cloze">⚡ Cloze Deletion</option>
+                            <option value="differential">⚖️ Differential Contrasts</option>
+                            <option value="trap">⚠️ Board Traps</option>
+                        </select>
+                    </div>
+
+                    <!-- Mastery Filter -->
+                    <div class="flex items-center gap-1">
+                        <span class="text-slate-400 font-medium">Status:</span>
+                        <select id="ankiMasteryFilter" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
+                            <option value="all">All Cards</option>
+                            <option value="due">⏰ Due / Overdue</option>
+                            <option value="struggling">🔴 Struggling</option>
+                            <option value="learning">🟡 Learning</option>
+                            <option value="mastered">🟢 Mastered</option>
+                            <option value="unreviewed">⚪ Unreviewed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Right: Search Box -->
+                <div class="relative">
+                    <input id="ankiSearchInput" type="text" placeholder="Search cards, pearls, drugs..." class="bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 w-44">
+                    <span class="absolute right-2 top-1 text-slate-500 text-[10px]">🔍</span>
+                </div>
+            </div>
+
+            <!-- ================= SUB-PANEL A: INTERACTIVE STUDY MODE ARENA ================= -->
+            <div id="ankiStudyArena" class="hidden flex flex-col gap-4">
+                <!-- Arena Header Bar -->
+                <div class="flex items-center justify-between bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-2.5 text-xs">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-pulse"></span>
+                        <span id="studyQueueCounter" class="font-bold text-indigo-300 font-mono">Card 1 of 12</span>
+                        <span class="text-slate-500">•</span>
+                        <span id="studyQueueBadge" class="text-[11px] text-slate-400">Due for Spaced Repetition</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="btnStudyWikiLink" class="bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 text-xs px-2.5 py-1 rounded border border-indigo-700/50 transition flex items-center gap-1">
+                            <span>📖</span> Read Concept in Wiki
+                        </button>
+                        <button id="btnExitStudyMode" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-2.5 py-1 rounded border border-slate-600 transition flex items-center gap-1">
+                            <span>✕</span> Exit Study Mode
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Study Flashcard Interactive Box -->
+                <div id="studyCardBox" class="study-card-box bg-slate-800 border border-slate-700 rounded-2xl p-8 flex flex-col justify-between min-h-[360px] shadow-2xl relative">
+                    <!-- Badges & Metadata -->
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <span id="studyCardSystemBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-700/50">Hepatology</span>
+                            <span id="studyCardTypeBadge" class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-slate-700 text-slate-300">cloze card</span>
+                            <span id="studyCardDifficulty" class="text-xs text-amber-400 font-mono">★★☆</span>
+                        </div>
+                        <span id="studyCardMasteryBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full mastery-badge-unreviewed">Unreviewed</span>
+                    </div>
+
+                    <!-- Question / Prompt Area -->
+                    <div class="flex-1 flex flex-col justify-center my-4">
+                        <div id="studyCardPrompt" class="text-lg md:text-xl text-slate-100 font-medium leading-relaxed">
+                            Loading flashcard...
+                        </div>
+                    </div>
+
+                    <!-- Reveal Button (Active on Front) -->
+                    <div id="studyRevealContainer" class="pt-4 border-t border-slate-700/60 flex justify-center">
+                        <button id="btnStudyRevealAnswer" class="w-full md:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2">
+                            <span>👁</span> Reveal Cloze Deletion & Clinical Pearl <kbd class="bg-indigo-700 px-2 py-0.5 rounded text-[11px] font-mono ml-2">Space</kbd>
+                        </button>
+                    </div>
+
+                    <!-- Answer & Clinical Pearl (Revealed on Back) -->
+                    <div id="studyAnswerContainer" class="hidden flex flex-col gap-4 pt-4 border-t border-slate-700/60">
+                        <!-- Pearl Box -->
+                        <div class="bg-emerald-950/40 border-l-4 border-emerald-500 rounded-r-xl p-4 text-emerald-300 text-sm">
+                            <div class="font-bold flex items-center gap-1.5 mb-1 text-emerald-400 text-xs uppercase tracking-wider">
+                                <span>💡</span> High-Yield Clinical Pearl:
+                            </div>
+                            <p id="studyCardPearl" class="leading-relaxed"></p>
+                        </div>
+
+                        <!-- Spaced Repetition Rating Buttons -->
+                        <div class="flex flex-col gap-2 pt-2">
+                            <div class="text-center text-[11px] text-slate-400 font-medium">How well did you recall this mechanism?</div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 font-semibold text-xs">
+                                <button onclick="rateActiveCard(1)" class="bg-rose-900/60 hover:bg-rose-800 text-rose-200 border border-rose-700/60 py-2.5 rounded-xl transition flex flex-col items-center justify-center shadow">
+                                    <span class="text-sm font-bold">Again (<10m)</span>
+                                    <span class="text-[10px] text-rose-300/80 font-mono mt-0.5">[1] Failed</span>
+                                </button>
+                                <button onclick="rateActiveCard(2)" class="bg-amber-900/60 hover:bg-amber-800 text-amber-200 border border-amber-700/60 py-2.5 rounded-xl transition flex flex-col items-center justify-center shadow">
+                                    <span class="text-sm font-bold">Hard (1d)</span>
+                                    <span class="text-[10px] text-amber-300/80 font-mono mt-0.5">[2] Difficult</span>
+                                </button>
+                                <button onclick="rateActiveCard(3)" class="bg-emerald-900/60 hover:bg-emerald-800 text-emerald-200 border border-emerald-700/60 py-2.5 rounded-xl transition flex flex-col items-center justify-center shadow">
+                                    <span class="text-sm font-bold">Good (3d)</span>
+                                    <span class="text-[10px] text-emerald-300/80 font-mono mt-0.5">[3] Retained</span>
+                                </button>
+                                <button onclick="rateActiveCard(4)" class="bg-sky-900/60 hover:bg-sky-800 text-sky-200 border border-sky-700/60 py-2.5 rounded-xl transition flex flex-col items-center justify-center shadow">
+                                    <span class="text-sm font-bold">Easy (7d+)</span>
+                                    <span class="text-[10px] text-sky-300/80 font-mono mt-0.5">[4] Mastered</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= SUB-PANEL B: BROWSE CARDS GRID ================= -->
+            <div id="ankiBrowseContainer" class="flex flex-col gap-3">
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                    <span id="ankiCardCountLabel">Showing all cards</span>
+                    <span class="italic text-[11px]">Click "Review Now" on any card to drill it in Study Mode</span>
+                </div>
+                <!-- Staged Cards Grid -->
+                <div id="ankiCardsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Cards injected here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= VIEW 5: CURRICULUM & DIAGNOSTICS ================= -->
+        <section id="viewCurriculum" class="view-panel hidden space-y-6">
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Upcoming Milestone -->
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Curriculum Block Milestone</h3>
+                    <div class="text-lg font-bold text-amber-300" id="currTargetExam">Cardiovascular Block Final</div>
+                    <div class="text-2xl font-black text-rose-400 mt-2 flex items-baseline gap-2">
+                        <span id="currDaysLeft">8</span>
+                        <span class="text-xs font-normal text-slate-400">Days Remaining</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2" id="currBlockName">MS2 Cardiopulmonary & Renal Medicine</p>
+                </div>
+
+                <!-- Readiness Index -->
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Overall Board Readiness Index</h3>
+                    <div class="text-3xl font-black text-emerald-400" id="currReadiness">65.2%</div>
+                    <div class="w-full bg-slate-700 h-2 rounded-full mt-3 overflow-hidden">
+                        <div id="currReadinessBar" class="bg-gradient-to-r from-amber-400 to-emerald-400 h-full rounded-full" style="width: 65%;"></div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-2">Weighted average across organ systems.</p>
+                </div>
+
+                <!-- Priority Topics -->
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Target High-Yield Objectives</h3>
+                    <ul id="currTopicsList" class="space-y-1 text-xs text-slate-300">
+                        <!-- topics -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Organ System Mastery Breakdown -->
+            <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-white mb-4">Organ System Mastery Scores</h3>
+                <div id="masteryBreakdown" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <!-- mastery items -->
+                </div>
+            </div>
+
+            <!-- Misconceptions Log -->
+            <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-rose-400 mb-3 flex items-center gap-1.5">
+                    <span>⚠️</span> Diagnostic Error Ledger (student_profile/misconceptions.md)
+                </h3>
+                <div id="misconceptionsContainer" class="bg-slate-900 border border-slate-700/80 rounded-lg p-4 text-xs font-mono text-slate-300 max-h-64 overflow-y-auto whitespace-pre-wrap">
+                    Loading diagnostic log...
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ================= MODAL: QUICK-CAPTURE SYNAPSE ================= -->
+    <div id="modalQuickCapture" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                <h3 class="font-bold text-white flex items-center gap-2">
+                    <span>📝</span> Quick-Capture Synapse (On-The-Fly Note)
+                </h3>
+                <button class="text-slate-400 hover:text-white" onclick="closeModal('modalQuickCapture')">✕</button>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Topic / Anchor Concept</label>
+                <input id="qcTopicInput" type="text" placeholder="e.g. Loop Diuretics in Sulfa Allergy, Nitrates Mechanism..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Clinical Pearl / Lecture Note</label>
+                <textarea id="qcNoteInput" rows="4" placeholder="Jot down the clinical pearl or board trap you just learned..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></textarea>
+            </div>
+            <div class="flex items-center justify-end space-x-3 pt-2">
+                <button class="text-xs px-3 py-2 text-slate-400 hover:text-slate-200" onclick="closeModal('modalQuickCapture')">Cancel</button>
+                <button id="btnSubmitQuickCapture" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow flex items-center gap-1.5">
+                    <span>⚡</span> Weave into Brain & Stage Card
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: PULL-IN MEDICAL CONCEPT ================= -->
+    <div id="modalPullKnowledge" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                <h3 class="font-bold text-white flex items-center gap-2">
+                    <span>🌐</span> Pull-In External Medical Literature
+                </h3>
+                <button class="text-slate-400 hover:text-white" onclick="closeModal('modalPullKnowledge')">✕</button>
+            </div>
+            <p class="text-xs text-slate-400">Search any clinical condition, drug, or landmark clinical trial. Paideia Genesis fetches authoritative medical abstracts and synthesizes a linked wiki page and flashcard on-the-fly.</p>
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Medical Topic / Drug / Trial</label>
+                <input id="pullQueryInput" type="text" placeholder="e.g. SGLT2 inhibitors, Sacubitril-Valsartan, Spironolactone..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+            </div>
+            <div class="flex items-center justify-end space-x-3 pt-2">
+                <button class="text-xs px-3 py-2 text-slate-400 hover:text-slate-200" onclick="closeModal('modalPullKnowledge')">Cancel</button>
+                <button id="btnSubmitPullKnowledge" class="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow flex items-center gap-1.5">
+                    <span>🔬</span> Synthesize into Living Wiki
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: IMPORT COURSE / SYLLABUS ================= -->
+    <div id="modalImportCourse" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                <h3 class="font-bold text-white flex items-center gap-2">
+                    <span>📥</span> Import External Medical Course / Syllabus
+                </h3>
+                <button class="text-slate-400 hover:text-white" onclick="closeModal('modalImportCourse')">✕</button>
+            </div>
+            <p class="text-xs text-slate-400">Import course curricula (like MIT OpenCourseWare HST.121 Gastroenterology) directly into the living wiki, connecting multi-organ pathophysiology with HippoRAG associative memory and staging high-yield board flashcards.</p>
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Course URL or Syllabus</label>
+                <input id="importCourseUrlInput" type="text" value="https://ocw.mit.edu/courses/hst-121-gastroenterology-fall-2005/pages/lecture-notes/" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500 font-mono">
+            </div>
+            <div class="p-3 bg-slate-900/60 border border-slate-700/60 rounded-lg text-xs space-y-1 text-slate-300">
+                <div class="font-semibold text-amber-300">Preset: MIT OCW HST.121 Gastroenterology</div>
+                <div class="text-slate-400">• 20 lecture sessions (Embryology, IBD, Pancreatitis, Bilirubin, Cirrhosis)</div>
+                <div class="text-slate-400">• Generates 6 core concept pages, 2 comparative differentials & board traps</div>
+                <div class="text-slate-400">• Cross-links splanchnic vasodilation to existing cardio-renal models</div>
+            </div>
+            <div class="flex items-center justify-end space-x-3 pt-2">
+                <button class="text-xs px-3 py-2 text-slate-400 hover:text-slate-200" onclick="closeModal('modalImportCourse')">Cancel</button>
+                <button id="btnSubmitImportCourse" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow flex items-center gap-1.5">
+                    <span>🚀</span> Ingest & Weave into Brain
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-800 border border-indigo-500 text-white px-4 py-3 rounded-lg shadow-xl text-xs font-medium transform transition-all translate-y-20 opacity-0 pointer-events-none flex items-center gap-2 z-50">
+        <span id="toastIcon">✨</span>
+        <span id="toastMsg">Operation completed.</span>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

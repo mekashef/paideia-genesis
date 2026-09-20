@@ -1,0 +1,15 @@
+{
+  "question_id": "uworld-cardio-9841",
+  "source": "Pre-clinical Cardiovascular Quiz #2",
+  "stem": "A 58-year-old male with long-standing poorly controlled hypertension presents to the ED with severe dyspnea, orthopnea, and lower extremity swelling. Vitals: BP 162/98, HR 112, RR 26, SpO2 88% on room air. Crackles are auscultated bilaterally up to the scapulae. The resident physician decides to aggressively manage the patient's acute presentation. Which medication, if initiated at this exact moment, carries the highest risk of precipitating acute hemodynamic collapse?",
+  "options": [
+    {"id": "A", "text": "Intravenous Furosemide"},
+    {"id": "B", "text": "Intravenous Nitroglycerin"},
+    {"id": "C", "text": "Oral Carvedilol"},
+    {"id": "D", "text": "Intravenous Morphine sulfate"}
+  ],
+  "student_choice": "A",
+  "correct_choice": "C",
+  "student_stated_reason": "I thought furosemide drops blood pressure too fast and causes collapse.",
+  "faculty_explanation": "Oral Carvedilol (Option C) is a non-selective beta-blocker with alpha-1 blocking properties. Initiating beta-blockers in an acutely decompensated heart failure patient removes catecholamine-dependent inotropic support, causing sudden reduction in stroke volume and cardiogenic shock. IV Furosemide (Option A) is actually the first-line treatment to relieve pulmonary congestion."
+}

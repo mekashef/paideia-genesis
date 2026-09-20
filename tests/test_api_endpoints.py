@@ -3,6 +3,31 @@ from fastapi.testclient import TestClient
 from src.api.server import app
 
 class TestApiEndpoints(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        from src.wiki.schema import init_wiki_structure
+        from src.wiki.course_importer import CourseImporter
+        from src.wiki.compiler import WikiCompiler
+        from src.anki.generator import AnkiManager
+        from src.config import BASE_DIR, WIKI_DIR
+
+        init_wiki_structure()
+        sessions_dir = WIKI_DIR / "course_sessions"
+        if not any(sessions_dir.glob("*.md")):
+            demo_lecture = BASE_DIR / "demo_data" / "Cardiology_Block_Lecture_4_Heart_Failure_and_Diuretics.md"
+            if demo_lecture.exists():
+                compiler = WikiCompiler()
+                compiler.ingest_source(
+                    filename="Cardiology_Block_Lecture_4_Heart_Failure_and_Diuretics.md",
+                    content=demo_lecture.read_text(encoding="utf-8"),
+                    source_type="lecture"
+                )
+            importer = CourseImporter()
+            importer.import_mit_ocw_course()
+
+            anki_mgr = AnkiManager()
+            anki_mgr.recompile_from_wiki()
+
     def setUp(self):
         self.client = TestClient(app)
 

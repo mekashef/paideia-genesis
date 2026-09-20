@@ -160,6 +160,9 @@ class CourseImporter:
             "anki_cards_staged": len(HST121_FLASHCARDS)
         }
 
+    # Alias for curriculum bootstrap
+    import_mit_ocw_course = import_hst121_course
+
     def _compile_gi_sessions(self) -> List[str]:
         created = []
         today = datetime.date.today().isoformat()

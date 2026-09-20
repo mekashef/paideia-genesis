@@ -37,6 +37,29 @@ graph_memory = AssociativeGraphMemory()
 knowledge_puller = KnowledgePuller()
 course_importer = CourseImporter()
 
+def ensure_wiki_bootstrapped():
+    """Auto-seed medical curricula if running on a fresh clone or empty database."""
+    sessions_dir = WIKI_DIR / "course_sessions"
+    if not any(sessions_dir.glob("*.md")):
+        from src.config import BASE_DIR
+        demo_lecture = BASE_DIR / "demo_data" / "Cardiology_Block_Lecture_4_Heart_Failure_and_Diuretics.md"
+        if demo_lecture.exists():
+            try:
+                compiler.ingest_source(
+                    filename="Cardiology_Block_Lecture_4_Heart_Failure_and_Diuretics.md",
+                    content=demo_lecture.read_text(encoding="utf-8"),
+                    source_type="lecture"
+                )
+            except Exception:
+                pass
+        try:
+            course_importer.import_mit_ocw_course()
+            anki_manager.recompile_from_wiki()
+        except Exception:
+            pass
+
+ensure_wiki_bootstrapped()
+
 # Ensure static directory exists
 STATIC_DIR = Path(__file__).resolve().parent.parent.parent / "static"
 STATIC_DIR.mkdir(parents=True, exist_ok=True)

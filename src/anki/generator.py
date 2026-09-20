@@ -274,7 +274,7 @@ class AnkiManager:
 
         today = datetime.date.today()
         repetitions = target_card.get("repetitions", 0)
-        interval = target_card.get("interval", 1)
+        interval = min(36500, max(1, target_card.get("interval", 1)))
         ease_factor = target_card.get("ease_factor", 2.5)
 
         # SuperMemo-2 (SM-2) algorithm
@@ -294,7 +294,7 @@ class AnkiManager:
             elif repetitions == 1:
                 interval = 3 if rating == 3 else 5
             else:
-                interval = int(round(interval * ease_factor))
+                interval = min(36500, int(round(interval * ease_factor)))
 
             repetitions += 1
             # Adjust ease factor

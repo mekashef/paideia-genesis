@@ -93,40 +93,4 @@ jobs:
           tag_name: ${{ github.ref_name }}
           draft: false
           prerelease: false
-          generate_release_notes: true
-          body: |
-            ### ⚕ Paideia Genesis v0.0.1 Release ⚕
-            **Autonomous Living Medical Teacher & Compounding LLM-Wiki Engine**
-
-            This release includes precompiled, standalone binary executables for **Linux**, **macOS**, and **Windows**. No Python installation or source code required.
-
-            #### 📦 Download & Quickstart
-
-            ##### Linux (Ubuntu / Debian / Fedora x86_64)
-            ```bash
-            tar -xvf paideia-genesis-linux-x86_64.tar.gz
-            chmod +x paideia-genesis
-            ./paideia-genesis
-            ```
-
-            ##### macOS (Apple Silicon arm64)
-            ```bash
-            tar -xvf paideia-genesis-macos-arm64.tar.gz
-            chmod +x paideia-genesis
-            ./paideia-genesis
-            ```
-
-            ##### Windows (x64)
-            - Extract `paideia-genesis-windows-x64.zip`
-            - Double-click `paideia-genesis.exe`
-
-            Once launched, open your web browser to:
-            👉 **`http://localhost:8000`**
-
-            ---
-            #### 🌟 What's Included in v0.0.1
-            - **Compounding Karpathy LLM-Wiki**: Preloaded with MIT HST.121 (20 sessions, 28 entities, 6 differentials, 3 traps) and Cardiopulmonary block.
-            - **Biomimetic Cognitive Brain Graph**: Multi-foci anatomical clustering with HippoRAG spreading activation.
-            - **High-Precision KaTeX Math Engine**: Perfect rendering of clinical formulas ($$\text{Stool Osmotic Gap}$$, $$\text{SAAG}$$, $$\text{MELD}$$).
-            - **Socratic Living Teacher**: Step-1 clinical vignette generator with reasoning diagnostic probes and misconception ledgers.
-            - **Spaced-Repetition Active Recall**: 117+ high-yield cloze deletion flashcards with SuperMemo-2 in-browser player, `.apkg` export, and 1-click AnkiConnect sync.
+          body_path: RELEASE_NOTES.md

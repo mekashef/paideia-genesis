@@ -4,6 +4,7 @@ Powered by TypeSafe AI (founded by Diogo Almeida, Erik Gafni, Sasha Sheng).
 Implements Kahneman Dual-Process System 1:
 Fast, typed decisions (Choice, Score, Noul) with calibrated confidence in 70ms-500ms.
 """
+import re
 import time
 import logging
 from typing import Dict, Any, List, Optional
@@ -132,15 +133,23 @@ class MockJevEngine:
                         score_val = min(1, max_score)
 
                 elif "recall" in q_name:
-                    answer = state.get("student_answer", "").lower()
+                    answer = state.get("student_answer", "").lower().strip()
+                    pearl = state.get("gold_standard_pearl", "").lower()
+                    prompt = state.get("flashcard_prompt", "").lower()
                     if not answer:
                         score_val = 0
-                    elif any(kw in answer for kw in ["nkcc2", "thick ascending limb", "furosemide", "saag", "transmural"]):
-                        score_val = max_score
-                    elif len(answer) > 10:
-                        score_val = min(2, max_score)
                     else:
-                        score_val = min(1, max_score)
+                        words = set(re.findall(r'\b\w{3,}\b', answer))
+                        target_words = set(re.findall(r'\b\w{3,}\b', pearl + " " + prompt))
+                        overlap = words.intersection(target_words)
+                        if answer in pearl or pearl in answer or len(overlap) >= 2 or any(kw in answer for kw in ["nkcc2", "thick ascending limb", "furosemide", "saag", "transmural", "granuloma"]):
+                            score_val = max_score
+                        elif len(overlap) >= 1 or len(answer) > 20:
+                            score_val = min(3, max_score)
+                        elif len(answer) > 10:
+                            score_val = min(2, max_score)
+                        else:
+                            score_val = min(1, max_score)
 
                 elif "yield" in q_name:
                     score_val = max_score

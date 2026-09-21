@@ -178,14 +178,15 @@ def get_wiki_tree(course: Optional[str] = None):
                     or "consensus" in stem_lower
                 )
 
+                tag_tokens = [t.strip().lower() for t in raw_tags.replace("[", "").replace("]", "").split(",")] if raw_tags else []
+
                 is_hst121 = not is_eecs and (
                     "hst" in course_tag
                     or "hst.121" in src_tag.lower()
                     or "hst.121" in raw_tags.lower()
                     or "gastroenterology" in sys_tag.lower()
                     or "hepatology" in sys_tag.lower()
-                    or "gi" in raw_tags.lower()
-                    or (cat == "course_sessions" and not is_eecs)
+                    or "gi" in tag_tokens
                     or stem_lower == "spironolactone"
                 )
                 is_cardio = (
@@ -210,7 +211,7 @@ def get_wiki_tree(course: Optional[str] = None):
                 elif is_hst121 and is_cardio:
                     item_course = "Both"
                 else:
-                    item_course = "Core"
+                    item_course = parsed.get("course") or "General"
 
                 if course_filter in ["hst121", "hst-121", "gastroenterology"] and not is_hst121:
                     continue
@@ -219,6 +220,10 @@ def get_wiki_tree(course: Optional[str] = None):
                 if course_filter in ["eecs", "6.033", "6-033", "cs", "distributed"] and not is_eecs:
                     continue
 
+                domain_val = parsed.get("domain") or ("Computer Science" if is_eecs else ("Medicine" if is_hst121 or is_cardio else "General"))
+                cat_val = parsed.get("category") or cat
+                entity_type_val = parsed.get("entity_type") or cat
+
                 items.append({
                     "slug": f.stem,
                     "title": parsed["title"],
@@ -226,7 +231,10 @@ def get_wiki_tree(course: Optional[str] = None):
                     "tags": raw_tags,
                     "system": sys_tag,
                     "source": src_tag,
-                    "course": item_course
+                    "course": parsed.get("course") or item_course,
+                    "domain": domain_val,
+                    "category": cat_val,
+                    "entity_type": entity_type_val
                 })
         tree[cat] = items
     return tree

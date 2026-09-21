@@ -21,7 +21,7 @@ class TestApiEndpoints(unittest.TestCase):
                 source_type="lecture"
             )
         sessions_dir = WIKI_DIR / "course_sessions"
-        if not any(sessions_dir.glob("*.md")):
+        if not (sessions_dir / "session-20-pathophysiological-consequences-of-cirrhosis.md").exists():
             importer = CourseImporter()
             importer.import_mit_ocw_course()
 

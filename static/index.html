@@ -96,31 +96,42 @@
             <!-- Sidebar: Search & Tree -->
             <div class="md:col-span-4 bg-slate-800 border border-slate-700 rounded-xl p-4 flex flex-col h-[750px]">
                 <!-- Course / Module Selector -->
-                <div class="mb-3.5 bg-slate-900/70 p-2.5 rounded-lg border border-slate-700/60">
+                <div class="mb-3 bg-slate-900/70 p-2.5 rounded-lg border border-slate-700/60">
                     <div class="flex items-center justify-between mb-1.5">
                         <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Course / Discipline Focus</label>
-                        <span id="activeCourseCountBadge" class="text-[10px] font-mono bg-indigo-900/60 text-indigo-300 border border-indigo-700/50 px-1.5 py-0.5 rounded">All (89)</span>
+                        <span id="activeCourseCountBadge" class="text-[10px] font-mono bg-indigo-900/60 text-indigo-300 border border-indigo-700/50 px-1.5 py-0.5 rounded">All</span>
                     </div>
                     <select id="wikiCourseFilter" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 font-medium cursor-pointer">
-                        <option value="all">🌐 All Curricula & Modules</option>
+                        <option value="all">🌐 All Curricula & Disciplines</option>
+                        <option value="vision" selected>🤖 3D Vision, Foundation Models & UAVs</option>
                         <option value="eecs">💻 MIT 6.033: Distributed Systems & Networking</option>
-                        <option value="hst121">🎓 MIT HST.121: Gastroenterology & Hepatology</option>
+                        <option value="hst121">🩺 MIT HST.121: Gastroenterology & Hepatology</option>
                         <option value="cardio">❤️ Cardiopulmonary & Renal Block</option>
                     </select>
                 </div>
 
-                <div class="mb-3">
-                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">FTS5 Search (Concepts & Notes)</label>
+                <div class="mb-2.5">
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Search Wiki & Knowledge Base</label>
                     <div class="relative">
-                        <input id="wikiSearchInput" type="text" placeholder="Search concepts, protocols, formulas, drugs..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+                        <input id="wikiSearchInput" type="text" placeholder="Search concepts, algorithms, models, formulas..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
                         <span class="absolute right-3 top-2.5 text-slate-500 text-xs">🔍</span>
                     </div>
+                </div>
+
+                <!-- Quick Discovery Filter Bar -->
+                <div class="flex items-center gap-1 mb-2 overflow-x-auto pb-1 text-[11px] no-scrollbar">
+                    <button id="btnCatFilterAll" class="wiki-cat-pill bg-indigo-600 text-white px-2 py-0.5 rounded-full font-medium transition" onclick="filterWikiSection('all')">All</button>
+                    <button id="btnCatFilterModels" class="wiki-cat-pill bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-purple-300 px-2 py-0.5 rounded-full font-medium transition" onclick="filterWikiSection('models')">Models</button>
+                    <button id="btnCatFilterAlgos" class="wiki-cat-pill bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-cyan-300 px-2 py-0.5 rounded-full font-medium transition" onclick="filterWikiSection('algorithms')">Algorithms</button>
+                    <button id="btnCatFilterConcepts" class="wiki-cat-pill bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-indigo-300 px-2 py-0.5 rounded-full font-medium transition" onclick="filterWikiSection('concepts')">Concepts</button>
+                    <button id="btnCatFilterDiffs" class="wiki-cat-pill bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-sky-300 px-2 py-0.5 rounded-full font-medium transition" onclick="filterWikiSection('differentials')">Differentials</button>
+                    <button id="btnCatFilterTraps" class="wiki-cat-pill bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-rose-300 px-2 py-0.5 rounded-full font-medium transition" onclick="filterWikiSection('traps')">Traps</button>
                 </div>
 
                 <!-- Tree Nav -->
                 <div class="flex-1 overflow-y-auto pr-1 space-y-3 text-sm" id="wikiTreeContainer">
                     <!-- Core Files Section -->
-                    <div class="tree-section border-b border-slate-700/40 pb-2">
+                    <div id="treeSecCore" class="tree-section border-b border-slate-700/40 pb-2">
                         <button class="w-full text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-between hover:text-slate-200 transition py-1 text-left" onclick="toggleTreeSection('sectionCore')">
                             <span class="flex items-center gap-1.5">
                                 <span id="icon-sectionCore" class="text-[10px] transform transition-transform">▼</span>
@@ -135,12 +146,12 @@
                         </ul>
                     </div>
 
-                    <!-- Lectures Section -->
-                    <div class="tree-section border-b border-slate-700/40 pb-2">
+                    <!-- Sessions & Lectures Section -->
+                    <div id="treeSecLectures" class="tree-section border-b border-slate-700/40 pb-2">
                         <button class="w-full text-xs font-bold text-amber-400 uppercase tracking-wider mb-1 flex items-center justify-between hover:text-amber-300 transition py-1 text-left" onclick="toggleTreeSection('listLectures')">
                             <span class="flex items-center gap-1.5">
                                 <span id="icon-listLectures" class="text-[10px] transform transition-transform">▼</span>
-                                <span>🎓 Course Lectures</span>
+                                <span>🎓 Curricula & Reading Sessions</span>
                             </span>
                             <span id="countLectures" class="text-[10px] bg-amber-900/50 text-amber-300 px-1.5 py-0.5 rounded font-mono">0</span>
                         </button>
@@ -148,35 +159,44 @@
                     </div>
 
                     <!-- Concepts Section -->
-                    <div class="tree-section border-b border-slate-700/40 pb-2">
+                    <div id="treeSecConcepts" class="tree-section border-b border-slate-700/40 pb-2">
                         <button class="w-full text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1 flex items-center justify-between hover:text-indigo-300 transition py-1 text-left" onclick="toggleTreeSection('listConcepts')">
                             <span class="flex items-center gap-1.5">
                                 <span id="icon-listConcepts" class="text-[10px] transform transition-transform">▼</span>
-                                <span>💡 Concepts & Mechanisms</span>
+                                <span>💡 Theoretical Concepts & Formulations</span>
                             </span>
                             <span id="countConcepts" class="text-[10px] bg-indigo-900/50 text-indigo-300 px-1.5 py-0.5 rounded font-mono">0</span>
                         </button>
                         <ul id="listConcepts" class="space-y-1 pl-1"></ul>
                     </div>
 
-                    <!-- Entities Section -->
-                    <div class="tree-section border-b border-slate-700/40 pb-2">
-                        <button class="w-full text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1 flex items-center justify-between hover:text-emerald-300 transition py-1 text-left" onclick="toggleTreeSection('listEntities')">
+                    <!-- Architectures, Algorithms & Entities Section -->
+                    <div id="treeSecEntities" class="tree-section border-b border-slate-700/40 pb-2">
+                        <button class="w-full text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1 flex items-center justify-between hover:text-emerald-300 transition py-1 text-left" onclick="toggleTreeSection('sectionEntitiesWrapper')">
                             <span class="flex items-center gap-1.5">
-                                <span id="icon-listEntities" class="text-[10px] transform transition-transform">▼</span>
-                                <span>💊 Entities (Drugs & Bugs)</span>
+                                <span id="icon-sectionEntitiesWrapper" class="text-[10px] transform transition-transform">▼</span>
+                                <span>🧩 Architectures, Algorithms & Frameworks</span>
                             </span>
                             <span id="countEntities" class="text-[10px] bg-emerald-900/50 text-emerald-300 px-1.5 py-0.5 rounded font-mono">0</span>
                         </button>
-                        <ul id="listEntities" class="space-y-1 pl-1"></ul>
+                        <div id="sectionEntitiesWrapper" class="space-y-1 pl-1">
+                            <!-- Discovery Filter Tabs for Entities -->
+                            <div class="flex items-center gap-1 py-1 px-1 overflow-x-auto text-[10px] border-b border-slate-700/30 mb-1">
+                                <button id="filterEntAll" class="entity-subfilter bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded font-medium transition" onclick="filterEntities('all')">All</button>
+                                <button id="filterEntModels" class="entity-subfilter text-slate-400 hover:text-purple-300 hover:bg-slate-800 px-1.5 py-0.5 rounded font-medium transition" onclick="filterEntities('models')">Models</button>
+                                <button id="filterEntAlgos" class="entity-subfilter text-slate-400 hover:text-cyan-300 hover:bg-slate-800 px-1.5 py-0.5 rounded font-medium transition" onclick="filterEntities('algorithms')">Algorithms</button>
+                                <button id="filterEntFrameworks" class="entity-subfilter text-slate-400 hover:text-amber-300 hover:bg-slate-800 px-1.5 py-0.5 rounded font-medium transition" onclick="filterEntities('frameworks')">Frameworks</button>
+                            </div>
+                            <ul id="listEntities" class="space-y-1"></ul>
+                        </div>
                     </div>
 
                     <!-- Differentials Section -->
-                    <div class="tree-section border-b border-slate-700/40 pb-2">
+                    <div id="treeSecDiffs" class="tree-section border-b border-slate-700/40 pb-2">
                         <button class="w-full text-xs font-bold text-sky-400 uppercase tracking-wider mb-1 flex items-center justify-between hover:text-sky-300 transition py-1 text-left" onclick="toggleTreeSection('listDifferentials')">
                             <span class="flex items-center gap-1.5">
                                 <span id="icon-listDifferentials" class="text-[10px] transform transition-transform">▼</span>
-                                <span>⚖️ Comparative Differentials</span>
+                                <span>⚖️ Comparative Differentials & Trade-offs</span>
                             </span>
                             <span id="countDifferentials" class="text-[10px] bg-sky-900/50 text-sky-300 px-1.5 py-0.5 rounded font-mono">0</span>
                         </button>
@@ -184,11 +204,11 @@
                     </div>
 
                     <!-- Traps Section -->
-                    <div class="tree-section pb-2">
+                    <div id="treeSecTraps" class="tree-section pb-2">
                         <button class="w-full text-xs font-bold text-rose-400 uppercase tracking-wider mb-1 flex items-center justify-between hover:text-rose-300 transition py-1 text-left" onclick="toggleTreeSection('listTraps')">
                             <span class="flex items-center gap-1.5">
                                 <span id="icon-listTraps" class="text-[10px] transform transition-transform">▼</span>
-                                <span>⚠️ Board Traps & Pitfalls</span>
+                                <span>⚠️ Failure Modes & Anti-Patterns</span>
                             </span>
                             <span id="countTraps" class="text-[10px] bg-rose-900/50 text-rose-300 px-1.5 py-0.5 rounded font-mono">0</span>
                         </button>
@@ -252,7 +272,7 @@
                             <span>🧠</span> Cognitive Brain Graph (Biomimetic Neural Network)
                             <span id="graphStatsBadge" class="text-xs font-mono bg-indigo-950 text-indigo-300 border border-indigo-700/60 px-2 py-0.5 rounded-full">84 Nodes • 168 Mechanism Links</span>
                         </h2>
-                        <p class="text-xs text-slate-400">Organ-system multi-foci constellations. Click any node to spotlight its biological pathways.</p>
+                        <p class="text-xs text-slate-400">High-dimensional associative knowledge graph. Click any node to spotlight connections and dependencies.</p>
                     </div>
                     <div class="flex items-center space-x-2 text-xs">
                         <button id="btnResetGraphZoom" class="bg-slate-700 hover:bg-slate-600 text-xs px-2.5 py-1.5 rounded text-slate-200 transition flex items-center gap-1">
@@ -272,8 +292,10 @@
                         <div class="flex items-center gap-1.5">
                             <span class="text-slate-400 font-semibold">Course:</span>
                             <select id="graphCourseFilter" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
-                                <option value="all">🌐 All Curricula</option>
-                                <option value="hst121">🎓 MIT HST.121 (GI & Liver)</option>
+                                <option value="all">🌐 All Disciplines</option>
+                                <option value="vision" selected>🤖 3D Vision, Models & UAVs</option>
+                                <option value="eecs">💻 Distributed Systems & CS</option>
+                                <option value="hst121">🩺 MIT HST.121 (GI & Liver)</option>
                                 <option value="cardio">❤️ Cardiopulmonary & Renal</option>
                             </select>
                         </div>
@@ -282,9 +304,12 @@
                         <div class="flex items-center gap-1.5">
                             <span class="text-slate-400 font-semibold">Layer:</span>
                             <select id="graphLayerFilter" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
-                                <option value="mechanisms">⚡ Pure Pathophysiology (Diseases & Drugs)</option>
-                                <option value="all">🌐 Complete Network (with Lectures)</option>
-                                <option value="lectures">🎓 Lecture Milestones</option>
+                                <option value="all">🌐 Complete Network (All Nodes)</option>
+                                <option value="models">🧩 Model Architectures & Foundation Models</option>
+                                <option value="algorithms">⚙️ Algorithms & State Estimators</option>
+                                <option value="mechanisms">💡 Theoretical Concepts & Formulations</option>
+                                <option value="traps">⚠️ Failure Modes & Pitfalls</option>
+                                <option value="lectures">🎓 Research Sessions & Milestones</option>
                             </select>
                         </div>
 
@@ -293,7 +318,7 @@
                             <span class="text-slate-400 font-semibold">Coloring:</span>
                             <select id="graphColorMode" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
                                 <option value="category">🎨 Category & Entity Type</option>
-                                <option value="mastery">📊 Student Readiness (Mastery)</option>
+                                <option value="mastery">📊 Research Readiness (Mastery)</option>
                             </select>
                         </div>
                     </div>
@@ -301,7 +326,7 @@
                     <!-- Right: Search & Quick Jump -->
                     <div class="flex items-center gap-2">
                         <div class="relative">
-                            <input id="graphSearchInput" type="text" placeholder="Spotlight concept or drug..." class="bg-slate-800 border border-slate-700 rounded px-2.5 py-1 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 w-44">
+                            <input id="graphSearchInput" type="text" placeholder="Spotlight concept, model, or algo..." class="bg-slate-800 border border-slate-700 rounded px-2.5 py-1 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 w-44">
                             <span class="absolute right-2 top-1 text-slate-500 text-[10px]">🔍</span>
                         </div>
                         <button id="btnClearSpotlight" class="hidden text-[11px] text-rose-300 hover:text-white bg-rose-950/60 border border-rose-800/60 px-2 py-1 rounded transition">
@@ -603,7 +628,7 @@
 
                 <!-- Right: Search Box -->
                 <div class="relative">
-                    <input id="ankiSearchInput" type="text" placeholder="Search cards, pearls, drugs..." class="bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 w-44">
+                    <input id="ankiSearchInput" type="text" placeholder="Search cards, formulas, algorithms, models..." class="bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 w-48">
                     <span class="absolute right-2 top-1 text-slate-500 text-[10px]">🔍</span>
                 </div>
             </div>
@@ -633,7 +658,7 @@
                     <!-- Badges & Metadata -->
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
-                            <span id="studyCardSystemBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-700/50">Hepatology</span>
+                            <span id="studyCardSystemBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-700/50">Core Concept</span>
                             <span id="studyCardTypeBadge" class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-slate-700 text-slate-300">cloze card</span>
                             <span id="studyCardAtomicBadge" class="hidden text-[11px] font-mono px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">🎯 Single Unknown</span>
                             <span id="studyCardDifficulty" class="text-xs text-amber-400 font-mono">★★☆</span>
@@ -656,7 +681,7 @@
                             </span>
                             <span class="text-[10px] text-slate-400 font-mono">AI-Graded SM-2 (Eliminates Self-Grading Bias)</span>
                         </div>
-                        <textarea id="studyRecallInput" rows="2" placeholder="Type the physiological mechanism, drug target, or clinical pearl from memory..." class="w-full bg-slate-950 border border-slate-700/80 rounded-lg p-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none"></textarea>
+                        <textarea id="studyRecallInput" rows="2" placeholder="Type the mathematical formulation, algorithmic invariant, or key insight from memory..." class="w-full bg-slate-950 border border-slate-700/80 rounded-lg p-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none"></textarea>
                         <div class="flex items-center justify-between">
                             <button id="btnGradeWithJev" onclick="gradeActiveCardWithJev()" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-500 hover:to-emerald-500 text-white font-bold text-xs rounded-lg transition shadow-md flex items-center gap-1.5">
                                 <span>⚡</span> Auto-Grade with Jev System 1
@@ -668,7 +693,7 @@
                     <!-- Reveal Button (Active on Front) -->
                     <div id="studyRevealContainer" class="pt-4 border-t border-slate-700/60 flex justify-center">
                         <button id="btnStudyRevealAnswer" class="w-full md:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2">
-                            <span>👁</span> Reveal Cloze Deletion & Clinical Pearl <kbd class="bg-indigo-700 px-2 py-0.5 rounded text-[11px] font-mono ml-2">Space</kbd>
+                            <span>👁</span> Reveal Solution & Key Takeaway <kbd class="bg-indigo-700 px-2 py-0.5 rounded text-[11px] font-mono ml-2">Space</kbd>
                         </button>
                     </div>
 
@@ -786,11 +811,11 @@
             </div>
             <div>
                 <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Topic / Anchor Concept</label>
-                <input id="qcTopicInput" type="text" placeholder="e.g. Loop Diuretics in Sulfa Allergy, Nitrates Mechanism..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                <input id="qcTopicInput" type="text" placeholder="e.g. Raft Consensus Invariants, Multi-Head Attention, Kalman Filters..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
             </div>
             <div>
-                <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Clinical Pearl / Lecture Note</label>
-                <textarea id="qcNoteInput" rows="4" placeholder="Jot down the clinical pearl or board trap you just learned..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></textarea>
+                <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Research Note / Key Formulation</label>
+                <textarea id="qcNoteInput" rows="4" placeholder="Jot down the algorithm insight, mathematical derivation, or trap you just learned..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></textarea>
             </div>
             <div class="flex items-center justify-end space-x-3 pt-2">
                 <button class="text-xs px-3 py-2 text-slate-400 hover:text-slate-200" onclick="closeModal('modalQuickCapture')">Cancel</button>
@@ -801,19 +826,19 @@
         </div>
     </div>
 
-    <!-- ================= MODAL: PULL-IN MEDICAL CONCEPT ================= -->
+    <!-- ================= MODAL: PULL-IN EXTERNAL RESEARCH & CONCEPTS ================= -->
     <div id="modalPullKnowledge" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-lg w-full p-6 shadow-2xl space-y-4">
             <div class="flex items-center justify-between border-b border-slate-700 pb-3">
                 <h3 class="font-bold text-white flex items-center gap-2">
-                    <span>🌐</span> Pull-In External Medical Literature
+                    <span>🌐</span> Pull-In External Research Literature
                 </h3>
                 <button class="text-slate-400 hover:text-white" onclick="closeModal('modalPullKnowledge')">✕</button>
             </div>
-            <p class="text-xs text-slate-400">Search any clinical condition, drug, or landmark clinical trial. Paideia Genesis fetches authoritative medical abstracts and synthesizes a linked wiki page and flashcard on-the-fly.</p>
+            <p class="text-xs text-slate-400">Search any paper, model architecture, algorithm, or mathematical formulation. Paideia Genesis fetches authoritative sources and synthesizes a linked wiki page and flashcard on-the-fly.</p>
             <div>
-                <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Medical Topic / Drug / Trial</label>
-                <input id="pullQueryInput" type="text" placeholder="e.g. SGLT2 inhibitors, Sacubitril-Valsartan, Spironolactone..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+                <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Topic / Model / Paper / Algorithm</label>
+                <input id="pullQueryInput" type="text" placeholder="e.g. Distributed Consensus Quorums, State Space Models, Transformer Attention..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
             </div>
             <div class="flex items-center justify-end space-x-3 pt-2">
                 <button class="text-xs px-3 py-2 text-slate-400 hover:text-slate-200" onclick="closeModal('modalPullKnowledge')">Cancel</button>

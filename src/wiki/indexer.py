@@ -62,6 +62,10 @@ def parse_markdown_file(file_path: Path) -> Dict[str, Any]:
     tags = ""
     system = ""
     source = ""
+    domain = ""
+    course = ""
+    category = ""
+    entity_type = ""
     frontmatter: Dict[str, Any] = {}
     body = content
 
@@ -84,6 +88,14 @@ def parse_markdown_file(file_path: Path) -> Dict[str, Any]:
                     system = v
                 elif k == "source":
                     source = v
+                elif k == "domain":
+                    domain = v
+                elif k == "course":
+                    course = v
+                elif k == "category":
+                    category = v
+                elif k == "entity_type":
+                    entity_type = v
 
     # Extract first H1 if title was not in frontmatter
     if not fm_match:
@@ -104,6 +116,10 @@ def parse_markdown_file(file_path: Path) -> Dict[str, Any]:
         "tags": tags,
         "system": system,
         "source": source,
+        "domain": domain,
+        "course": course,
+        "category": category,
+        "entity_type": entity_type,
         "frontmatter": frontmatter,
         "body": body,
         "raw": content,

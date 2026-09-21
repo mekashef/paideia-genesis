@@ -441,20 +441,21 @@ function renderMarkdownWithMath(markdownText) {
     let mathIndex = 0;
 
     // 1. Protect block math $$...$$
+    // Use alphanumeric token without underscores/asterisks so Marked won't parse it as bold/italic!
     let text = markdownText.replace(/\$\$([\s\S]+?)\$\$/g, (match, math) => {
-        const id = `___MATH_BLOCK_${mathIndex++}___`;
+        const id = `KATEXBLOCKTOKEN${mathIndex++}END`;
         mathBlocks.push({ id, math: math.trim(), display: true });
-        return id;
+        return `\n\n${id}\n\n`;
     });
 
     // 2. Protect inline math $...$
     text = text.replace(/\$([^\$\n\r]+?)\$/g, (match, math) => {
-        const id = `___MATH_INLINE_${mathIndex++}___`;
+        const id = `KATEXINLINETOKEN${mathIndex++}END`;
         mathBlocks.push({ id, math: math.trim(), display: false });
         return id;
     });
 
-    // 3. Normalize USMLE / GitHub callouts (> [!NOTE] Title)
+    // 3. Normalize GitHub / USMLE callouts (> [!NOTE] Title)
     text = text.replace(/^>\s*\[!(NOTE|TIP|WARNING|CAUTION|IMPORTANT)\](?:\s*(.*?))?$/gim, (match, type, title) => {
         const t = type.toUpperCase();
         const cleanTitle = title ? title.trim() : "";
@@ -475,24 +476,24 @@ function renderMarkdownWithMath(markdownText) {
         return `<span class="wikilink" onclick="loadWikiPage('${targetPath}')">${label}</span>`;
     });
 
-    // 6. Style USMLE Alert callout boxes
+    // 6. Style Alert callout boxes
     html = html.replace(/<blockquote>\s*<p><strong>\[(NOTE|TIP|WARNING|CAUTION|IMPORTANT):\s*(.*?)\]<\/strong>(?:<br>)?\s*([\s\S]*?)<\/p>\s*<\/blockquote>/gi, (match, type, header, content) => {
         const t = type.toUpperCase();
         let boxClass = 'callout-note';
         let icon = '📌';
-        let defaultTitle = 'Clinical Note';
+        let defaultTitle = 'Technical Note';
         if (t === 'TIP') {
             boxClass = 'callout-tip';
             icon = '💡';
-            defaultTitle = 'Board Pearl & High-Yield Concept';
+            defaultTitle = 'Key Insight & Mathematical Principle';
         } else if (t === 'CAUTION') {
             boxClass = 'callout-caution';
             icon = '🚨';
-            defaultTitle = 'Board Exam Trap & Pitfall';
+            defaultTitle = 'Engineering Trap & Pitfall';
         } else if (t === 'WARNING' || t === 'IMPORTANT') {
             boxClass = 'callout-warning';
             icon = '⚠️';
-            defaultTitle = 'High-Priority Clinical Warning';
+            defaultTitle = 'Critical System Constraint';
         }
         const displayHeader = header && header.trim() ? header.trim() : defaultTitle;
         return `
@@ -506,24 +507,29 @@ function renderMarkdownWithMath(markdownText) {
     // 7. Restore and render KaTeX math expressions
     mathBlocks.forEach(({ id, math, display }) => {
         let renderedMath = "";
+        // Normalize double-escaped backslashes before LaTeX commands (e.g., \\mathcal -> \mathcal)
+        const cleanMath = math.replace(/\\\\([a-zA-Z_{}])/g, '\\$1');
         try {
             if (window.katex) {
-                renderedMath = katex.renderToString(math, {
+                renderedMath = katex.renderToString(cleanMath, {
                     displayMode: display,
                     throwOnError: false
                 });
             } else {
                 renderedMath = display
-                    ? `<div class="katex-display font-mono text-indigo-300 text-xs">${math}</div>`
-                    : `<code class="bg-slate-800 text-indigo-300 px-1 rounded font-mono">${math}</code>`;
+                    ? `<div class="katex-display font-mono text-indigo-300 text-xs py-2 my-2 bg-slate-900/60 rounded px-3 border border-indigo-900/40">${cleanMath}</div>`
+                    : `<code class="bg-slate-800 text-indigo-300 px-1 rounded font-mono">${cleanMath}</code>`;
             }
         } catch (err) {
-            renderedMath = `<span class="text-rose-400 font-mono text-xs">${math}</span>`;
+            renderedMath = `<span class="text-rose-400 font-mono text-xs">${cleanMath}</span>`;
         }
 
         // Handle standalone display formula paragraph wrapping
         if (display) {
-            html = html.split(`<p>${id}</p>`).join(renderedMath);
+            const pWrapped = new RegExp(`<p>\\s*${id}\\s*<\\/p>`, 'g');
+            if (pWrapped.test(html)) {
+                html = html.replace(pWrapped, renderedMath);
+            }
         }
         html = html.split(id).join(renderedMath);
     });
@@ -539,6 +545,7 @@ async function loadWikiTree() {
 
         const resp = await fetch(`/api/wiki/tree?course=${encodeURIComponent(selectedCourse)}`);
         const tree = await resp.json();
+        currentTreeData = tree;
 
         let totalItems = 0;
         ["course_sessions", "concepts", "entities", "differentials", "exam_traps"].forEach(k => {
@@ -547,7 +554,9 @@ async function loadWikiTree() {
 
         const badgeEl = document.getElementById("activeCourseCountBadge");
         if (badgeEl) {
-            if (selectedCourse === "eecs") {
+            if (selectedCourse === "vision") {
+                badgeEl.textContent = `3D Vision (${totalItems})`;
+            } else if (selectedCourse === "eecs") {
                 badgeEl.textContent = `MIT 6.033 (${totalItems})`;
             } else if (selectedCourse === "hst121") {
                 badgeEl.textContent = `HST.121 (${totalItems})`;
@@ -560,11 +569,103 @@ async function loadWikiTree() {
 
         renderTreeCategory("listLectures", "countLectures", tree.course_sessions || []);
         renderTreeCategory("listConcepts", "countConcepts", tree.concepts || []);
-        renderTreeCategory("listEntities", "countEntities", tree.entities || []);
         renderTreeCategory("listDifferentials", "countDifferentials", tree.differentials || []);
         renderTreeCategory("listTraps", "countTraps", tree.exam_traps || []);
+
+        // Apply any active entity subfilter (models, algorithms, frameworks, or all)
+        filterEntities(currentEntitySubfilter || "all");
     } catch (e) {
         console.error("Wiki tree load error", e);
+    }
+}
+
+let currentTreeData = {};
+let currentEntitySubfilter = "all";
+let currentWikiSectionFilter = "all";
+
+function filterEntities(subcat) {
+    currentEntitySubfilter = subcat;
+    // Update subfilter button styles
+    ["All", "Models", "Algos", "Frameworks"].forEach(idSuffix => {
+        const btn = document.getElementById(`filterEnt${idSuffix}`);
+        if (!btn) return;
+        const matches = (idSuffix.toLowerCase().startsWith(subcat.slice(0, 3)));
+        if (matches) {
+            btn.className = "entity-subfilter bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded font-medium transition shadow-sm";
+        } else {
+            btn.className = "entity-subfilter text-slate-400 hover:text-slate-200 px-1.5 py-0.5 rounded font-medium transition";
+        }
+    });
+
+    const allEntities = (currentTreeData && currentTreeData.entities) || [];
+    let filtered = allEntities;
+    if (subcat === "models") {
+        filtered = allEntities.filter(e => {
+            const k = ((e.entity_type || "") + " " + (e.category || "") + " " + e.title + " " + e.slug).toLowerCase();
+            return k.includes("model") || k.includes("architecture") || k.includes("transformer") || k.includes("nerf") || k.includes("splat") || k.includes("dust3r") || k.includes("backbone") || k.includes("droid");
+        });
+    } else if (subcat === "algorithms") {
+        filtered = allEntities.filter(e => {
+            const k = ((e.entity_type || "") + " " + (e.category || "") + " " + e.title + " " + e.slug).toLowerCase();
+            return k.includes("algorithm") || k.includes("estimator") || k.includes("vio") || k.includes("slam") || k.includes("filter") || k.includes("consensus") || k.includes("flow") || k.includes("vins") || k.includes("msckf");
+        });
+    } else if (subcat === "frameworks") {
+        filtered = allEntities.filter(e => {
+            const k = ((e.entity_type || "") + " " + (e.category || "") + " " + e.title + " " + e.slug).toLowerCase();
+            return k.includes("framework") || k.includes("library") || k.includes("store") || k.includes("gtsam") || k.includes("etcd") || k.includes("rocksdb") || k.includes("conceptfusion");
+        });
+    }
+    renderTreeCategory("listEntities", "countEntities", filtered);
+}
+
+function filterWikiSection(section) {
+    currentWikiSectionFilter = section;
+    const pillIds = {
+        all: "btnCatFilterAll",
+        models: "btnCatFilterModels",
+        algorithms: "btnCatFilterAlgos",
+        concepts: "btnCatFilterConcepts",
+        differentials: "btnCatFilterDiffs",
+        traps: "btnCatFilterTraps"
+    };
+
+    Object.entries(pillIds).forEach(([secKey, btnId]) => {
+        const btn = document.getElementById(btnId);
+        if (!btn) return;
+        if (secKey === section) {
+            btn.className = "wiki-cat-pill bg-indigo-600 text-white px-2 py-0.5 rounded-full font-medium transition shadow";
+        } else {
+            btn.className = "wiki-cat-pill bg-slate-800 text-slate-300 hover:bg-slate-700 px-2 py-0.5 rounded-full font-medium transition";
+        }
+    });
+
+    const secCore = document.getElementById("treeSecCore");
+    const secLectures = document.getElementById("treeSecLectures");
+    const secConcepts = document.getElementById("treeSecConcepts");
+    const secEntities = document.getElementById("treeSecEntities");
+    const secDiffs = document.getElementById("treeSecDiffs");
+    const secTraps = document.getElementById("treeSecTraps");
+
+    if (section === "all") {
+        [secCore, secLectures, secConcepts, secEntities, secDiffs, secTraps].forEach(s => s && s.classList.remove("hidden"));
+        filterEntities("all");
+    } else if (section === "models") {
+        [secCore, secLectures, secConcepts, secDiffs, secTraps].forEach(s => s && s.classList.add("hidden"));
+        if (secEntities) secEntities.classList.remove("hidden");
+        filterEntities("models");
+    } else if (section === "algorithms") {
+        [secCore, secLectures, secConcepts, secDiffs, secTraps].forEach(s => s && s.classList.add("hidden"));
+        if (secEntities) secEntities.classList.remove("hidden");
+        filterEntities("algorithms");
+    } else if (section === "concepts") {
+        [secCore, secLectures, secEntities, secDiffs, secTraps].forEach(s => s && s.classList.add("hidden"));
+        if (secConcepts) secConcepts.classList.remove("hidden");
+    } else if (section === "differentials") {
+        [secCore, secLectures, secConcepts, secEntities, secTraps].forEach(s => s && s.classList.add("hidden"));
+        if (secDiffs) secDiffs.classList.remove("hidden");
+    } else if (section === "traps") {
+        [secCore, secLectures, secConcepts, secEntities, secDiffs].forEach(s => s && s.classList.add("hidden"));
+        if (secTraps) secTraps.classList.remove("hidden");
     }
 }
 
@@ -577,7 +678,7 @@ function renderTreeCategory(listId, countId, items) {
     listEl.innerHTML = "";
 
     if (items.length === 0) {
-        listEl.innerHTML = `<li class="text-[11px] text-slate-500 italic px-2 py-0.5">None in selected course</li>`;
+        listEl.innerHTML = `<li class="text-[11px] text-slate-500 italic px-2 py-0.5">None in selected filter</li>`;
         return;
     }
 
@@ -585,19 +686,32 @@ function renderTreeCategory(listId, countId, items) {
         const li = document.createElement("li");
         const isActive = currentLoadedPath === item.rel_path;
 
-        // Choose pill badge
+        // Domain-aware category & type badge
         let sysPill = "";
+        const etype = (item.entity_type || item.category || "").toLowerCase();
         const sysLower = (item.system || item.tags || item.course || "").toLowerCase();
-        if (sysLower.includes("gastro") || sysLower.includes("hepat") || sysLower.includes("gi") || sysLower.includes("hst.121")) {
+        const domLower = (item.domain || "").toLowerCase();
+
+        if (etype.includes("model") || etype.includes("architecture") || etype.includes("transformer") || etype.includes("splat") || etype.includes("nerf")) {
+            sysPill = `<span class="px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-purple-950 text-purple-300 border border-purple-800/60">Model</span>`;
+        } else if (etype.includes("algorithm") || etype.includes("estimator") || etype.includes("vio") || etype.includes("slam") || etype.includes("filter") || etype.includes("flow")) {
+            sysPill = `<span class="px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-cyan-950 text-cyan-300 border border-cyan-800/60">Algo</span>`;
+        } else if (etype.includes("framework") || etype.includes("library") || etype.includes("store") || etype.includes("tool")) {
+            sysPill = `<span class="px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-amber-950 text-amber-300 border border-amber-800/60">Tool</span>`;
+        } else if (etype.includes("protocol")) {
+            sysPill = `<span class="px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-blue-950 text-blue-300 border border-blue-800/60">Proto</span>`;
+        } else if (sysLower.includes("vision") || sysLower.includes("3d") || domLower.includes("vision") || domLower.includes("robot")) {
+            sysPill = `<span class="px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-indigo-950 text-indigo-300 border border-indigo-800/60">3D/CV</span>`;
+        } else if (sysLower.includes("distributed") || sysLower.includes("6.033") || domLower.includes("computer")) {
+            sysPill = `<span class="px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-emerald-950 text-emerald-300 border border-emerald-800/60">Sys</span>`;
+        } else if (etype === "drug") {
+            sysPill = `<span class="system-pill system-pill-pharm">Rx</span>`;
+        } else if (etype === "pathogen") {
+            sysPill = `<span class="system-pill system-pill-micro">Bug</span>`;
+        } else if (sysLower.includes("gastro") || sysLower.includes("hepat") || sysLower.includes("gi")) {
             sysPill = `<span class="system-pill system-pill-gi">GI</span>`;
         } else if (sysLower.includes("cardio") || sysLower.includes("heart")) {
             sysPill = `<span class="system-pill system-pill-cardio">CV</span>`;
-        } else if (sysLower.includes("renal") || sysLower.includes("diuretic")) {
-            sysPill = `<span class="system-pill system-pill-renal">Renal</span>`;
-        } else if (sysLower.includes("pharm")) {
-            sysPill = `<span class="system-pill system-pill-pharm">Rx</span>`;
-        } else if (sysLower.includes("micro") || sysLower.includes("infect")) {
-            sysPill = `<span class="system-pill system-pill-micro">Micro</span>`;
         } else {
             sysPill = `<span class="system-pill system-pill-core">Core</span>`;
         }
@@ -796,18 +910,18 @@ function updateGraphLegend(colorMode) {
     if (colorMode === "category") {
         bar.innerHTML = `
             <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-sm shadow-indigo-500/50"></span> 💡 Concepts</div>
-            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span> 💊 Drugs (Rx)</div>
-            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-sm shadow-purple-500/50"></span> 🔬 Pathogens</div>
-            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-teal-400 shadow-sm shadow-teal-400/50"></span> 🧬 Transporters</div>
-            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50"></span> 🎓 Lectures</div>
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-sm shadow-purple-500/50"></span> 🤖 Models & Architectures</div>
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></span> ⚡ Algorithms & Estimators</div>
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50"></span> 🛠️ Frameworks & Tools</div>
             <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-sky-500 shadow-sm shadow-sky-500/50"></span> ⚖️ Differentials</div>
             <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></span> 🚨 Traps</div>
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-yellow-400 shadow-sm shadow-yellow-400/50"></span> 🎓 Lectures</div>
         `;
     } else {
         bar.innerHTML = `
             <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span> Mastered (&ge;70%)</div>
             <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50"></span> Review Needed (50-69%)</div>
-            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></span> Board Trap / Misconception</div>
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></span> Trap / Failure Mode (<50%)</div>
         `;
     }
 }
@@ -815,32 +929,49 @@ function updateGraphLegend(colorMode) {
 // Multi-Foci Spatial Clustering Coordinates
 function getClusterFocus(node, width, height) {
     const sys = (node.system || "").toLowerCase();
-    // Hepatology cluster: Top-Right
-    if (sys.includes("hepat")) {
-        return { x: width * 0.72, y: height * 0.32 };
+    const etype = (node.entity_type || "").toLowerCase();
+    const title = (node.title || node.id || "").toLowerCase();
+    const combo = `${sys} ${etype} ${title}`;
+
+    // 1. 3D Vision, Radiance Fields & Foundation Models (Top-Left)
+    if (combo.includes("nerf") || combo.includes("splat") || combo.includes("gaussian") || 
+        combo.includes("mapanything") || combo.includes("dinov2") || combo.includes("latent") || 
+        combo.includes("pointcloud") || combo.includes("metric") || combo.includes("depth") || 
+        combo.includes("geometry") || combo.includes("radiance")) {
+        return { x: width * 0.26, y: height * 0.28 };
     }
-    // Luminal GI & IBD cluster: Top-Left
-    if (sys.includes("luminal") || sys.includes("bowel") || sys.includes("diarrhea") || sys.includes("colon")) {
-        return { x: width * 0.28, y: height * 0.30 };
+
+    // 2. High-Speed VIO, State Estimation & SLAM (Top-Right)
+    if (combo.includes("vio") || combo.includes("imu") || combo.includes("odometry") || 
+        combo.includes("preintegration") || combo.includes("factor") || combo.includes("slam") || 
+        combo.includes("filter") || combo.includes("estimator") || combo.includes("bundle") ||
+        combo.includes("kalman") || combo.includes("quaternion") || combo.includes("lie")) {
+        return { x: width * 0.74, y: height * 0.30 };
     }
-    // Gastroduodenal & Motility cluster: Center-Left
-    if (sys.includes("gastroduodenal") || sys.includes("peptic") || sys.includes("esophag")) {
-        return { x: width * 0.38, y: height * 0.65 };
+
+    // 3. Aerial Robotics, Drones & UAV Flow (Center)
+    if (combo.includes("drone") || combo.includes("uav") || combo.includes("aerial") || 
+        combo.includes("event") || combo.includes("rotor") || combo.includes("fpv") || 
+        combo.includes("eventsplat") || combo.includes("normal flow")) {
+        return { x: width * 0.50, y: height * 0.48 };
     }
-    // Pancreaticobiliary cluster: Bottom-Left
-    if (sys.includes("pancrea") || sys.includes("biliary")) {
-        return { x: width * 0.18, y: height * 0.68 };
+
+    // 4. Distributed Systems, Consensus & Fault Tolerance (Bottom-Right)
+    if (combo.includes("consensus") || combo.includes("raft") || combo.includes("paxos") || 
+        combo.includes("distributed") || combo.includes("rpc") || combo.includes("replicated") || 
+        combo.includes("eecs") || combo.includes("6.033") || combo.includes("cardio") || combo.includes("renal")) {
+        return { x: width * 0.76, y: height * 0.72 };
     }
-    // Cardiopulmonary & Renal cluster: Bottom-Right
-    if (sys.includes("cardio") || sys.includes("renal") || sys.includes("heart")) {
-        return { x: width * 0.78, y: height * 0.70 };
+
+    // 5. Deep Learning & Latent Dynamics (Bottom-Left)
+    if (combo.includes("world model") || combo.includes("planning") || combo.includes("mpc") || 
+        combo.includes("backprop") || combo.includes("transformer") || combo.includes("attention") || 
+        combo.includes("luminal") || combo.includes("hepat")) {
+        return { x: width * 0.24, y: height * 0.70 };
     }
-    // Cardio-Hepatic bridge (e.g. Spironolactone): Center
-    if (sys.includes("bridge") || sys.includes("cardio-hepatic")) {
-        return { x: width * 0.50, y: height * 0.50 };
-    }
-    // General Gastroenterology / Lectures: Center
-    return { x: width * 0.50, y: height * 0.45 };
+
+    // Default center
+    return { x: width * 0.50, y: height * 0.50 };
 }
 
 // Dynamic Node Color
@@ -853,14 +984,22 @@ function getNodeColor(d, colorMode) {
 
     // Color by Category & Entity Type
     if (d.category === "concepts") return "#6366f1"; // Indigo
-    if (d.category === "course_sessions") return "#f59e0b"; // Amber
+    if (d.category === "course_sessions") return "#eab308"; // Yellow
     if (d.category === "differentials") return "#0284c7"; // Sky
     if (d.category === "exam_traps") return "#f43f5e"; // Rose
     
-    if (d.entity_type === "drug") return "#10b981"; // Emerald
-    if (d.entity_type === "pathogen") return "#a855f7"; // Purple
-    if (d.entity_type === "transporter") return "#14b8a6"; // Teal
-    if (d.entity_type === "biomarker") return "#ec4899"; // Pink
+    // STEM / ML / CV Entity classifications
+    const etype = (d.entity_type || "").toLowerCase();
+    if (etype.includes("model") || etype.includes("architecture")) return "#a855f7"; // Purple
+    if (etype.includes("algorithm") || etype.includes("estimator") || etype.includes("vio") || etype.includes("filter")) return "#06b6d4"; // Cyan
+    if (etype.includes("framework") || etype.includes("tool") || etype.includes("library") || etype.includes("protocol")) return "#f59e0b"; // Amber
+    if (etype.includes("hardware") || etype.includes("kernel") || etype.includes("sensor")) return "#14b8a6"; // Teal
+    
+    // Medical fallback
+    if (etype === "drug") return "#10b981"; // Emerald
+    if (etype === "pathogen") return "#a855f7"; // Purple
+    if (etype === "transporter") return "#14b8a6"; // Teal
+    if (etype === "biomarker") return "#ec4899"; // Pink
     
     return "#64748b"; // Slate
 }
@@ -1564,7 +1703,7 @@ function renderCurrentStudyCard() {
     document.getElementById("studyCardPrompt").innerHTML = promptText;
 
     // Back Pearl
-    document.getElementById("studyCardPearl").textContent = card.pearl || card.back || "Review this physiological mechanism in the compounding wiki.";
+    document.getElementById("studyCardPearl").textContent = card.pearl || card.back || "Review this concept or mechanism in the compounding wiki.";
 
     // Show reveal button, hide rating bar
     document.getElementById("studyRevealContainer").classList.remove("hidden");
@@ -1577,7 +1716,7 @@ function renderCurrentStudyCard() {
         if (card.is_atomic && card.total_clozes > 1) {
             recallInput.placeholder = `Type the target blank (Unknown ${card.cloze_index} of ${card.total_clozes}) from memory...`;
         } else {
-            recallInput.placeholder = "Type the physiological mechanism, drug target, or clinical pearl from memory...";
+            recallInput.placeholder = "Type the core mechanism, mathematical formula, or key insight from memory...";
         }
     }
     const recallBadge = document.getElementById("jevRecallFeedbackBadge");
@@ -1587,7 +1726,7 @@ function renderCurrentStudyCard() {
     }
 }
 
-// Reveal Cloze Answer & Clinical Pearl in Study Mode
+// Reveal Cloze Answer & Key Insight in Study Mode
 function revealStudyAnswer() {
     if (ankiCurrentCards.length === 0) return;
     const card = ankiCurrentCards[ankiActiveCardIndex];

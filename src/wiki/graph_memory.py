@@ -87,7 +87,9 @@ class AssociativeGraphMemory:
             # Determine course curriculum association
             if crs_tag:
                 course = crs_tag
-            elif "6.033" in src_lower or "6.004" in src_lower or domain == "Computer Science":
+            elif any(k in src_lower or k in tags_lower or k in stem_lower for k in ["vision", "3d", "mapanything", "dinov2", "vio", "dust3r", "splat", "drone", "uav"]):
+                course = "3D-Vision"
+            elif "6.033" in src_lower or "6.004" in src_lower:
                 course = "MIT 6.033"
             else:
                 is_hst = (
@@ -105,22 +107,30 @@ class AssociativeGraphMemory:
                 course = "HST.121" if is_hst and not is_cardio else ("Cardiopulmonary" if is_cardio and not is_hst else ("Both" if is_hst and is_cardio else "Core"))
 
             # Determine fine-grained entity type
-            entity_type = fm.get("category") or category
+            raw_cat = (fm.get("category") or "").lower()
+            entity_type = raw_cat or category
             if category == "entities":
-                if any(k in stem_lower for k in ["omeprazole", "spironolactone", "octreotide", "lactulose", "rifaximin", "infliximab", "azathioprine", "mesalamine", "d-penicillamine", "bismuth", "sofosbuvir", "cholestyramine", "furosemide", "carvedilol"]):
-                    entity_type = "drug"
-                elif any(k in stem_lower for k in ["pylori", "cholerae", "virus", "whipplei"]):
-                    entity_type = "pathogen"
-                elif any(k in stem_lower for k in ["transporter", "cftr", "asbt", "mrp2", "ugt1a1", "trypsin", "atp7b", "hepcidin"]):
-                    entity_type = "transporter"
-                elif any(k in stem_lower for k in ["etcd", "rocksdb"]):
-                    entity_type = "distributed-store"
-                elif any(k in stem_lower for k in ["epoll", "tlb", "wal"]):
-                    entity_type = "kernel-hardware"
-                elif any(k in stem_lower for k in ["grpc", "protobuf", "mesi"]):
+                if any(k in raw_cat or k in stem_lower for k in ["foundation model", "model", "transformer", "backbone", "nerf", "splat", "dust3r", "mapanything", "droid", "uav-flow", "eventsplat", "fpv-nerf"]):
+                    entity_type = "model-architecture"
+                elif any(k in raw_cat or k in stem_lower for k in ["algorithm", "estimator", "vio", "slam", "filter", "consensus", "msckf", "vins", "raft", "paxos", "normal-flow"]):
+                    entity_type = "algorithm"
+                elif any(k in raw_cat or k in stem_lower for k in ["framework", "library", "gtsam", "conceptfusion", "etcd", "rocksdb"]):
+                    entity_type = "framework"
+                elif any(k in raw_cat or k in stem_lower for k in ["protocol", "standard", "grpc", "protobuf", "mesi"]):
                     entity_type = "protocol"
+                elif any(k in raw_cat or k in stem_lower for k in ["kernel", "hardware", "epoll", "tlb", "wal"]):
+                    entity_type = "hardware-kernel"
+                elif domain == "Medicine":
+                    if any(k in stem_lower for k in ["omeprazole", "spironolactone", "octreotide", "lactulose", "rifaximin", "infliximab", "azathioprine", "mesalamine", "d-penicillamine", "bismuth", "sofosbuvir", "cholestyramine", "furosemide", "carvedilol"]):
+                        entity_type = "drug"
+                    elif any(k in stem_lower for k in ["pylori", "cholerae", "virus", "whipplei"]):
+                        entity_type = "pathogen"
+                    elif any(k in stem_lower for k in ["transporter", "cftr", "asbt", "mrp2", "ugt1a1", "trypsin", "atp7b", "hepcidin"]):
+                        entity_type = "transporter"
+                    else:
+                        entity_type = "biomarker"
                 else:
-                    entity_type = "biomarker" if domain == "Medicine" else "component"
+                    entity_type = "component"
 
             nodes_meta[slug] = {
                 "slug": slug,
@@ -222,7 +232,10 @@ class AssociativeGraphMemory:
 
             # Course filtering
             if course_filter != "all":
-                if course_filter in ["hst121", "hst-121", "gastroenterology"]:
+                if course_filter in ["vision", "3d-vision", "3d", "robotics", "drone"]:
+                    if not ("vision" in c or "3d" in c or "robot" in domain or "uav" in domain):
+                        continue
+                elif course_filter in ["hst121", "hst-121", "gastroenterology"]:
                     if not ("hst" in c or "gastro" in c or c == "both"):
                         continue
                 elif course_filter in ["cardio", "cardiopulmonary", "renal"]:
@@ -234,10 +247,19 @@ class AssociativeGraphMemory:
                 elif course_filter not in c and course_filter not in domain:
                     continue
 
-            # Layer filtering: "mechanisms" hides lecture sessions, "lectures" shows lectures + direct concepts
-            if layer_filter in ["mechanisms", "pathophysiology", "theories"] and cat == "course_sessions":
+            # Layer filtering
+            etype = meta.get("entity_type", "")
+            if layer_filter in ["models", "model-architecture"]:
+                if etype not in ["model-architecture", "foundation-model"]:
+                    continue
+            elif layer_filter in ["algorithms", "algorithm"]:
+                if etype not in ["algorithm", "estimator"]:
+                    continue
+            elif layer_filter in ["mechanisms", "concepts", "theories"] and cat != "concepts":
                 continue
-            if layer_filter in ["lectures", "curriculum", "sessions"] and cat not in ["course_sessions", "concepts"]:
+            elif layer_filter in ["traps", "exam_traps"] and cat != "exam_traps":
+                continue
+            elif layer_filter in ["lectures", "curriculum", "sessions"] and cat != "course_sessions":
                 continue
 
             filtered_slugs.add(slug)

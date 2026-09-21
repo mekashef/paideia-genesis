@@ -24,14 +24,13 @@ DEFAULT_SCHEDULE = {
 DEFAULT_MASTERY = {
     "Deep Learning": 72.0,
     "Machine Learning": 75.0,
-    "Distributed Training": 68.0,
-    "Transformer Architectures": 70.0,
-    "Model Optimization": 65.0,
-    "Cardiovascular": 68.0,
-    "Renal": 54.0,
-    "Pharmacology": 62.0,
+    "3D Computer Vision": 68.0,
+    "Representation Learning": 70.0,
+    "Visual-Inertial Navigation": 62.0,
+    "State Estimation": 60.0,
     "Distributed Systems": 65.0,
-    "Storage Engines": 58.0
+    "Model Optimization": 65.0,
+    "Cardiovascular": 68.0
 }
 
 class StudentProfile:

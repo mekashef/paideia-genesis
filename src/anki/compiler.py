@@ -95,6 +95,14 @@ class WikiFlashcardCompiler:
     def __init__(self, wiki_dir: Path):
         self.wiki_dir = wiki_dir
 
+    def _has_medical_curriculum(self) -> bool:
+        if not self.wiki_dir or not self.wiki_dir.exists():
+            return False
+        return any(
+            any(k in p.name.lower() for k in ["hst121", "crohn", "cirrhosis", "celiac", "hemochromatosis", "gastroenterology", "hepatology", "heart_failure", "cardio"])
+            for p in self.wiki_dir.rglob("*.md")
+        )
+
     def compile_all(self, existing_cards: Optional[List[Dict[str, Any]]] = None, atomic_cards: bool = False) -> List[Dict[str, Any]]:
         """Compiles cards from all wiki sources and preserves review state of existing cards."""
         existing_map = {}
@@ -155,13 +163,23 @@ class WikiFlashcardCompiler:
 
             merged.append(card)
 
-        # Also preserve any user-created custom cards (e.g. quick capture cards not in static templates)
+        # Also preserve any user-created custom cards whose sources still exist or are quick capture
         if existing_cards:
             for old in existing_cards:
                 norm_key = re.sub(r'\s+', ' ', (old.get("text") or old.get("front") or "")).strip()
-                if norm_key and norm_key not in seen_texts:
-                    seen_texts.add(norm_key)
-                    merged.append(old)
+                if not norm_key or norm_key in seen_texts:
+                    continue
+                # If the card is tied to a specific wiki slug that no longer exists in wiki, skip it
+                wiki_slug = old.get("wiki_slug")
+                if wiki_slug:
+                    slug_path = self.wiki_dir / wiki_slug
+                    if not slug_path.exists() and not slug_path.with_suffix(".md").exists():
+                        continue
+                course = old.get("course")
+                if course in ["HST.121", "Cardiopulmonary"] and not self._has_medical_curriculum():
+                    continue
+                seen_texts.add(norm_key)
+                merged.append(old)
 
         # Assign sequential IDs if missing
         for idx, card in enumerate(merged, start=1):
@@ -178,6 +196,8 @@ class WikiFlashcardCompiler:
 
     def _compile_differentials(self) -> List[Dict[str, Any]]:
         cards = []
+        if not self._has_medical_curriculum():
+            return cards
         diff_dir = self.wiki_dir / "differentials"
         if not diff_dir.exists() or not any(diff_dir.glob("*.md")):
             return cards
@@ -365,6 +385,8 @@ class WikiFlashcardCompiler:
 
     def _compile_exam_traps(self) -> List[Dict[str, Any]]:
         cards = []
+        if not self._has_medical_curriculum():
+            return cards
         trap_dir = self.wiki_dir / "exam_traps"
         if not trap_dir.exists() or not any(trap_dir.glob("*.md")):
             return cards
@@ -478,6 +500,8 @@ class WikiFlashcardCompiler:
 
     def _compile_entities(self) -> List[Dict[str, Any]]:
         cards = []
+        if not self._has_medical_curriculum():
+            return cards
         ent_dir = self.wiki_dir / "entities"
         if not ent_dir.exists() or not any(ent_dir.glob("*.md")):
             return cards
@@ -798,6 +822,8 @@ class WikiFlashcardCompiler:
 
     def _compile_concepts(self) -> List[Dict[str, Any]]:
         cards = []
+        if not self._has_medical_curriculum():
+            return cards
         con_dir = self.wiki_dir / "concepts"
         if not con_dir.exists() or not any(con_dir.glob("*.md")):
             return cards
@@ -996,6 +1022,8 @@ class WikiFlashcardCompiler:
 
     def _compile_sessions(self) -> List[Dict[str, Any]]:
         cards = []
+        if not self._has_medical_curriculum():
+            return cards
         sess_dir = self.wiki_dir / "course_sessions"
         if not sess_dir.exists() or not any(sess_dir.glob("*.md")):
             return cards

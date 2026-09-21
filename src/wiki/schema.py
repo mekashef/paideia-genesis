@@ -1,62 +1,66 @@
-"""LLM-Wiki schema definition and directory structure manager for medical domain.
+"""LLM-Wiki schema definition and directory structure manager for universal multi-discipline knowledge.
 Adapted from Andrej Karpathy's LLM-Wiki specification.
+Supports engineering, computer science, research, undergraduate studies, school curricula, and medicine.
 """
 from pathlib import Path
 from typing import Optional
 from src.config import RAW_SOURCES_DIR, WIKI_DIR, ANKI_EXPORT_DIR
 
-SCHEMA_CONTENT = """# Medical LLM-Wiki Schema
+SCHEMA_CONTENT = """# Universal LLM-Wiki Schema
 
-This wiki is an evolving, compounding knowledge base designed to accompany a medical student through their preclinical, clinical, and board examination years.
+This wiki is an evolving, compounding knowledge base designed to accompany a learner, engineer, or researcher through their coursework, technical mastery, and research milestones.
 
 ## Layer Hierarchy
-1. **Raw Sources (`raw_sources/`)**: Immutable original documents (lecture slides, syllabi, question bank logs). The LLM reads from here but never alters original files.
-2. **The Medical Wiki (`wiki/`)**: Curated markdown files maintained by the LLM:
-   - `index.md`: Category-organized master index of all concepts, drugs, diseases, and syntheses.
+1. **Raw Sources (`raw_sources/`)**: Immutable original documents (lecture slides, syllabi, papers, problem sets, textbook chapters). The LLM reads from here but never alters original files.
+2. **The Compounding Wiki (`wiki/`)**: Curated markdown files maintained collaboratively by the learner and the LLM:
+   - `index.md`: Category-organized master index of all concepts, entities, comparative differentials, and lecture sessions.
    - `log.md`: Chronological journal of all ingests, study drills, error diagnostics, and updates.
-   - `concepts/`: Deep physiological mechanisms, biochemical pathways, and pathophysiologies.
-   - `entities/`: High-yield drugs, microbes, anatomic structures, and diagnostic tests.
-   - `differentials/`: Side-by-side comparative analyses and clinical decision algorithms.
-   - `exam_traps/`: High-yield board traps, common student misunderstandings, and look-alike pitfalls.
-   - `student_profile/`: Student diagnostic model (mastery scores, misconceptions, upcoming deadlines).
+   - `course_sessions/`: Lectures, modules, chapters, reading seminars, research milestones.
+   - `concepts/`: Deep mechanisms, theoretical foundations, architectural patterns, laws, and algorithms.
+   - `entities/`: Tools, libraries, hardware, algorithms, theorems, equations, protocols, drugs, and components.
+   - `differentials/`: Side-by-side comparative analyses, benchmark contrasts, trade-off studies, and decision trees.
+   - `exam_traps/`: Anti-patterns, common misconceptions, edge cases, fallacies, and classic exam/interview traps.
+   - `student_profile/`: Learner diagnostic profile (mastery scores, misconceptions, upcoming deadlines).
 
 ## Cross-Linking Conventions
 - Use standard wikilink syntax: `[[concept-slug]]` or `[[concept-slug|Display Text]]`.
+- Relative paths are supported: `[[concepts/raft-distributed-consensus|Raft Consensus]]`.
 - Every page begins with YAML frontmatter:
   ```yaml
   ---
-  title: Acute Decompensated Heart Failure
-  system: Cardiovascular
-  high_yield_rating: 5/5
-  tags: [cardiology, pharmacology, board-trap]
-  last_updated: 2026-09-18
+  title: Raft Distributed Consensus
+  domain: Computer Science
+  field: Distributed Systems
+  course: MIT 6.033
+  tags: [consensus, fault-tolerance, distributed-systems]
+  last_updated: 2026-09-21
   ---
   ```
-- Every concept page includes a "Board Exam Traps & Common Errors" section.
+- Concept pages include a "Common Traps, Anti-Patterns & Misconceptions" section.
 """
 
-INDEX_INITIAL_TEMPLATE = """# Medical Master Index
+INDEX_INITIAL_TEMPLATE = """# Universal Knowledge Master Index
 
-Welcome to your living Medical Wiki. As lectures and exam results are ingested, this index dynamically updates.
+Welcome to your living Compounding Wiki. As lectures, papers, and drill results are ingested, this index dynamically updates.
 
-## High-Yield Concepts
+## Core Concepts & Mechanisms
 - *No concepts compiled yet.*
 
-## Pharmacologic Agents & Entities
+## Key Entities, Algorithms & Components
 - *No entities registered yet.*
 
-## Differentials & Syntheses
+## Comparative Differentials & Trade-offs
 - *No comparative syntheses yet.*
 
-## Board Traps & Misconceptions
+## Common Traps, Anti-Patterns & Misconceptions
 - *No traps recorded yet.*
 """
 
-LOG_INITIAL_TEMPLATE = """# Medical Learning Log
+LOG_INITIAL_TEMPLATE = """# Universal Learning Log
 
 Append-only chronological record of all knowledge acquisitions, quiz drills, and wiki lint passes.
 
-## [2026-09-18] system_init | Medical LLM-Wiki initialized with Karpathy schema
+## [2026-09-21] system_init | Universal LLM-Wiki initialized with Karpathy schema
 """
 
 def init_wiki_structure(

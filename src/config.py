@@ -48,3 +48,7 @@ ENABLE_JEV_SYSTEM_ONE = os.getenv("ENABLE_JEV_SYSTEM_ONE", "true").lower() in ("
 HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", "8000"))
 
+# Auto-seed demo curricula on empty database (defaults to false for clean research notebook setup)
+AUTO_SEED_DEMO_DATA = os.getenv("AUTO_SEED_DEMO_DATA", "false").lower() in ("true", "1", "yes")
+
+

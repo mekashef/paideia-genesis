@@ -117,6 +117,10 @@ class WikiFlashcardCompiler:
         all_cards.extend(self._compile_concepts())
         # 5. Course Sessions
         all_cards.extend(self._compile_sessions())
+        # 6. EECS & Engineering Starter Cards
+        all_cards.extend(self._compile_eecs_cards())
+        # 7. Dynamic extraction from all wiki markdown files
+        all_cards.extend(self._compile_from_markdown_files())
 
         # Merge with existing cards to preserve review history and custom user cards
         merged: List[Dict[str, Any]] = []
@@ -1413,6 +1417,105 @@ class WikiFlashcardCompiler:
             "system": "Gastroduodenal",
             "difficulty": 1
         })
+
+        return cards
+
+    def _compile_eecs_cards(self) -> List[Dict[str, Any]]:
+        """Compiles starter cards from EECS Distributed Systems curriculum if present in wiki."""
+        if not self.wiki_dir or not self.wiki_dir.exists():
+            return []
+
+        has_eecs = any(
+            "6.033" in p.name or "eecs" in p.name or "consensus" in p.name
+            for p in self.wiki_dir.rglob("*.md")
+        )
+        if not has_eecs:
+            return []
+
+        try:
+            from src.wiki.eecs_curriculum import EECS_FLASHCARDS
+            return [dict(c) for c in EECS_FLASHCARDS]
+        except Exception:
+            return []
+
+    def _compile_from_markdown_files(self) -> List[Dict[str, Any]]:
+        """Dynamically scans all markdown files across all subjects in wiki/ for cloze deletions.
+        
+        Enables universal living compilation: any topic (engineering, math, biology, research)
+        added to the wiki with {{c1::...}} syntax is automatically converted into active recall cards.
+        """
+        cards = []
+        if not self.wiki_dir or not self.wiki_dir.exists():
+            return cards
+
+        search_dirs = [
+            self.wiki_dir / "concepts",
+            self.wiki_dir / "differentials",
+            self.wiki_dir / "entities",
+            self.wiki_dir / "exam_traps",
+            self.wiki_dir / "course_sessions",
+            self.wiki_dir / "research",
+        ]
+        
+        cloze_pattern = re.compile(r'\{\{c\d+::.+?\}\}')
+
+        for sdir in search_dirs:
+            if not sdir.exists():
+                continue
+            for md_file in sdir.glob("*.md"):
+                try:
+                    text = md_file.read_text(encoding="utf-8")
+                except Exception:
+                    continue
+
+                frontmatter: Dict[str, Any] = {}
+                body = text
+                if text.startswith("---"):
+                    parts = text.split("---", 2)
+                    if len(parts) >= 3:
+                        body = parts[2]
+                        for line in parts[1].splitlines():
+                            if ":" in line:
+                                k, v = line.split(":", 1)
+                                frontmatter[k.strip().lower()] = v.strip()
+
+                domain = frontmatter.get("domain", "General")
+                course = frontmatter.get("course", "General")
+                system = frontmatter.get("system", frontmatter.get("field", "Core"))
+                tags_str = frontmatter.get("tags", "")
+                tags = [t.strip().strip("[]'\"") for t in tags_str.split(",") if t.strip().strip("[]'\"")]
+                if not tags:
+                    tags = ["CompoundedNote", md_file.stem]
+
+                lines = body.splitlines()
+                for i, line in enumerate(lines):
+                    line_clean = line.strip()
+                    if cloze_pattern.search(line_clean):
+                        # Clean leading list markers like "- " or "1. " or "> "
+                        cleaned_line = re.sub(r'^(?:[-*+]|\d+\.|\>)\s*', '', line_clean)
+                        # Look ahead for a pearl or explanation in the next 1-2 lines
+                        pearl = ""
+                        for j in range(i + 1, min(i + 3, len(lines))):
+                            nxt = lines[j].strip()
+                            if nxt.startswith(("> Pearl:", "> Tip:", "Pearl:", "Tip:", "Note:", "> Note:", "Insight:", "> Insight:")):
+                                pearl = re.sub(r'^(?:> ?)?(?:Pearl|Tip|Note|Insight):\s*', '', nxt)
+                                break
+                        if not pearl and frontmatter.get("summary"):
+                            pearl = frontmatter.get("summary")
+
+                        rel_path = str(md_file.relative_to(self.wiki_dir))
+                        cards.append({
+                            "type": "cloze",
+                            "text": cleaned_line,
+                            "pearl": pearl,
+                            "tags": list(tags),
+                            "source": rel_path,
+                            "wiki_slug": rel_path,
+                            "course": course,
+                            "domain": domain,
+                            "system": system,
+                            "difficulty": 2
+                        })
 
         return cards
 

@@ -192,6 +192,10 @@ class AnkiManager:
                 filtered = [c for c in filtered if c.get("course") in ["HST.121", "Both"]]
             elif clow in ["cardio", "cardiopulmonary", "renal"]:
                 filtered = [c for c in filtered if c.get("course") in ["Cardiopulmonary", "Both"]]
+            elif clow in ["6.033", "6-033", "eecs", "cs", "distributed"]:
+                filtered = [c for c in filtered if c.get("course") in ["MIT 6.033", "6.033", "EECS", "MIT 6.004", "Both"]]
+            else:
+                filtered = [c for c in filtered if clow in (c.get("course") or "").lower() or clow in (c.get("domain") or "").lower()]
 
         # System filter
         if system and system.lower() != "all":
@@ -410,8 +414,13 @@ class AnkiManager:
                 deck_name = f"PaideiaGenesis::MIT_HST121_Gastroenterology{suffix}"
             elif course and course.lower() in ["cardio", "cardiopulmonary"]:
                 deck_name = f"PaideiaGenesis::Cardiopulmonary_Renal{suffix}"
+            elif course and course.lower() in ["6.033", "6-033", "eecs", "cs", "distributed"]:
+                deck_name = f"PaideiaGenesis::MIT_6_033_Distributed_Systems{suffix}"
+            elif course:
+                clean_c = re.sub(r'[^\w\-]', '_', course).strip('_')
+                deck_name = f"PaideiaGenesis::{clean_c}{suffix}"
             else:
-                deck_name = f"PaideiaGenesis::Master_Medical_HighYield{suffix}"
+                deck_name = f"PaideiaGenesis::Master_HighYield{suffix}"
 
         deck_id = random.randrange(1 << 30, 1 << 31)
         deck = genanki.Deck(deck_id, deck_name)

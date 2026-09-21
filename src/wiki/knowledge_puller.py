@@ -39,18 +39,19 @@ class KnowledgePuller:
 
         # Fallback offline knowledge base for classic high-yield topics
         return {
-            "source": "Verified Medical Compendium (Offline)",
+            "source": "Universal Knowledge Compendium (Offline)",
             "title": clean_topic,
-            "extract": f"{clean_topic} is a high-yield clinical entity in medicine with critical physiological mechanisms, drug-drug interactions, and board examination contraindications."
+            "extract": f"{clean_topic} is a core entity and fundamental concept with critical underlying mechanisms, real-world implementations, edge cases, and trade-offs."
         }
 
-    def pull_and_synthesize(self, query: str) -> Dict[str, Any]:
-        """Fetches external data and prompts LLM to synthesize a full medical wiki page."""
+    def pull_and_synthesize(self, query: str, domain: Optional[str] = None) -> Dict[str, Any]:
+        """Fetches external data and prompts LLM to synthesize a full multi-discipline wiki page."""
         raw_doc = self.fetch_online_abstract(query)
         slug = re.sub(r'[^\w\-]', '-', query.lower()).strip('-')
+        domain_hint = domain or "General"
 
-        prompt = f"""You are a senior medical school curriculum synthesizer.
-Synthesize the following medical topic into an authoritative, high-yield concept page for a medical student:
+        prompt = f"""You are an expert educator, research mentor, and universal knowledge synthesizer.
+Synthesize the following topic ({domain_hint}) into an authoritative, high-yield concept page for a student, researcher, or engineer:
 
 Topic: {query}
 Raw Material:
@@ -58,26 +59,26 @@ Raw Material:
 
 Requirements:
 1. Provide a clean kebab-case 'slug'.
-2. Provide formal 'title' (e.g. SGLT2 Inhibitors (Empagliflozin, Dapagliflozin)).
-3. Specify 'system' (e.g. Cardiovascular & Renal).
-4. Provide 'summary' (2 sentences).
+2. Provide formal 'title' (e.g. Paxos Distributed Consensus Protocol, or SGLT2 Inhibitors).
+3. Specify 'domain' (e.g. Computer Science, Medicine, Mathematics, Engineering, Physics, Humanities) and 'system' (e.g. Distributed Systems, Cardiovascular & Renal, Signal Processing).
+4. Provide 'summary' (2-3 sentences explaining core essence and practical importance).
 5. Provide 'content' in markdown with:
-   - Mechanism of Action (cellular/biochemical level)
-   - Landmark Clinical Trials (e.g. DAPA-HF, EMPEROR-Reduced)
-   - Adverse Effects & USMLE Board Traps (e.g. Euglycemic DKA)
-   - Internal Wikilinks [[like-this]] to connect to related drugs/diseases
-6. Provide a candidate Anki cloze deletion card: 'front' and 'back' (with {{c1::...}} cloze format).
+   - Core Mechanism / Theoretical Foundations
+   - Practical Applications & Concrete Implementations
+   - Common Traps, Trade-offs & Pitfalls
+   - Internal Wikilinks [[like-this]] to connect to related concepts/entities
+6. Provide a candidate spaced-repetition cloze deletion card: 'front' and 'back' (with {{{{c1::...}}}} cloze format).
 
 Respond strictly with valid JSON conforming to this structure."""
 
-        # In offline/mock mode, provide rich structured cardiology/renal output
+        # In offline/mock mode, provide rich structured multi-discipline output
         if hasattr(self.llm, "generate_json"):
             try:
-                synthesized = self.llm.generate_json(prompt, system_prompt="You are a clinical curriculum compiler.")
+                synthesized = self.llm.generate_json(prompt, system_prompt="You are a universal curriculum compiler.")
             except Exception:
-                synthesized = self._fallback_synthesis(query, raw_doc)
+                synthesized = self._fallback_synthesis(query, raw_doc, domain=domain)
         else:
-            synthesized = self._fallback_synthesis(query, raw_doc)
+            synthesized = self._fallback_synthesis(query, raw_doc, domain=domain)
 
         # Fallback fields if missing
         if "slug" not in synthesized or not synthesized["slug"]:
@@ -87,12 +88,40 @@ Respond strictly with valid JSON conforming to this structure."""
 
         return synthesized
 
-    def _fallback_synthesis(self, query: str, raw_doc: Dict[str, str]) -> Dict[str, Any]:
+    def _fallback_synthesis(self, query: str, raw_doc: Dict[str, str], domain: Optional[str] = None) -> Dict[str, Any]:
         clean_q = query.lower()
-        if "sglt2" in clean_q or "gliflozin" in clean_q or "empagliflozin" in clean_q or "dapagliflozin" in clean_q:
+        if any(w in clean_q for w in ["raft", "paxos", "consensus", "quorum"]):
+            return {
+                "slug": "distributed-consensus-protocols",
+                "title": "Distributed Consensus Protocols (Raft & Paxos)",
+                "domain": "Computer Science",
+                "system": "Distributed Systems",
+                "summary": "State machine replication protocols that ensure fault-tolerant consistency across asynchronous, partitionable networks with crash failures.",
+                "content": """### Core Mechanism
+Distributed consensus algorithms coordinate state transitions among $2F + 1$ replica nodes such that all non-faulty nodes agree on the exact sequence of committed log entries, tolerating up to $F$ concurrent crash failures.
+
+### Key Protocols
+- **Paxos**: Decomposes consensus into two phases: Prepare/Promise (phase 1) and Accept/Accepted (phase 2), electing proposer proposals based on ballot numbers.
+- **Raft**: Designed for understandability, enforcing strong leader invariants, term-based randomized election timeouts, and append-only log replication.
+
+### Common Pitfalls & Traps
+> [!CAUTION]
+> **Split-Brain on Network Partition**:
+> Without an absolute majority quorum ($> N/2$), a network partition can elect two leaders concurrently, causing divergent state updates and catastrophic data corruption.
+
+Related: [[concepts/raft-distributed-consensus]], [[exam_traps/split-brain-consensus-even-quorum]].""",
+                "tags": ["Distributed-Systems", "Consensus", "Fault-Tolerance", "Algorithms"],
+                "candidate_card": {
+                    "front": "In a distributed consensus cluster of $2F + 1$ nodes, a majority quorum requires {{c1::F + 1}} nodes to commit an entry.",
+                    "back": "This allows the cluster to safely tolerate up to {{c1::F}} concurrent node crash failures."
+                }
+            }
+
+        if any(w in clean_q for w in ["sglt2", "gliflozin", "empagliflozin", "dapagliflozin"]):
             return {
                 "slug": "sglt2-inhibitors",
                 "title": "SGLT2 Inhibitors (Dapagliflozin, Empagliflozin)",
+                "domain": "Medicine",
                 "system": "Cardiovascular & Renal",
                 "summary": "Sodium-glucose cotransporter-2 inhibitors that reduce cardiovascular mortality and hospitalization in HFrEF regardless of diabetes status.",
                 "content": """### Mechanism of Action
@@ -116,17 +145,19 @@ Related: [[acute-decompensated-heart-failure]], [[loop-diuretics]], [[renin-angi
                 }
             }
         
-        # General fallback
+        # General universal fallback
+        inferred_domain = domain or "Universal Knowledge"
         return {
             "slug": re.sub(r'[^\w\-]', '-', query.lower()).strip('-'),
             "title": query.title(),
-            "system": "Clinical Medicine",
-            "summary": f"Authoritative clinical review and board pearls for {query}.",
-            "content": f"### Overview & Pathophysiology\n{raw_doc.get('extract', '')}\n\n### Clinical Management\nHigh-yield clinical diagnostic criteria and first-line pharmacotherapy.",
-            "tags": ["Clinical-Medicine", "On-The-Fly-Pull"],
+            "domain": inferred_domain,
+            "system": "Core Concepts",
+            "summary": f"Authoritative review and foundational insights for {query}.",
+            "content": f"### Theoretical Foundations\n{raw_doc.get('extract', '')}\n\n### Practical Applications\nKey analytical frameworks, problem-solving paradigms, and concrete applications of {query}.",
+            "tags": [inferred_domain.replace(" ", "-"), "On-The-Fly-Pull"],
             "candidate_card": {
-                "front": f"What is a primary clinical feature of {{c1::{query}}}?",
-                "back": f"High-yield board objective for {query}."
+                "front": f"What is a core fundamental principle of {{c1::{query}}}?",
+                "back": f"Key learning objective and mechanism for {query}."
             }
         }
 
@@ -136,8 +167,10 @@ Related: [[acute-decompensated-heart-failure]], [[loop-diuretics]], [[renin-angi
         page_file = self.wiki_dir / "concepts" / f"{slug}.md"
         
         tags_str = ", ".join(synthesized.get("tags", ["On-The-Fly"]))
+        domain_val = synthesized.get("domain", "General")
         page_content = f"""---
 title: {synthesized['title']}
+domain: {domain_val}
 system: {synthesized.get('system', 'General')}
 tags: [{tags_str}]
 source: External Literature Pull (On-The-Fly)
@@ -171,8 +204,10 @@ last_compiled: {datetime.date.today().isoformat()}
                 "type": "cloze",
                 "text": cand.get("front", ""),
                 "pearl": cand.get("back", ""),
-                "tags": ["PaideiaGenesis", "On-The-Fly", slug],
-                "source": f"External pull: {slug}"
+                "tags": ["PaideiaGenesis", "On-The-Fly", slug, domain_val.replace(" ", "-")],
+                "source": f"External pull: {slug}",
+                "domain": domain_val,
+                "system": synthesized.get("system", "General")
             })
 
         return {

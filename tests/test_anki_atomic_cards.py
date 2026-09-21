@@ -171,6 +171,17 @@ class TestAnkiAtomicCards(unittest.TestCase):
         self.assertTrue(apkg_atom.stat().st_size > 500)
 
 class TestAnkiApiEndpoints(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        from src.wiki.schema import init_wiki_structure
+        from src.wiki.course_importer import CourseImporter
+        from src.anki.generator import AnkiManager
+        init_wiki_structure()
+        importer = CourseImporter()
+        importer.import_mit_ocw_course()
+        anki_mgr = AnkiManager()
+        anki_mgr.recompile_from_wiki()
+
     def setUp(self):
         self.client = TestClient(app)
 

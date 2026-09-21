@@ -1,84 +1,55 @@
-### ⚕ Paideia Genesis v0.2.0 Release ⚕
-**Dual-Process Kahneman Architecture (Jev System 1) & Single-Unknown Atomic Flashcards**
+### 🏛 Paideia Genesis v0.3.0 Release 🧠
+**Universal Living Education Assistant & Compounding LLM-Wiki for All Disciplines**
+*Deep Learning / ML Research &bull; Computer Systems & Engineering &bull; Mathematics &bull; Medicine &bull; Humanities*
 
-Paideia Genesis v0.2.0 introduces deep integration with **Jev (TypeSafe AI)** for sub-100ms machine-native clinical triage and automated active recall grading, alongside **Single-Unknown (Atomic) Flashcard Derivation** adhering to Piotr Wozniak's *Minimum Information Principle*.
+Paideia Genesis v0.3.0 generalizes the platform from a medical-only tutor into an **Autonomous Universal Living Education Assistant & Compounding LLM-Wiki**. The system now natively supports any academic or technical discipline with interactive user-guided topic steering, multi-domain HippoRAG associative graph memory, universal engineering error taxonomies, and a pristine personal research setup by default.
 
-Precompiled, standalone zero-dependency binary executables are available below for **Linux (x86_64)**, **macOS (Apple Silicon arm64)**, and **Windows (x64)**.
-
----
-
-## ⚡ How to Configure & Use Jev (TypeSafe AI)
-
-Paideia Genesis implements a **Kahneman Dual-Process Cognitive Architecture**:
-- **System 1 (Jev `jev-1.13.0`)**: Fast, typed, machine-native decision primitives (`Choice`, `Score`, `Noul`) executing in **sub-second inference (~80ms–400ms)** with calibrated confidence.
-- **System 2 (Gemini / Claude / Local LLM)**: Multi-turn analytical Socratic tutoring, diagnostic remediation, and vignette authoring.
-
-### 1. Setting Your Jev API Key
-To enable live Jev System 1 inference:
-1. Copy `.env.example` (or create a `.env` file) in the directory where you run Paideia Genesis:
-   ```bash
-   cp .env.example .env
-   ```
-2. Add your TypeSafe AI API key:
-   ```env
-   TYPESAFE_API_KEY=ts_live_your_actual_api_key_here
-   ENABLE_JEV_SYSTEM_ONE=true
-   ```
-   *Alternatively, export it directly in your shell or terminal before running:*
-   ```bash
-   export TYPESAFE_API_KEY="ts_live_your_actual_api_key_here"
-   export ENABLE_JEV_SYSTEM_ONE="true"
-   ```
-
-### 2. Verifying Jev Connection
-Start Paideia Genesis:
-```bash
-./paideia-genesis   # or: python3 run.py
-```
-Open your browser to **`http://localhost:8000`** and verify:
-- **API Status**: Check `http://localhost:8000/api/status`:
-  ```json
-  {
-    "status": "online",
-    "system_one": {
-      "model": "jev",
-      "enabled": true,
-      "has_api_key": true
-    }
-  }
-  ```
-- **Web Dashboard**: Look at the top navigation bar. When live Jev is connected, a green status pill will indicate:
-  `⚡ Jev System 1: Active (Live)`
-
-### 3. Trying Out Jev in Action
-- **🩺 Socratic Teacher (Vignette Drill)**:
-  - Generate an adaptive clinical case.
-  - Pick an answer and type your pathophysiological reasoning.
-  - Watch the **Jev System 1 Reflex Box**: in **sub-100ms**, Jev pre-classifies your error taxonomy (`CLINICAL_CONTRAINDICATION`, `MECHANISM_GAP`, `DISCRIMINATOR_CONFUSION`, `READING_SLIP`) and flags USMLE board traps with calibrated confidence before the generative tutor speaks.
-- **🎴 Active Recall Flashcard Auto-Grading**:
-  - Open the **Anki Flashcard Center** and click **🚀 Study Mode**.
-  - Type your clinical mechanism or drug target into the **"✍️ Type Your Active Recall"** box.
-  - Click **"⚡ Auto-Grade with Jev System 1"**.
-  - Jev grades your recall accuracy on a 5-tier rubric (Levels 0–4) in **~180ms**, updates the SuperMemo-2 (SM-2) review interval, and flips the card to reveal the clinical pearl.
-
-### 4. Zero-Config Offline Fallback
-If no API key is set, Paideia Genesis **never crashes**. It automatically falls back to an internal deterministic mock decision engine with simulated latencies, allowing full offline studying, unit testing, and demonstration.
+Precompiled, zero-dependency standalone binary executables are available below for **Linux (x86_64)**, **macOS (Apple Silicon arm64)**, and **Windows (x64)**.
 
 ---
 
-## 🎯 Single-Unknown (Atomic) Flashcards
+## 🚀 Key Highlights & New Capabilities in v0.3.0
 
-Medical cards often test 2 to 4 clozes at once (e.g. skip lesions, cobblestone mucosa, Crohn's, Ulcerative Colitis). Testing all 4 simultaneously overwhelms working memory. 
+### 1. 🗂 Universal Karpathy 5-Layer LLM-Wiki
+- **Multi-Domain Schema**: Every markdown note in the Karpathy-style knowledge base now features first-class `domain`, `field`, `course`, `system`, and arbitrary `tags` frontmatter.
+- **Hierarchical Knowledge Organization**:
+  - `course_sessions/`: Module readings, syllabus sessions, and lecture decks.
+  - `concepts/`: Core mechanisms, state machines, and algorithmic proofs.
+  - `entities/`: Protocols, components, drugs, and biomarkers.
+  - `differentials/`: Side-by-side trade-off matrices (*Raft vs Paxos*, *B+Trees vs LSM-Trees*, *Crohn's vs UC*).
+  - `exam_traps/`: Critical engineering anti-patterns and high-yield traps.
+- **Universal Manifest Importer**: Ingest arbitrary JSON curriculum manifests via `POST /api/course/import_manifest`.
 
-In v0.2.0, students can now toggle between:
-1. **🎯 Single Unknown (1 topic / Atomic 1-by-1)**:
-   - Derives focused child cards where **strictly 1 cloze blank (`{{c1::...}}`) is tested**, while revealing all other clozes as plain text for context.
-   - Child cards track review histories and SM-2 curves independently in `parent.atomic_states` without modifying the base Anki format.
-2. **📦 Combined (Multi-cloze)**:
-   - Preserves multi-cloze board contrast cards in their original layout.
-3. **Bi-Directional Switching**:
-   - Switch anytime via the **Focus Mode** dropdown in the toolbar.
-   - Export either Single-Unknown or Combined decks via the **⬇️ Download .apkg** button or API (`GET /api/anki/export?atomic=true`).
+### 2. 🏛 User-Guided Socratic Living Teacher & Topic Steering
+- **Targeted Dilemma Generation**: Steer Socratic problem generation with explicit controls:
+  - **Topic**: Target subject or concept (e.g., *"Distributed Consensus Quorums"* or *"Transformer Attention"*).
+  - **Guidance**: Pedagogical focus or constraints (e.g., *"Focus on why an even 4-node cluster fails to increase fault tolerance under network partitions"*).
+  - **Domain & Difficulty**: Support for Computer Science, Engineering, Mathematics, and Medicine across beginner, intermediate, and advanced levels.
+- **Sub-500ms Reasoning Evaluation**: Analyzes submitted rationale alongside option selection, diagnosing traps in real time without giving away answers.
+
+### 3. ⚡ Universal Kahneman Dual-Process AI (Jev System 1)
+- **Universal Error Taxonomies**:
+  - **Engineering & CS**: `CRITICAL_PITFALL`, `INVARIANT_VIOLATION`, `RACE_CONDITION`, `OVERFLOW_HAZARD`, `SCALE_BOTTLENECK`
+  - **Biomedicine & Natural Sciences**: `CLINICAL_CONTRAINDICATION`, `MECHANISM_GAP`, `DISCRIMINATOR_CONFUSION`, `READING_SLIP`
+- **Objective Active Recall (SM-2)**: Free-text typed explanations graded by Jev in **~180ms** against gold-standard rubrics, updating SuperMemo-2 intervals without self-assessment bias.
+
+### 4. 🧠 Multi-Domain Cognitive Brain Graph (HippoRAG)
+- **Domain-Aware Semantic Clustering**: Group nodes into field-specific constellations (e.g., Computer Systems, Storage Engines, Biomedicine).
+- **HippoRAG Mechanism Spotlighting**: Click any node to illuminate 1-hop direct pathways (bright white) and 2-hop associative cascades (soft blue), dimming unrelated nodes to 12% opacity.
+- **Cross-Domain Bridges**: Visualizes architectural parallels and cross-disciplinary concepts (e.g., state machine replication and physiological homeostasis).
+
+### 5. 💻 Built-In Starter Pack: MIT 6.033 Distributed Systems
+- Ingested from MIT OpenCourseWare:
+  - **10 In-Depth Sessions**: RPC, Virtual Memory/TLB, Concurrency/Deadlocks, WAL/ARIES, Paxos, Raft, B+Trees vs LSM-Trees, Cache Coherence (MESI), Linux Epoll, CAP Theorem.
+  - **8 Core Concepts**: State machines, quorum invariants, compaction mechanics.
+  - **8 Key Entities**: etcd, RocksDB, gRPC, Epoll, TLB, WAL, MESI Protocol.
+  - **5 Comparative Differentials**: Detailed trade-off matrices.
+  - **5 Critical Engineering Traps**: Even-numbered consensus quorums, un-cached TLB shootdowns, and edge-triggered epoll starvation.
+
+### 6. 🧹 Pristine Personal Research Setup by Default
+- **Zero Default Pollution**: Starts with an empty, clean workspace (`AUTO_SEED_DEMO_DATA=false`) ready for your personal research, work notes, or course projects.
+- **Seeding on Demand**: Bootstrap starter curricula anytime with `python3 run.py --seed` or import via the web UI.
+- **Clean Slate Command**: Purge and reset wiki state anytime with `python3 run.py --clean` or `POST /api/wiki/reset`.
 
 ---
 
@@ -104,11 +75,11 @@ chmod +x paideia-genesis
 - Extract `paideia-genesis-windows-x64.zip`
 - Double-click `paideia-genesis.exe`
 
-Once running, navigate to:
+Once running, open your browser to:
 👉 **`http://localhost:8000`**
 
 ---
 
 ## 🧪 Verification & Automated Tests
-- Full test suite: **77 / 77 unit tests passing** across all subsystems.
-- CI/CD verified on GitHub Actions with Python 3.11 & 3.12 matrices.
+- **83 / 83 unit tests passing** cleanly across all modules and curricula.
+- Full CI/CD matrix passing on GitHub Actions (Python 3.11 & 3.12).

@@ -89,7 +89,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: release-assets/*
-          name: "Paideia Genesis ${{ github.ref_name }} — Autonomous Living Medical Teacher"
+          name: "Paideia Genesis ${{ github.ref_name }} — Universal Living Education Assistant & Compounding LLM-Wiki"
           tag_name: ${{ github.ref_name }}
           draft: false
           prerelease: false

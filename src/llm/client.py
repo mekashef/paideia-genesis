@@ -180,19 +180,6 @@ class MockUniversalLLMClient(BaseLLMClient):
 
         # 2. Socratic evaluation
         if ("student selected" in prompt_lower or "evaluate this student" in prompt_lower or "student's stated reasoning" in prompt_lower):
-            if any(k in prompt_lower for k in ["vio", "imu", "euler", "drift", "preintegration"]):
-                return json.dumps({
-                    "is_correct": False,
-                    "error_taxonomy": "CRITICAL_PITFALL",
-                    "socratic_critique": "You selected option A. Why would naive global-frame integration require recomputing the entire state trajectory whenever an earlier keyframe orientation changes during optimization? What happens to the rotated gravity vector when a 1-degree gyroscope bias exists?",
-                    "mechanism_explanation": "Evaluating IMU integration in the global frame couples state propagation directly to the initial orientation R_0. Whenever the optimizer adjusts R_0, all subsequent integrated states become invalid. Furthermore, a 1° gyro bias projects gravity into false horizontal acceleration causing explosive quadratic position drift (8.5 meters in 10 seconds).",
-                    "remediation_action": "Recorded anti-pattern: 'Naive global-frame IMU integration'. Added trap to wiki concept [[imu-preintegration-on-so3-manifolds]].",
-                    "anki_card_candidate": {
-                        "front": "Why is naive global-frame IMU numerical integration {{c1::prohibited in optimization-based VIO}}?",
-                        "back": "Any update to initial orientation during bundle adjustment invalidates all integrated states, and uncorrected gyro bias causes {{c1::quadratic position divergence}} via gravity tilt."
-                    }
-                })
-
             if any(k in prompt_lower for k in ["4-node", "quorum", "raft", "split-brain", "consensus"]):
                 return json.dumps({
                     "is_correct": False,
@@ -220,60 +207,6 @@ class MockUniversalLLMClient(BaseLLMClient):
 
         # 3. Problem / Vignette generation
         if "vignette" in prompt_lower or "generate a challenging" in prompt_lower or "problem" in prompt_lower:
-            if any(k in prompt_lower for k in ["vio", "imu", "odometry", "preintegration", "visual-inertial", "navigation"]):
-                return json.dumps({
-                    "vignette_id": "vio-imu-001",
-                    "topic": "On-Manifold IMU Preintegration in Visual-Inertial Odometry",
-                    "domain": "Engineering",
-                    "stem": "You are developing a real-time Visual-Inertial Odometry (VIO) estimator for an autonomous drone. A roboticist on your team implements IMU numerical integration by accumulating accelerometer readings in the world frame: v_{t+1} = v_t + (R_t a_t + g) Δt. During non-linear pose-graph bundle adjustment, the optimizer updates the initial orientation R_0.\n\nWhat is the primary computational failure and physical consequence of this naive implementation?",
-                    "options": [
-                        {"id": "A", "text": "The implementation is sound and reduces memory usage by keeping IMU measurements in the global frame."},
-                        {"id": "B", "text": "Whenever initial orientation R_0 updates during optimization, all intermediate IMU measurements must be re-integrated from scratch, creating an O(N) bottleneck and severe quadratic position drift from uncorrected gyroscope bias."},
-                        {"id": "C", "text": "The naive integration automatically guarantees that the yaw angle around gravity remains fully observable without magnetometer input."},
-                        {"id": "D", "text": "Global-frame integration prevents accelerometer bias from affecting horizontal velocity estimates."}
-                    ],
-                    "correct_option": "B",
-                    "explanation": "On-manifold IMU Preintegration (Forster et al.) isolates relative motion deltas (ΔR, Δv, Δp) in the local coordinate frame of the initial keyframe. Without preintegration, every change to R_0 during nonlinear least-squares bundle adjustment invalidates all integrated states, forcing expensive numerical re-integration. Furthermore, a 1° gyro bias tilts the gravity vector into false horizontal acceleration causing rapid quadratic drift.",
-                    "learning_pearl": "Always preintegrate IMU delta measurements in the local body frame so that optimization iterations do not require re-integrating high-rate sensor streams.",
-                    "high_yield_tags": ["VIO", "IMU Preintegration", "SO(3)", "State Estimation", "MIT 16.485"]
-                })
-
-            if any(k in prompt_lower for k in ["mapanything", "dust3r", "3d", "reconstruction", "gaussian"]):
-                return json.dumps({
-                    "vignette_id": "3d-mapanything-001",
-                    "topic": "MapAnything & Universal Feed-Forward Metric 3D Reconstruction",
-                    "domain": "Computer Science",
-                    "stem": "You are deploying a 3D mapping pipeline on an inspection robot capturing uncalibrated multi-view RGB images. Traditional Structure-from-Motion (COLMAP) fails to deliver real-time reconstructions due to slow incremental bundle adjustment. An engineer suggests deploying MapAnything.\n\nWhich of the following describes MapAnything's architectural strategy for achieving feed-forward metric 3D reconstruction?",
-                    "options": [
-                        {"id": "A", "text": "It executes 100 iterations of Levenberg-Marquardt optimization per frame to triangulate SIFT keypoints."},
-                        {"id": "B", "text": "It factors multi-view geometry into per-view depth maps, local ray maps, 6-DoF poses, and a global metric scale factor, regressing 3D scenes in a single forward pass without test-time optimization."},
-                        {"id": "C", "text": "It strictly requires calibrated stereo camera rigs and cannot reconstruct from monocular or heterogeneous image sets."},
-                        {"id": "D", "text": "It only outputs implicit NeRF density fields that require volumetric ray-marching to extract meshes."}
-                    ],
-                    "correct_option": "B",
-                    "explanation": "MapAnything decomposes 3D geometry into depth maps D, ray maps R, camera poses T, and a metric scale S. By predicting these factors in a unified Vision Transformer, it unifies over 12 tasks (SfM, MVS, localization, depth estimation) into a single feed-forward pass without iterative bundle adjustment.",
-                    "learning_pearl": "Feed-forward foundation models replace fragile feature matching and slow non-linear optimization by directly regressing metric ray and depth structures.",
-                    "high_yield_tags": ["MapAnything", "3D Reconstruction", "Foundation Models", "CVPR/3DV"]
-                })
-
-            if any(k in prompt_lower for k in ["dino", "latent", "world model"]):
-                return json.dumps({
-                    "vignette_id": "dinov2-latent-001",
-                    "topic": "DINOv2 Latent Space Geometry & Dense Point Correspondence",
-                    "domain": "Computer Science",
-                    "stem": "You are designing an autonomous tabletop manipulation agent using Vision Transformer representations. You need to establish dense point-to-point physical correspondences across wide-baseline camera views without collecting ground-truth keypoint annotations.\n\nWhich representation extracted from a frozen DINOv2 model provides this capability, and what metric geometry governs the correspondence?",
-                    "options": [
-                        {"id": "A", "text": "The scalar output of the [CLS] classification token using Euclidean L1 norm distance."},
-                        {"id": "B", "text": "The spatial patch tokens (z_i ∈ R^D) forming a dense feature manifold where corresponding physical surface points maximize cosine similarity."},
-                        {"id": "C", "text": "A pixel-level diffusion decoder operating in RGB color space."},
-                        {"id": "D", "text": "Language embeddings projected through a text tokenizer."}
-                    ],
-                    "correct_option": "B",
-                    "explanation": "In DINOv2, the spatial patch tokens retain local geometric and semantic identity. Because the model is trained with self-distillation, physical points on the same object surface across different camera angles, scales, and lighting conditions naturally cluster together, maximizing cosine similarity.",
-                    "learning_pearl": "DINOv2 patch tokens form an emergent metric manifold for dense geometric correspondence without any multi-view supervision.",
-                    "high_yield_tags": ["DINOv2", "Latent Space", "Dense Correspondence", "ViT"]
-                })
-
             if any(k in prompt_lower for k in ["distributed", "consensus", "raft", "cs", "computer", "engineering", "system"]):
                 return json.dumps({
                     "vignette_id": "eecs-consensus-001",

@@ -416,12 +416,6 @@ def import_manifest(req: ImportCourseManifestRequest):
     anki_manager.recompile_from_wiki()
     return result
 
-@app.post("/api/course/import_vision")
-def import_vision():
-    result = course_importer.import_vision_curriculum()
-    anki_manager.recompile_from_wiki()
-    return result
-
 @app.get("/api/curriculums")
 def get_curriculums():
     return {
@@ -431,18 +425,6 @@ def get_curriculums():
                 "name": "All Curricula & Cross-Discipline Concepts",
                 "domain": "Universal",
                 "code": "All"
-            },
-            {
-                "id": "vision",
-                "name": "3D Vision, DINOv2 & Visual Navigation",
-                "domain": "Computer Science & Robotics",
-                "code": "3D-Vision"
-            },
-            {
-                "id": "eecs",
-                "name": "MIT 6.033: Distributed Systems & Networking",
-                "domain": "Computer Science & Engineering",
-                "code": "MIT 6.033"
             },
             {
                 "id": "hst121",
@@ -455,6 +437,12 @@ def get_curriculums():
                 "name": "Cardiopulmonary & Renal Block",
                 "domain": "Medicine",
                 "code": "Cardiopulmonary"
+            },
+            {
+                "id": "eecs",
+                "name": "MIT 6.033: Distributed Systems & Networking",
+                "domain": "Computer Science & Engineering",
+                "code": "MIT 6.033"
             }
         ]
     }

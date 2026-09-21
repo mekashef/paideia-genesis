@@ -99,16 +99,9 @@ class AnkiManager:
         self._init_storage()
 
     def _init_storage(self):
-        """Initializes storage and compiles comprehensive wiki cards if empty or small."""
+        """Initializes storage."""
         if not self.cards_file.exists():
-            self.recompile_from_wiki()
-        else:
-            try:
-                cards = json.loads(self.cards_file.read_text(encoding="utf-8"))
-                if len(cards) < 30:
-                    self.recompile_from_wiki()
-            except Exception:
-                self.recompile_from_wiki()
+            self.cards_file.write_text("[]", encoding="utf-8")
 
     def recompile_from_wiki(self, atomic: bool = False) -> Dict[str, Any]:
         """Compiles cards across all wiki files, merging with existing review histories."""

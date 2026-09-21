@@ -12,16 +12,16 @@ class TestApiEndpoints(unittest.TestCase):
         from src.config import BASE_DIR, WIKI_DIR
 
         init_wiki_structure()
+        demo_lecture = BASE_DIR / "demo_data" / "Cardiology_Block_Lecture_4_Heart_Failure_and_Diuretics.md"
+        if demo_lecture.exists() and not (WIKI_DIR / "concepts" / "acute-decompensated-heart-failure.md").exists():
+            compiler = WikiCompiler()
+            compiler.ingest_source(
+                filename="Cardiology_Block_Lecture_4_Heart_Failure_and_Diuretics.md",
+                content=demo_lecture.read_text(encoding="utf-8"),
+                source_type="lecture"
+            )
         sessions_dir = WIKI_DIR / "course_sessions"
         if not any(sessions_dir.glob("*.md")):
-            demo_lecture = BASE_DIR / "demo_data" / "Cardiology_Block_Lecture_4_Heart_Failure_and_Diuretics.md"
-            if demo_lecture.exists():
-                compiler = WikiCompiler()
-                compiler.ingest_source(
-                    filename="Cardiology_Block_Lecture_4_Heart_Failure_and_Diuretics.md",
-                    content=demo_lecture.read_text(encoding="utf-8"),
-                    source_type="lecture"
-                )
             importer = CourseImporter()
             importer.import_mit_ocw_course()
 

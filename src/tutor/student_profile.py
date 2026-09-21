@@ -10,27 +10,28 @@ from src.config import WIKI_DIR
 PROFILE_DIR = WIKI_DIR / "student_profile"
 
 DEFAULT_SCHEDULE = {
-    "current_block": "MS2 Cardiopulmonary & Renal Systems",
-    "target_exam": "Cardiovascular Block Final & USMLE Prep",
-    "exam_date": (datetime.date.today() + datetime.timedelta(days=8)).isoformat(),
+    "current_block": "Active Research & Deep Learning / ML Engineering",
+    "target_exam": "Deep Learning / ML Research & Engineering Milestone",
+    "exam_date": (datetime.date.today() + datetime.timedelta(days=14)).isoformat(),
     "topics": [
-        {"name": "Acute Decompensated Heart Failure & Inotropes", "priority": "CRITICAL"},
-        {"name": "Loop & Thiazide Diuretics Electrolyte Effects", "priority": "HIGH"},
-        {"name": "Antiarrhythmics Classes I-IV", "priority": "HIGH"},
-        {"name": "Renin-Angiotensin-Aldosterone System (RAAS)", "priority": "MEDIUM"}
+        {"name": "Deep Learning Architectures & Transformer Attention", "priority": "CRITICAL"},
+        {"name": "Distributed Training, Data & Pipeline Parallelism", "priority": "HIGH"},
+        {"name": "Model Optimization, Quantization & KV Cache", "priority": "HIGH"},
+        {"name": "Empirical Research & Benchmark Evaluation", "priority": "MEDIUM"}
     ]
 }
 
 DEFAULT_MASTERY = {
+    "Deep Learning": 72.0,
+    "Machine Learning": 75.0,
+    "Distributed Training": 68.0,
+    "Transformer Architectures": 70.0,
+    "Model Optimization": 65.0,
     "Cardiovascular": 68.0,
     "Renal": 54.0,
     "Pharmacology": 62.0,
-    "Pulmonology": 72.0,
-    "Autonomic Nervous System": 80.0,
     "Distributed Systems": 65.0,
-    "Storage Engines": 58.0,
-    "Computer Architecture": 62.0,
-    "Systems Programming": 60.0
+    "Storage Engines": 58.0
 }
 
 class StudentProfile:

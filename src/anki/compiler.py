@@ -179,7 +179,7 @@ class WikiFlashcardCompiler:
     def _compile_differentials(self) -> List[Dict[str, Any]]:
         cards = []
         diff_dir = self.wiki_dir / "differentials"
-        if not diff_dir.exists():
+        if not diff_dir.exists() or not any(diff_dir.glob("*.md")):
             return cards
 
         # 1. Crohn's vs Ulcerative Colitis
@@ -366,7 +366,7 @@ class WikiFlashcardCompiler:
     def _compile_exam_traps(self) -> List[Dict[str, Any]]:
         cards = []
         trap_dir = self.wiki_dir / "exam_traps"
-        if not trap_dir.exists():
+        if not trap_dir.exists() or not any(trap_dir.glob("*.md")):
             return cards
 
         # 1. HBV Serology Traps
@@ -479,7 +479,7 @@ class WikiFlashcardCompiler:
     def _compile_entities(self) -> List[Dict[str, Any]]:
         cards = []
         ent_dir = self.wiki_dir / "entities"
-        if not ent_dir.exists():
+        if not ent_dir.exists() or not any(ent_dir.glob("*.md")):
             return cards
 
         # Pharmacology Entities
@@ -799,7 +799,7 @@ class WikiFlashcardCompiler:
     def _compile_concepts(self) -> List[Dict[str, Any]]:
         cards = []
         con_dir = self.wiki_dir / "concepts"
-        if not con_dir.exists():
+        if not con_dir.exists() or not any(con_dir.glob("*.md")):
             return cards
 
         # 1. Cirrhosis Pathophysiology
@@ -997,7 +997,7 @@ class WikiFlashcardCompiler:
     def _compile_sessions(self) -> List[Dict[str, Any]]:
         cards = []
         sess_dir = self.wiki_dir / "course_sessions"
-        if not sess_dir.exists():
+        if not sess_dir.exists() or not any(sess_dir.glob("*.md")):
             return cards
 
         # Pancreatitis

@@ -34,6 +34,11 @@ class TestUniversalTopics(unittest.TestCase):
         self.mock_llm = MockUniversalLLMClient()
         self.client = TestClient(app)
 
+    @classmethod
+    def tearDownClass(cls):
+        client = TestClient(app)
+        client.post("/api/wiki/reset", json={"confirm": True})
+
     def tearDown(self):
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 

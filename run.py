@@ -49,7 +49,12 @@ def main():
         anki_mgr = AnkiManager()
         if anki_mgr.cards_file.exists():
             anki_mgr.cards_file.write_text("[]", encoding="utf-8")
+        from src.wiki.schema import INDEX_INITIAL_TEMPLATE, LOG_INITIAL_TEMPLATE
+        (WIKI_DIR / "index.md").write_text(INDEX_INITIAL_TEMPLATE, encoding="utf-8")
+        (WIKI_DIR / "log.md").write_text(LOG_INITIAL_TEMPLATE, encoding="utf-8")
         init_wiki_structure()
+        indexer = WikiIndexer()
+        indexer.reindex_all()
         print("      ✓ Wiki purged to clean slate.")
 
     # 2. Check if initial curricula should be pre-compiled

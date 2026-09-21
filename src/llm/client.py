@@ -179,7 +179,7 @@ class MockUniversalLLMClient(BaseLLMClient):
             })
 
         # 2. Socratic evaluation
-        if "evaluate" in prompt_lower or "diagnostic" in prompt_lower or "student selected" in prompt_lower:
+        if ("student selected" in prompt_lower or "evaluate this student" in prompt_lower or "student's stated reasoning" in prompt_lower):
             if any(k in prompt_lower for k in ["4-node", "quorum", "raft", "split-brain", "consensus"]):
                 return json.dumps({
                     "is_correct": False,

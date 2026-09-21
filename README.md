@@ -1,4 +1,4 @@
-# Paideia Genesis: Living Medical Teacher & Compounding LLM-Wiki
+# Paideia Genesis: Universal Living Education Assistant & Compounding LLM-Wiki
 
 <div align="center">
 
@@ -12,18 +12,20 @@
                       ⚕  S C O O Z I   L A B S  ⚕
 ```
 
-### ⚕ Scoozi Labs &bull; Paideia Genesis ⚕
-**An Autonomous Living Medical Teacher & Compounding LLM-Wiki**
+### 🧠 Scoozi Labs &bull; Paideia Genesis 🏛
+**An Autonomous Living Education Assistant & Compounding LLM-Wiki for All Disciplines**
+*Deep Learning / ML Research &bull; Computer Systems & Engineering &bull; Mathematics &bull; Medicine &bull; Humanities*
 
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
 [![System 1: Jev](https://img.shields.io/badge/System%201-Jev%20by%20TypeSafe%20AI-7952b3.svg)](#-kahneman-dual-process-cognitive-architecture-system-1-jev--system-2-gemini--llama)
 [![System 2: Gemini](https://img.shields.io/badge/System%202-Google%20Gemini%20%2F%20Local%20LLM-4285F4.svg)](#-kahneman-dual-process-cognitive-architecture-system-1-jev--system-2-gemini--llama)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Curriculum](https://img.shields.io/badge/Curriculum-MIT%20HST.121%20%7C%20Cardiopulmonary-orange.svg)](#curriculum-architecture)
-[![USMLE](https://img.shields.io/badge/Target-USMLE%20Step%201%20%26%20Step%202%20CK-red.svg)](#socratic-living-teacher)
+[![Curricula](https://img.shields.io/badge/Curricula-MIT%206.033%20EECS%20%7C%20MIT%20HST.121%20Med%20%7C%20Research-orange.svg)](#curriculum-architecture)
+[![CI Tests](https://img.shields.io/badge/CI%20Tests-83%2F83%20Passing-brightgreen.svg)](#4-running-the-automated-test-suite)
+[![Memory](https://img.shields.io/badge/Memory-HippoRAG%20Associative%20Graph-blueviolet.svg)](#2--biomimetic-cognitive-brain-graph-hipporag)
 
-*Built on Andrej Karpathy's LLM-Wiki architecture, integrating Daniel Kahneman Dual-Process AI (Jev System 1 + Gemini System 2), HippoRAG associative retrieval, and SuperMemo-2 active recall.*
+*Built on Andrej Karpathy's LLM-Wiki architecture, integrating Daniel Kahneman Dual-Process AI (Jev System 1 <100ms decision primitives + Gemini/Llama System 2 analytical reasoning), multi-domain HippoRAG associative graph memory, and SuperMemo-2 active recall across any discipline.*
 
 </div>
 
@@ -31,15 +33,18 @@
 
 ## 🌟 Overview
 
-Medical education is overwhelmed by fragmented resources: 100+ lecture decks weekly, First Aid, Pathoma, UWorld question banks, and 30,000-card Anki decks. Students waste hundreds of hours manually copy-pasting notes and cross-referencing disjointed systems.
+Whether preparing for high-stakes professional exams (USMLE Step 1/2), conducting cutting-edge **Deep Learning / Machine Learning research**, mastering **Distributed Systems and Computer Engineering**, or tackling advanced mathematics, learners and researchers confront the same fundamental challenge: **cognitive fragmentation and information entropy**.
 
-**Paideia Genesis transforms this experience into a compounding cognitive engine:**
-1. **From Static RAG to Compounding LLM-Wiki**: Ingests syllabi and lecture slides to build an evolving, hyperlinked medical knowledge base (`course_sessions/`, `concepts/`, `entities/`, `differentials/`, `exam_traps/`).
-2. **Kahneman Dual-Process Cognitive Architecture**: Integrates **Jev (TypeSafe AI)** as ultra-fast **System 1** (<100ms machine-native decision primitives: `Choice`, `Score`, `Noul`) coupled with **Gemini / Local LLMs** as analytical **System 2** for deep Socratic dialogue and clinical vignette synthesis.
-3. **Cognitive Biomimetic Brain Graph**: Visualizes disease mechanisms as multi-foci organ-system constellations (Hepatology, Luminal GI, Gastroduodenal, Pancreaticobiliary, Cardiorenal) with interactive 1-hop and 2-hop biological pathway spotlighting.
-4. **Socratic Living Teacher & Diagnostic Reflex**: Evaluates clinical reasoning in under 500ms, diagnoses why mistakes happen (e.g. `CLINICAL_CONTRAINDICATION` with 98% confidence), and steers generative dialogue.
-5. **Objective AI-Graded Spaced Repetition**: Eliminates student self-assessment bias. Students type active recall in free text; Jev grades the explanation against gold-standard clinical rubrics in ~180ms and updates SuperMemo-2 (SM-2) intervals automatically.
-6. **High-Precision KaTeX Math Engine**: Flawless rendering of clinical equations ($$\text{Stool Osmotic Gap}$$, $$\text{SAAG}$$, $$\text{MELD}$$) without markdown token corruption.
+Static notes become write-only graveyards. Syllabi, research preprints, 100+ slide lecture decks, and massive flashcard decks live in disconnected silos. Self-scoring flashcards suffers from the *"illusion of competence,"* while traditional heavy LLMs introduce 3–5 second latencies, schema hallucinations, and prohibitive token costs.
+
+**Paideia Genesis transforms learning into an autonomous, compounding cognitive engine:**
+1. **From Static RAG to Compounding Multi-Domain LLM-Wiki**: Ingests lecture decks, research papers, and syllabi across any field into an evolving, hyperlinked Karpathy 5-layer knowledge base (`course_sessions/`, `concepts/`, `entities/`, `differentials/`, `exam_traps/`) tagged by domain, field, course, and topic.
+2. **Kahneman Dual-Process Cognitive Architecture**: Integrates **Jev (TypeSafe AI)** as ultra-fast **System 1** (<100ms machine-native decision primitives: `Choice`, `Score`, `Noul`) coupled with **Gemini / Local LLMs** as analytical **System 2** for deep Socratic dialogue, multi-domain dilemma synthesis, and free-text active recall grading.
+3. **User-Guided Socratic Living Teacher**: Interactive topic steering allows students to define specific topics, pedagogical focus areas, and constraints (e.g. distributed consensus under network partitions, transformer multi-head attention mechanisms, or cardiopulmonary hemodynamics).
+4. **Cognitive Biomimetic Brain Graph (HippoRAG)**: Visualizes cross-disciplinary knowledge networks with multi-domain force clustering, cross-domain bridge concepts, and interactive 1-hop and 2-hop associative cascade spotlighting.
+5. **Objective AI-Graded Spaced Repetition (SM-2)**: Eliminates self-assessment bias. Students type active recall explanations in free text; Jev evaluates the rationale against gold-standard rubrics in ~180ms and schedules SuperMemo-2 (SM-2) intervals objectively.
+6. **Clean Personal Research Setup by Default**: Starts with a pristine, uncluttered workspace (`AUTO_SEED_DEMO_DATA=false`) ready for your personal research, work notes, or course projects, with built-in instant-import starter packs for **MIT 6.033 Distributed Systems & Networking** and **MIT HST.121 Gastroenterology & Hepatology**.
+7. **High-Precision KaTeX Math Engine**: Flawless mathematical rendering of algorithms, equations, and formulations ($$\text{Paxos Quorum} = \lfloor n/2 \rfloor + 1$$, $$\mathcal{L}_{\text{loss}}$$, $$\text{SAAG}$$) without markdown token corruption.
 
 ---
 
@@ -49,26 +54,26 @@ Medical education is overwhelmed by fragmented resources: 100+ lecture decks wee
 
 ```mermaid
 flowchart TD
-    subgraph Ingestion["1. Curriculum Ingestion & Synthesis"]
-        Raw[("Raw Curricula<br/>MIT HST.121, Slides & Syllabi")] --> Ingest["CourseImporter & WikiCompiler"]
-        Ingest --> Struct["Structured Karpathy LLM-Wiki<br/>• course_sessions/ (20 Sessions)<br/>• concepts/ (19 Concepts)<br/>• entities/ (28 Entities)<br/>• differentials/ (7 Tables)<br/>• exam_traps/ (4 Traps)"]
+    subgraph Ingestion["1. Multi-Disciplinary Ingestion & Synthesis"]
+        Raw[("Raw Inputs<br/>• Research Papers & Syllabi<br/>• MIT 6.033 EECS Manifest<br/>• MIT HST.121 Med Notes<br/>• Custom User Markdown")] --> Ingest["CourseImporter & WikiCompiler"]
+        Ingest --> Struct["Structured Karpathy LLM-Wiki<br/>• course_sessions/ (Lectures & Modules)<br/>• concepts/ (State Machines & Mechanisms)<br/>• entities/ (Protocols, Drugs, Biomarkers)<br/>• differentials/ (Trade-Off Matrices)<br/>• exam_traps/ (Critical Pitfalls)"]
     end
 
     subgraph Memory["2. Dual-Engine Cognitive Memory Layer"]
-        Struct --> SQLite[("SQLite FTS5 Index<br/>Full-Text Lexical BM25")]
+        Struct --> SQLite[("SQLite FTS5 Index<br/>Full-Text Lexical BM25 Search")]
         Struct --> Graph[("Biomimetic Brain Graph<br/>HippoRAG Spreading Activation")]
     end
 
-    subgraph Learning["3. Interactive Cognitive Learning Loops"]
-        SQLite & Graph --> Tutor["🩺 Socratic Living Teacher<br/>• USMLE Step-1 Vignette Engine<br/>• Clinical Reasoning Evaluator<br/>• Misconception Classifier"]
-        SQLite & Graph --> Anki["🎴 Spaced-Repetition Center<br/>• 117 High-Yield Cloze Cards<br/>• In-Browser SM-2 Scheduler<br/>• Filtered .apkg & AnkiConnect"]
+    subgraph Learning["3. Interactive Socratic & Spaced-Repetition Loops"]
+        SQLite & Graph --> Tutor["🏛 User-Guided Socratic Teacher<br/>• Topic & Guidance Constraint Steering<br/>• Universal Error Classification<br/>• Sub-500ms Reasoning Evaluator"]
+        SQLite & Graph --> Anki["🎴 Spaced-Repetition Center<br/>• Dynamic {{c1::...}} Cloze Extraction<br/>• In-Browser SM-2 Scheduler<br/>• Filtered .apkg & AnkiConnect Sync"]
         Tutor -->|"Auto-queue remedial cards"| Anki
         Anki -->|"Record review intervals"| Profile[("Student Profile<br/>Mastery Ledger")]
         Profile -->|"Targeted weakness drills"| Tutor
     end
 
     subgraph Interface["4. Frontend Mission Control (Tailwind + D3 + KaTeX)"]
-        Tutor & Anki --> WebUI["Web Mission Control UI<br/>• Hierarchy & Wiki Reader<br/>• Multi-Foci Brain Graph Canvas<br/>• Active Recall Flashcard Player<br/>• Socratic Reasoning Arena"]
+        Tutor & Anki --> WebUI["Web Mission Control UI<br/>• Multi-Curriculum Hierarchy & Wiki Reader<br/>• Force-Directed Multi-Foci Brain Graph<br/>• Free-Text Active Recall Player<br/>• Guided Socratic Dilemma Arena"]
     end
 ```
 
@@ -77,7 +82,7 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Student as Medical Student
+    actor Student as Learner / Researcher
     participant WebUI as Paideia Web UI
     participant Tutor as Socratic Engine
     participant Jev as ⚡ Jev (System 1 Reflex)
@@ -85,57 +90,54 @@ sequenceDiagram
     participant Anki as Flashcard Manager
     participant Profile as Misconception Ledger
 
-    Student->>WebUI: Selects option + Submits Clinical Rationale
+    Student->>WebUI: Provides Topic, Constraints & Submits Dilemma Rationale
     WebUI->>Tutor: POST /api/tutor/evaluate
     Note over Tutor,Jev: Step 1: System 1 Fast Diagnostic Triage (~80ms)
-    Tutor->>Jev: Evaluate state (stem, option, reasoning) with Choice/Score/Noul
-    Jev-->>Tutor: error_taxonomy: CLINICAL_CONTRAINDICATION (98%), trap: true, score: 1.0
+    Tutor->>Jev: Evaluate state (dilemma stem, option, reasoning) with Choice/Score/Noul
+    Jev-->>Tutor: error_taxonomy: CRITICAL_PITFALL / INVARIANT_VIOLATION / CLINICAL_CONTRAINDICATION (98%), trap: true, score: 1.0
     Note over Tutor,LLM: Step 2: System 2 Socratic Synthesis (guided by Jev diagnosis)
     Tutor->>LLM: Generate targeted Socratic dialogue focusing on diagnosed misconception
-    LLM-->>Tutor: Socratic critique + physiological mechanism + remedial card candidate
-    Tutor-->>WebUI: Return feedback + Jev System 1 telemetry (latency: 180ms, confidence: 98%)
-    Tutor->>Profile: Record error taxonomy & update organ-system mastery
+    LLM-->>Tutor: Socratic critique + underlying mechanism + remedial card candidate
+    Tutor-->>WebUI: Return feedback + Jev System 1 telemetry (latency: ~180ms, confidence: 98%)
+    Tutor->>Profile: Record error taxonomy & update domain mastery ledger
     Tutor->>Anki: Auto-synthesize & queue targeted remedial cloze card
 ```
 
-### 3. Biomimetic Organ-System Multi-Foci Graph Topology
+### 3. Multi-Domain Associative Brain Graph Topology
 
 ```mermaid
 graph LR
-    subgraph Hepatology["Hepatology Cluster (Top-Right)"]
-        Cirrhosis(("Cirrhosis<br/>[Degree: 14]"))
-        Ascites[Ascites]
-        SBP[Spontaneous Bacterial Peritonitis]
-        SAAG[SAAG Calculation]
+    subgraph DistributedSystems["Computer Systems Cluster (Top-Left)"]
+        Consensus(("Distributed Consensus<br/>[Degree: 12]"))
+        Paxos[Multi-Paxos Protocol]
+        Raft[Raft Consensus]
+        Quorum[Quorum Invariant: floor(n/2)+1]
+        Consensus --- Paxos
+        Consensus --- Raft
+        Raft --- Quorum
+    end
+
+    subgraph StorageEngines["Storage & Concurrency Cluster (Center-Left)"]
+        LSM(("LSM-Trees vs B+Trees<br/>[Degree: 8]"))
+        RocksDB[RocksDB Engine]
+        WAL[Write-Ahead Logging / ARIES]
+        LSM --- RocksDB
+        LSM --- WAL
+    end
+
+    subgraph Biomedicine["Biomedical Sciences Cluster (Bottom-Right)"]
+        Cirrhosis(("Cirrhosis Hemodynamics<br/>[Degree: 14]"))
+        Ascites[Ascites & Portal HTN]
+        HF[Congestive Heart Failure]
         Cirrhosis --- Ascites
-        Ascites --- SBP
-        Ascites --- SAAG
     end
 
-    subgraph LuminalGI["Luminal GI Cluster (Top-Left)"]
-        IBD(("Inflammatory Bowel Disease<br/>[Degree: 9]"))
-        CD[Crohn's Disease]
-        UC[Ulcerative Colitis]
-        StoolGap[Stool Osmotic Gap]
-        IBD --- CD
-        IBD --- UC
-        IBD --- StoolGap
+    subgraph CrossBridge["Cross-Domain / Interdisciplinary Bridge"]
+        StateCoherence[("Architectural Bridge:<br/>State Machine Replication & Homeostasis")]
     end
 
-    subgraph Cardiorenal["Cardiorenal Cluster (Bottom-Right)"]
-        HF(("Heart Failure<br/>[Degree: 6]"))
-        Loop[Loop Diuretics]
-        RAAS[RAAS Cascade]
-        HF --- Loop
-        HF --- RAAS
-    end
-
-    subgraph CrossBridge["Cross-System Physiological Bridge"]
-        Spironolactone[("Rx: Spironolactone<br/>Aldosterone Receptor Blocker")]
-    end
-
-    Ascites -.->|Bridge Link| Spironolactone
-    HF -.->|Bridge Link| Spironolactone
+    Consensus -.->|Bridge Link| StateCoherence
+    Cirrhosis -.->|Bridge Link| StateCoherence
 ```
 
 ---
@@ -160,23 +162,37 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Launch the Application
-```bash
-python3 run.py
-```
+### 3. Launching the Application
 
-> [!NOTE]
-> On first run, `run.py` automatically initializes the schema and seeds the complete **MIT HST.121 Gastroenterology & Hepatology** curriculum, **Cardiopulmonary** block, and **117-card Spaced-Repetition Master Deck**.
+Paideia Genesis supports three operating modes out of the box:
+
+```bash
+# Option A: Clean Personal Research Setup (Default)
+# Starts with a pristine workspace ready for your notes, papers, and projects
+python3 run.py
+
+# Option B: Seed Pre-Configured Demonstration Curricula
+# Seeds MIT 6.033 Distributed Systems and MIT HST.121 Gastroenterology
+python3 run.py --seed
+
+# Option C: Purge Wiki to Clean Slate
+# Wipes all sessions, concepts, cards, and indexes back to initial templates
+python3 run.py --clean
+```
 
 Open your browser to:
 **`http://localhost:8000`**
 
 ### 4. Running the Automated Test Suite
+The repository includes a comprehensive 83-test automated test suite covering multi-discipline schema compilation, user-guided Socratic generation, HippoRAG associative retrieval, Jev System 1 primitives, and SuperMemo-2 mathematical scheduling:
+
 ```bash
 python3 -m unittest discover tests/
 ```
 ```
-Ran 69 tests in 27.057s
+...................................................................................
+----------------------------------------------------------------------
+Ran 83 tests in ~45s
 
 OK
 ```
@@ -185,206 +201,237 @@ OK
 
 ## ⚡ Kahneman Dual-Process Cognitive Architecture: System 1 (Jev) + System 2 (Gemini / Llama)
 
-Traditional LLM applications fail because they force heavy generative models (System 2) to perform basic classifications and judgments. In medicine, this causes high latency (3–5 seconds), schema fragility, and runaway token costs.
+Traditional LLM education applications fail because they force heavy generative models (System 2) to perform foundational classifications, rubric gradings, and misconception triage. In fast-paced learning and research, this causes unacceptable latency (3–5 seconds), schema fragility, and runaway token costs.
 
 Paideia Genesis implements a **Biomimetic Dual-Process Architecture** inspired by Daniel Kahneman (*Thinking, Fast and Slow*):
 
 ```
-                                  [Medical Student Input]
-                                             │
-                        ┌────────────────────┴────────────────────┐
-                        ▼                                         ▼
-            System 1: Jev Decision Engine             System 2: Gemini / Local LLM
-                   (TypeSafe AI)                           (Generative Tutor)
-            ─────────────────────────────             ────────────────────────────
-            • Latency: 70ms – 400ms                   • Latency: 2s – 4s
-            • Primitives: Choice / Score / Noul       • Deep Socratic inquiry
-            • Typed decisions without prose           • Adaptive clinical vignette writing
-            • Free output tokens ($0.042/1M input)    • Pathophysiological synthesis
-                        │                                         ▲
-                        └───────── Steers Diagnostic Ground Truth ┘
+                            [Learner / Researcher Input]
+                                         │
+                    ┌────────────────────┴────────────────────┐
+                    ▼                                         ▼
+        System 1: Jev Decision Engine             System 2: Gemini / Local LLM
+               (TypeSafe AI)                           (Generative Tutor)
+        ─────────────────────────────             ────────────────────────────
+        • Latency: 70ms – 250ms                   • Latency: 2s – 4s
+        • Primitives: Choice / Score / Noul       • Deep Socratic inquiry
+        • Typed decisions without prose           • Adaptive case & dilemma synthesis
+        • Free output tokens ($0.042/1M input)    • Multi-domain mechanistic dialogue
+                    │                                         ▲
+                    └───────── Steers Diagnostic Ground Truth ┘
 ```
 
 ### 1. Sub-100ms Socratic Diagnostic Triage
-- **`Choice` (Categorical)**: Classifies student errors into `CLINICAL_CONTRAINDICATION`, `MECHANISM_GAP`, `DISCRIMINATOR_CONFUSION`, or `READING_SLIP` with calibrated confidence scores (e.g. 98%).
-- **`Score` (Rubric)**: Rates the student's pathophysiological reasoning depth on an ordered scale (e.g. `Level 1.0`: *"Superficial buzzword recall without mechanistic grounding"*).
-- **`Noul` (Hypothesis Testing)**: Tests whether the student fell for an explicit USMLE distractor trap ($p \in [0.0, 1.0]$).
+- **`Choice` (Categorical Classification)**: Rapidly classifies user misconceptions into domain-specific error taxonomies:
+  - **Engineering & Computer Science**: `CRITICAL_PITFALL`, `INVARIANT_VIOLATION`, `RACE_CONDITION`, `OVERFLOW_HAZARD`, `SCALE_BOTTLENECK`
+  - **Biomedicine & Natural Sciences**: `CLINICAL_CONTRAINDICATION`, `MECHANISM_GAP`, `DISCRIMINATOR_CONFUSION`, `READING_SLIP`
+- **`Score` (Rubric Scoring)**: Evaluates the learner's reasoning depth on an ordered scale (e.g. `Level 1.0`: *"Superficial buzzword recall without mechanistic grounding"*, `Level 3.0`: *"Sound first-principles causal reasoning"*).
+- **`Noul` (Hypothesis Testing)**: Tests whether the learner fell for an explicit distractor trap ($p \in [0.0, 1.0]$).
 
 ### 2. Objective AI-Graded Free-Text Active Recall (SM-2)
-- **Eliminates Self-Assessment Bias**: Medical students routinely suffer from the *"recognition vs. recall"* illusion when self-scoring flashcards ("Again/Hard/Good/Easy").
-- **Typed Active Recall**: In Study Mode, students type their clinical mechanism from memory.
-- **Jev Rubric Scoring**: Evaluates the typed response against the gold-standard pearl in **~180ms**, maps the rubric level to the SuperMemo-2 quality scale, and updates the card's interval and ease factor objectively.
+- **Eliminates Self-Assessment Bias**: Learners routinely suffer from the *"recognition vs. recall"* illusion when manually self-scoring flashcards ("Again / Hard / Good / Easy").
+- **Typed Active Recall**: In Study Mode, students type their mechanistic explanation from memory.
+- **Jev Rubric Scoring**: Evaluates the typed response against the gold-standard reference pearl in **~180ms**, maps the rubric level to the SuperMemo-2 quality scale, and updates the card's interval and ease factor objectively.
 
 ---
 
 ## 🧬 Feature Modules
 
-### 1. 🗂 Compounding Medical Wiki & Multi-Curriculum Navigation
-- **Curriculum Filtering**: Switch the sidebar instantly between `🌐 All Curricula`, `🎓 MIT HST.121 (GI & Liver)` (20 lectures, 19 concepts, 28 entities, 6 differentials, 3 traps), and `❤️ Cardiopulmonary & Renal`.
-- **Organ System Badges**: High-contrast color-coded indicators for Gastroenterology (`GI`), Cardiology (`CV`), Renal (`Renal`), Pharmacology (`Rx`), and Infectious Disease (`Micro`).
-- **In-Place Markdown Editor**: Live editing with instant reindexing and append-only audit logging (`log.md`).
+### 1. 🗂 Compounding Multi-Disciplinary Wiki & Multi-Curriculum Navigation
+- **Universal Karpathy 5-Layer Schema**: Structured hierarchy supporting arbitrary fields:
+  - `course_sessions/`: Syllabus modules, reading sessions, and lecture decks.
+  - `concepts/`: Core mechanisms, state machines, and algorithmic proofs.
+  - `entities/`: Protocols, components, drugs, and biomarkers.
+  - `differentials/`: Side-by-side comparative matrices (e.g., *Raft vs. Paxos*, *B+Trees vs. LSM-Trees*, *Crohn's vs. UC*).
+  - `exam_traps/`: Critical engineering anti-patterns and high-yield board traps.
+- **Multi-Curriculum Filtering**: Switch sidebar and views instantly between:
+  - `🌐 All Curricula`: Unified cross-disciplinary view.
+  - `💻 MIT 6.033`: Distributed Systems & Networking (10 sessions, 8 concepts, 8 entities, 5 differentials, 5 traps).
+  - `🎓 MIT HST.121`: Gastroenterology & Hepatology (20 sessions, 19 concepts, 28 entities, 6 differentials, 3 traps).
+  - `🔬 Active Research`: Custom workspace for Deep Learning / ML Engineering.
+- **Universal Course Manifest Importer**: Ingest any curriculum with `POST /api/course/import_manifest` using standard JSON schemas.
+- **Live Markdown Editor**: Real-time wiki reader and editor with instant FTS5 reindexing and append-only audit logging (`log.md`).
 
-### 2. 🧠 Biomimetic Cognitive Brain Graph
-- **Physiological Disease Hubs**: Eliminated artificial circular spoke-wheels; graph centrality is governed by real clinical anchors:
+### 2. 🧠 Biomimetic Cognitive Brain Graph (HippoRAG)
+- **Domain Semantic Clustering**: Graph centrality and layout are driven by first-principles anchors rather than artificial spoke wheels:
+  - *Distributed Consensus Protocol* (Degree 12)
   - *Pathophysiology of Cirrhosis* (Degree 14)
-  - *Inflammatory Bowel Disease* (Degree 9)
-  - *Gallstones & Biliary Disorders* (Degree 9)
-  - *Acute Decompensated Heart Failure* (Degree 6)
-- **Spatial Clustering**: Multi-foci D3 forces group nodes into anatomical quadrants (Hepatology top-right, Luminal GI top-left, Gastroduodenal center-left, Pancreaticobiliary bottom-left, Cardiorenal bottom-right).
-- **Mechanism Spotlighting**: Click any node to highlight **1-hop direct pathways** (bright white) and **2-hop cascades** (soft blue), dimming unrelated nodes to 12% opacity.
-- **Cross-System Bridges**: Molecules linking distinct systems (e.g. *Spironolactone* linking Cirrhosis Ascites and Heart Failure) are highlighted with dashed amber bridge links.
+  - *LSM-Trees vs B+Trees* (Degree 8)
+- **HippoRAG Mechanism Spotlighting**: Click any node to activate associative spreading activation:
+  - **1-hop direct pathways** illuminate in bright white.
+  - **2-hop associative cascades** illuminate in soft blue.
+  - Unrelated nodes dim to 12% opacity.
+- **Cross-Domain Bridges**: Interdisciplinary connecting concepts (e.g., state machine replication and physiological feedback loops) are highlighted with dashed amber bridge links.
 
-### 3. 🩺 Socratic Living Teacher Arena
-- **Clinical Vignette Generation**: Step-1 / Step-2 CK clinical stems with 4 multiple-choice management options.
-- **Diagnostic Reasoning Probes**: Students submit stated clinical reasoning alongside their diagnostic choice.
-- **Error Taxonomy**: Classifies reasoning gaps (`CLINICAL_CONTRAINDICATION`, `DIAGNOSTIC_OVERSIGHT`, `PHARMACOLOGIC_INTERACTION`), updates the student's longitudinal misconception ledger, and auto-queues remedial flashcards.
+### 3. 🏛 User-Guided Socratic Living Teacher Arena
+- **Custom Topic & Constraint Steering**: Learners steer problem generation with explicit controls:
+  - **Topic**: Target subject or concept (e.g., *"Distributed Consensus Quorums"* or *"Transformer Attention"*).
+  - **Guidance**: Pedagogical focus or constraints (e.g., *"Focus on why an even 4-node cluster fails to increase fault tolerance under network partitions"*).
+  - **Domain & Difficulty**: Support for Computer Science, Engineering, Mathematics, and Medicine across beginner, intermediate, and advanced levels.
+- **Sub-500ms Diagnostic Evaluation**: Analyzes submitted rationale alongside option selection, diagnosing traps in real time without giving away answers.
+- **Remedial Card Staging**: Automatically synthesizes and queues remedial cloze flashcards targeting diagnosed misconceptions.
 
 ### 4. 🎴 Spaced-Repetition Flashcard Center
-- **117-Card Master Deck**: Generated from comparative differentials, board traps, entities, and lecture sessions.
-- **In-Browser Interactive Study Mode**:
-  - Front: Cloze deletions masked with `[ ... ]` blanks.
-  - Reveal: Spacebar reveals highlighted answer and dark emerald **Clinical Pearl box**.
-  - Rating: SuperMemo-2 buttons (`[1] Again`, `[2] Hard`, `[3] Good`, `[4] Easy`) schedule future review intervals.
-- **1-Click Wiki Jumper**: Click **"📖 Read Concept in Wiki"** on any card to immediately navigate to that article in the wiki reader.
-- **Multi-Deck Export**: Download filtered `.apkg` packages (e.g. `PaideiaGenesis__MIT_HST121_Gastroenterology.apkg`) or 1-click sync via AnkiConnect (`localhost:8765`).
+- **Dynamic Markdown Cloze Scanner**: Automatically parses `{{c1::...}}` syntax from wiki concept pages and differential tables.
+- **Dual Study Modes**:
+  - **Free-Text AI-Graded Mode**: Type recall in free text; Jev grades the explanation in ~180ms and updates SM-2 intervals.
+  - **Standard Recall Mode**: Spacebar reveals cloze deletions and highlighted reference pearls, with 1-4 manual rating buttons.
+- **1-Click Wiki Jumper**: Click **"📖 Read Concept in Wiki"** on any card to navigate directly to the underlying article.
+- **Filtered Export & Sync**: Download course-filtered `.apkg` packages or sync with 1 click via AnkiConnect (`localhost:8765`).
+
+### 5. 🧹 Clean Research Workspace by Default
+- **Zero Demo Pollution**: By default (`AUTO_SEED_DEMO_DATA=false`), Paideia Genesis starts with an empty, pristine wiki so you can start organizing your own research immediately.
+- **Instant Reset**: Reset the entire wiki anytime using `python3 run.py --clean` or `POST /api/wiki/reset`.
+- **Pre-Configured Starter Packs**: Load MIT 6.033 EECS or MIT HST.121 on demand with `python3 run.py --seed` or via the web UI curriculum importer.
 
 ---
 
-## 🛠 Interactive Usages & Clinical Workflows
+## 🛠 Interactive Usages & Workflows
 
 ### 1. 🖥 Web Mission Control Usage Guide
 
-1. **Course Curriculum Exploration**:
-   - Open `http://localhost:8000` in your browser.
-   - Use the **Curriculum Filter** dropdown in the left sidebar to toggle between `🌐 All Curricula`, `🎓 MIT HST.121 (Gastroenterology & Hepatology)`, and `❤️ Cardiopulmonary & Renal`.
-   - Click through the hierarchical modules: **Course Sessions** (20 lectures), **Core Concepts** (e.g., *Pathophysiology of Cirrhosis*, *Ascites & SAAG*), **Entities & Biomarkers** (e.g., *Spironolactone*, *Serum Albumin*), and **Comparative Differentials**.
-   - Notice the high-precision **KaTeX math formatting** rendering equations like:
+1. **Curriculum Selection & Exploration**:
+   - Open `http://localhost:8000`.
+   - Use the **Curriculum Filter** dropdown in the navigation bar to toggle between `All Curricula`, `MIT 6.033 EECS`, `MIT HST.121 Med`, or `Active Research`.
+   - Browse through hierarchical modules: **Course Sessions**, **Concepts**, **Entities**, **Differentials**, and **Traps**.
+   - Equations render with precision KaTeX formatting:
+     $$\text{Paxos Quorum} = \left\lfloor \frac{n}{2} \right\rfloor + 1$$
      $$\text{Stool Osmotic Gap} = 290 - 2 \times ([\text{Na}^+]_{\text{stool}} + [\text{K}^+]_{\text{stool}})$$
-     $$\text{SAAG} = [\text{Albumin}]_{\text{serum}} - [\text{Albumin}]_{\text{ascites}}$$
 
-2. **Biomimetic Brain Graph Navigation**:
-   - Click the **🧠 Brain Graph** tab in the top navigation bar.
-   - Explore the physiological clusters organized into natural anatomical sectors:
-     - **Hepatology** (Top-Right): Centered around *Cirrhosis* (Degree 14), *Ascites*, *Hepatorenal Syndrome*.
-     - **Luminal GI** (Top-Left): Centered around *Inflammatory Bowel Disease* (Degree 9), *Crohn's*, *Ulcerative Colitis*.
-     - **Gastroduodenal** (Center-Left): *Peptic Ulcer Disease*, *H. pylori*, *GERD*.
-     - **Pancreaticobiliary** (Bottom-Left): *Gallstones & Cholecystitis*, *Acute Pancreatitis*.
-     - **Cardiorenal** (Bottom-Right): *Heart Failure*, *RAAS System*, *Loop Diuretics*.
-   - **Click any node** to trigger **HippoRAG Mechanism Spotlighting**:
-     - *1-hop direct connections* illuminate in bright white.
-     - *2-hop associative cascades* illuminate in soft blue.
-     - All other nodes smoothly fade to 12% opacity.
-   - Click the amber dashed cross-system bridge to explore how *Spironolactone* connects liver ascites management to heart failure neurohormonal blockade.
+2. **Associative Brain Graph Exploration**:
+   - Click the **🧠 Brain Graph** tab.
+   - Filter by course or view the full multi-domain landscape.
+   - Click any node to trigger **HippoRAG Mechanism Spotlighting** (1-hop white, 2-hop blue).
 
-3. **Socratic Living Teacher Drills**:
-   - Navigate to the **🩺 Socratic Arena** tab.
-   - Click **"Generate Clinical Vignette"** to spawn a board-style clinical scenario (e.g., a patient with worsening jaundice and fever).
-   - Select your diagnostic or therapeutic choice.
-   - **Provide your clinical rationale** in the reasoning textarea (e.g., *"Diagnostic paracentesis must precede antibiotic administration to establish PMN count"*).
-   - The Socratic engine evaluates both your choice and your underlying reasoning, identifying traps such as `CLINICAL_CONTRAINDICATION` or `DIAGNOSTIC_OVERSIGHT` without giving away the answer, and immediately stages a remedial cloze card.
+3. **User-Guided Socratic Dilemmas**:
+   - Navigate to the **🏛 Socratic Arena** tab.
+   - Enter your target topic and specific guidance constraints (or click **"Quick Preset"**).
+   - Click **"Generate Socratic Dilemma"** to spawn an adaptive problem.
+   - Select your answer and enter your rationale. The Socratic engine evaluates both your selection and underlying causal reasoning in under 500ms.
 
-4. **In-Browser Active Recall Study Player**:
+4. **Spaced-Repetition Study Player**:
    - Switch to the **🎴 Flashcards** tab.
-   - Filter by deck: `All Decks`, `MIT HST.121`, or `Cardiology Block`.
-   - **Active Recall Controls**:
-     - **Spacebar**: Reveals the cloze deletion answer and displays the dark emerald **Clinical Pearl** reference box.
-     - **Keys 1-4**: Rate your recall with SuperMemo-2 intervals (`[1] Again`, `[2] Hard`, `[3] Good`, `[4] Easy`).
-     - **"📖 Read Concept in Wiki"**: Instantly jumps to the corresponding article in the Compounding Wiki.
-   - Click **"Export .apkg"** to download an offline deck or **"Sync to AnkiConnect"** to push directly to your local Anki Desktop app (`localhost:8765`).
+   - Filter by deck: `All Decks`, `MIT 6.033`, or `MIT HST.121`.
+   - Type your explanation in free text for Jev AI auto-grading, or use Spacebar for manual SM-2 rating.
+   - Click **"Export .apkg"** or **"Sync to AnkiConnect"** for offline mobile review.
 
 ---
 
 ### 2. 🐍 Programmatic Python Usage
 
-You can use the Paideia Genesis core engine programmatically in your own Python pipelines and Jupyter notebooks:
-
 ```python
 from src.wiki.compiler import WikiCompiler
 from src.wiki.course_importer import CourseImporter
-from src.wiki.graph_memory import GraphMemory
+from src.wiki.graph_memory import AssociativeGraphMemory
 from src.anki.generator import AnkiManager
-from src.tutor.socratic_engine import SocraticEngine
+from src.tutor.socratic_engine import SocraticTeacher
 
-# 1. Ingest and compile MIT HST.121 curriculum
+# 1. Ingest pre-configured MIT 6.033 EECS curriculum
 importer = CourseImporter()
-result = importer.import_mit_ocw_course()
-print(f"Ingested {result['sessions_count']} sessions and {result['entities_count']} entities.")
+result = importer.import_engineering_course()
+print(f"Ingested {result['sessions_imported']} sessions, {result['concepts_compiled']} concepts.")
 
 # 2. HippoRAG Associative Spreading Activation
-memory = GraphMemory()
-associative_pathways = memory.find_associative_pathways(
-    concept_slug="pathophysiology_of_cirrhosis", 
+memory = AssociativeGraphMemory()
+pathways = memory.find_associative_pathways(
+    concept_slug="raft-distributed-consensus",
     max_hops=2
 )
-for node in associative_pathways["nodes"]:
-    print(f"Node: {node['label']} (Cluster: {node['cluster']}, Degree: {node['degree']})")
+for node in pathways["nodes"]:
+    print(f"Node: {node['label']} (Domain: {node.get('domain')}, Degree: {node['degree']})")
 
-# 3. Socratic Clinical Vignette & Reasoning Evaluation
-tutor = SocraticEngine()
-vignette = tutor.generate_vignette(course_id="HST121", difficulty="step1")
-print("Clinical Stem:", vignette["stem"])
-
-evaluation = tutor.evaluate_reasoning(
-    vignette_id=vignette["id"],
-    student_choice="B",
-    student_reasoning="Diagnostic paracentesis must be performed before antibiotics to confirm PMN > 250/uL."
+# 3. User-Guided Socratic Problem Generation
+teacher = SocraticTeacher()
+dilemma = teacher.generate_adaptive_vignette(
+    topic="Distributed Consensus & Quorums",
+    guidance="Test why a 4-node cluster fails to increase fault tolerance under network partitions",
+    domain="Computer Science"
 )
-print("Diagnostic Feedback:", evaluation["feedback"])
-print("Error Classification:", evaluation.get("error_taxonomy", "SOUND_REASONING"))
+print("Dilemma Stem:", dilemma["stem"])
 
-# 4. Synthesize Spaced-Repetition Deck & Export .apkg
+# 4. Evaluate Dilemma Response with Jev System 1 Triage
+evaluation = teacher.evaluate_response(
+    vignette=dilemma,
+    selected_option_id="A",
+    student_reasoning="4 nodes allow surviving two concurrent failures because 4 - 2 = 2."
+)
+print("Error Classification:", evaluation.get("error_taxonomy"))
+print("Socratic Critique:", evaluation.get("socratic_critique"))
+
+# 5. Compile Course-Filtered Anki Deck (.apkg)
 anki_mgr = AnkiManager()
-deck_path = anki_mgr.export_deck_package(course_filter="HST121")
-print(f"Anki package compiled to: {deck_path}")
+deck_path = anki_mgr.generate_apkg(course="6.033")
+print(f"Anki package exported to: {deck_path}")
 ```
 
 ---
 
-### 3. 🌐 REST API Examples (cURL)
+### 3. 🌐 REST API Reference & cURL Examples
 
-**Health & Status Check**:
+**System Health & Multi-Domain Status**:
 ```bash
 curl -X GET http://localhost:8000/api/status
 ```
 
-**Query Biomimetic Brain Graph with Course Filter**:
+**List Available Curricula**:
 ```bash
-curl -X GET "http://localhost:8000/api/wiki/brain_graph?course=HST121"
+curl -X GET http://localhost:8000/api/curriculums
 ```
 
-**Perform HippoRAG Associative Spreading Activation**:
+**Reset Wiki to Pristine State**:
 ```bash
-curl -X GET "http://localhost:8000/api/wiki/associative_recall?slug=pathophysiology_of_cirrhosis"
+curl -X POST http://localhost:8000/api/wiki/reset \
+  -H "Content-Type: application/json" \
+  -d '{"confirm": true}'
 ```
 
-**Generate Socratic Step-1 Clinical Vignette**:
+**Import MIT 6.033 Distributed Systems Starter Pack**:
+```bash
+curl -X POST http://localhost:8000/api/course/import_engineering
+```
+
+**Import Custom Curriculum Manifest**:
+```bash
+curl -X POST http://localhost:8000/api/course/import_manifest \
+  -H "Content-Type: application/json" \
+  -d '{"manifest_path": "demo_data/MIT_6_033_Distributed_Systems_and_Networking.json"}'
+```
+
+**Generate User-Guided Socratic Problem**:
 ```bash
 curl -X POST http://localhost:8000/api/tutor/generate_vignette \
   -H "Content-Type: application/json" \
-  -d '{"course_id": "HST121", "difficulty": "step1"}'
+  -d '{
+    "topic": "Distributed Consensus & Quorums",
+    "guidance": "Focus on why a 4-node cluster fails to increase fault tolerance under network partitions",
+    "domain": "Computer Science"
+  }'
 ```
 
-**Submit Clinical Reasoning for Diagnostic Evaluation**:
+**Submit Rationale for Dual-Process Diagnostic Evaluation**:
 ```bash
 curl -X POST http://localhost:8000/api/tutor/evaluate \
   -H "Content-Type: application/json" \
   -d '{
-    "vignette_id": "vig_cirrhosis_ascites_01",
-    "student_choice": "B",
-    "student_reasoning": "Diagnostic paracentesis must precede IV third-gen cephalosporin to document PMN count > 250."
+    "vignette": { ... },
+    "selected_option_id": "A",
+    "student_reasoning": "4 nodes provide extra redundancy to survive two node crashes."
   }'
 ```
 
-**Review Flashcard via SuperMemo-2 (SM-2)**:
+**Auto-Grade Free-Text Active Recall via Jev System 1**:
 ```bash
-curl -X POST http://localhost:8000/api/anki/cards/review \
+curl -X POST http://localhost:8000/api/anki/cards/grade_recall \
   -H "Content-Type: application/json" \
-  -d '{"card_id": "card_saag_calc_01", "rating": 3}'
+  -d '{
+    "card_id": "card_raft_election_01",
+    "student_answer": "Raft uses randomized election timeouts between 150ms and 300ms to prevent split-vote deadlocks."
+  }'
 ```
 
 **Download Filtered Anki .apkg Deck**:
 ```bash
-curl -O -J "http://localhost:8000/api/anki/export?course=HST121"
+curl -O -J "http://localhost:8000/api/anki/export?course=6.033"
 ```
 
 ---
@@ -393,60 +440,65 @@ curl -O -J "http://localhost:8000/api/anki/export?course=HST121"
 
 ```
 paideia-genesis/
-├── demo_data/                      # Immutable raw source files for first-run bootstrapping
+├── demo_data/                                              # Starter curriculum manifests & demo lectures
+│   ├── MIT_6_033_Distributed_Systems_and_Networking.json   # 10 sessions, 8 concepts, 5 differentials, 5 traps
 │   ├── Cardiology_Block_Lecture_4_Heart_Failure_and_Diuretics.md
 │   ├── MS2_Cardiopulmonary_Block_Syllabus.json
 │   └── Missed_Question_Sample.json
 ├── src/
-│   ├── anki/                       # Flashcard compiler & SuperMemo-2 engine
-│   │   ├── compiler.py             # Automatic cloze & differential synthesis
-│   │   └── generator.py            # genanki packaging, SM-2 scheduling, AnkiConnect bridge
+│   ├── anki/                               # Spaced-repetition compiler & SuperMemo-2 engine
+│   │   ├── compiler.py                     # Dynamic {{c1::...}} cloze scanner & differential synthesizer
+│   │   └── generator.py                    # genanki packager, SM-2 math scheduler, AnkiConnect bridge
 │   ├── api/
-│   │   └── server.py               # FastAPI application & RESTful endpoints
+│   │   └── server.py                       # FastAPI application & RESTful multi-curriculum routes
 │   ├── llm/
-│   │   ├── client.py               # LLM abstraction (Mock, Gemini, OpenAI/Ollama)
-│   │   └── jev_client.py           # TypeSafe AI Jev System 1 decision engine
+│   │   ├── client.py                       # LLM abstraction (Mock, Gemini, OpenAI/Ollama)
+│   │   └── jev_client.py                   # TypeSafe AI Jev System 1 decision engine & universal taxonomies
 │   ├── tutor/
-│   │   ├── socratic_engine.py      # Vignette generator & clinical reasoning evaluator
-│   │   └── student_profile.py      # Mastery tracking & misconception ledger
+│   │   ├── socratic_engine.py              # User-guided vignette generator & reasoning evaluator
+│   │   └── student_profile.py              # Mastery tracking & misconception ledger
 │   ├── wiki/
-│   │   ├── compiler.py             # Markdown wiki compiler
-│   │   ├── course_importer.py      # MIT OpenCourseWare curriculum ingester
-│   │   ├── graph_memory.py         # Biomimetic brain graph & HippoRAG memory
-│   │   ├── hst121_curriculum.py    # MIT HST.121 dataset & comparative differentials
-│   │   ├── hst121_full_sessions_and_entities.py # All 20 lecture sessions & 28 entities
-│   │   ├── indexer.py              # SQLite FTS5 indexer & wikilink graph builder
-│   │   ├── knowledge_puller.py     # On-the-fly external PubMed/web knowledge synthesis
-│   │   └── schema.py               # Karpathy LLM-Wiki schema manager
-│   └── config.py                   # Centralized configuration & environment variables
+│   │   ├── compiler.py                     # Karpathy markdown wiki compiler & catalog generator
+│   │   ├── course_importer.py              # Universal curriculum manifest & OCW ingester
+│   │   ├── eecs_curriculum.py              # MIT 6.033 EECS curriculum definitions & concept pages
+│   │   ├── graph_memory.py                 # Multi-domain brain graph & HippoRAG spreading activation
+│   │   ├── hst121_curriculum.py            # MIT HST.121 dataset & differentials
+│   │   ├── hst121_full_sessions_and_entities.py # 20 lecture sessions & 28 clinical entities
+│   │   ├── indexer.py                      # SQLite FTS5 indexer & wikilink graph builder
+│   │   ├── knowledge_puller.py             # External multi-domain knowledge synthesis
+│   │   └── schema.py                       # Karpathy LLM-Wiki schema manager & initial templates
+│   └── config.py                           # Centralized configuration & environment variables
 ├── static/
-│   ├── app.js                      # Application controller, D3 simulation, KaTeX engine
-│   ├── index.html                  # Mission Control UI, study player, graph canvas
-│   └── style.css                   # Dark mode styling, callouts, and animations
-├── tests/                          # 69 automated unit & integration tests
-│   ├── test_anki_compiler.py
-│   ├── test_anki_export.py
-│   ├── test_api_endpoints.py
-│   ├── test_course_importer.py
-│   ├── test_curriculum_integrity.py # 20 sessions, 28 entities, differentials, traps
-│   ├── test_equation_formatting.py # KaTeX math syntax & LaTeX delimiters
-│   ├── test_graph_memory.py
-│   ├── test_hipporag_activation.py # HippoRAG spreading activation & cross-bridges
-│   ├── test_jev_system_one.py      # Jev System 1 primitives & SM-2 auto-grading tests
-│   ├── test_knowledge_puller.py
-│   ├── test_llm_client.py          # Zero-cost offline mock LLM client & factory
-│   ├── test_sm2_algorithm.py       # SuperMemo-2 mathematical scheduling engine
-│   ├── test_socratic_engine.py
-│   ├── test_student_profile.py
-│   ├── test_wiki_compiler_extended.py
-│   └── test_wiki_indexer.py
+│   ├── app.js                              # Application controller, D3 simulation, KaTeX engine
+│   ├── index.html                          # Mission Control UI, guided Socratic arena, study player
+│   └── style.css                           # High-contrast dark styling, badges, and callouts
+├── tests/                                  # 83 automated unit & integration tests
+│   ├── test_anki_atomic_cards.py           # Atomic vs combined cloze card tests
+│   ├── test_anki_compiler.py               # Dynamic markdown cloze extraction tests
+│   ├── test_anki_export.py                 # .apkg packaging & course filtering tests
+│   ├── test_api_endpoints.py               # REST API route integration tests
+│   ├── test_course_importer.py             # MIT OCW and manifest importer tests
+│   ├── test_curriculum_integrity.py        # Curriculum data completeness verification
+│   ├── test_equation_formatting.py         # KaTeX math syntax & LaTeX delimiter verification
+│   ├── test_graph_memory.py                # Graph topology & cluster verification
+│   ├── test_hipporag_activation.py         # HippoRAG spreading activation & cross-bridge tests
+│   ├── test_jev_system_one.py              # Jev System 1 primitives & free-text SM-2 auto-grading
+│   ├── test_knowledge_puller.py            # External knowledge synthesis tests
+│   ├── test_llm_client.py                  # Offline mock & provider factory tests
+│   ├── test_sm2_algorithm.py               # SuperMemo-2 mathematical scheduling engine tests
+│   ├── test_socratic_engine.py             # Vignette generation & reasoning evaluation tests
+│   ├── test_student_profile.py             # Mastery calculation & misconception ledger tests
+│   ├── test_universal_topics.py            # Universal multi-discipline & user-guided topic tests
+│   ├── test_wiki_compiler_extended.py      # Extended markdown compilation tests
+│   └── test_wiki_indexer.py                # SQLite FTS5 lexical BM25 indexing tests
 ├── .github/
 │   └── workflows/
-│       └── unit-tests.yml          # GitHub Actions CI matrix (Python 3.11 & 3.12, 100% free)
-├── .gitignore                      # Excludes runtime data/, *.db, *.apkg, and .venv/
-├── LICENSE                         # MIT License
-├── requirements.txt                # Python dependencies
-└── run.py                          # Self-bootstrapping entry point
+│       └── unit-tests.yml                  # GitHub Actions CI matrix (Python 3.11 & 3.12, 100% free)
+├── .gitignore                              # Excludes runtime data/, *.db, *.apkg, and .venv/
+├── LICENSE                                 # MIT License
+├── README.md                               # Comprehensive documentation
+├── requirements.txt                        # Python dependencies
+└── run.py                                  # Self-bootstrapping entry point (--clean, --seed)
 ```
 
 ---
@@ -456,20 +508,25 @@ paideia-genesis/
 | Endpoint | Method | Description |
 |---|---|---|
 | `/api/status` | `GET` | Health check, Jev System 1 status, total wiki page count, flashcard count |
+| `/api/curriculums` | `GET` | List available curriculum tracks (MIT 6.033 EECS, MIT HST.121 Med, All) |
 | `/api/wiki/tree` | `GET` | Course-filtered hierarchical tree of sessions, concepts, entities, and traps |
 | `/api/wiki/page` | `GET`, `PUT` | Read and live-edit any markdown note in the Compounding Wiki |
 | `/api/wiki/brain_graph` | `GET` | Multi-foci brain graph nodes and links (supports `?course=` and `?layer=`) |
 | `/api/wiki/associative_recall` | `GET` | HippoRAG spreading activation from concept slug |
-| `/api/wiki/quick_capture` | `POST` | Weave student clinical note into Wiki and stage flashcard on-the-fly |
-| `/api/wiki/pull_external` | `POST` | On-the-fly clinical knowledge pull and synthesis |
-| `/api/course/import_url` | `POST` | Ingest and compile MIT OpenCourseWare syllabus |
-| `/api/tutor/generate_vignette`| `POST` | Generate adaptive Step-1 clinical vignette |
+| `/api/wiki/reset` | `POST` | Reset wiki to fresh pristine state (`{"confirm": true}`) |
+| `/api/wiki/quick_capture` | `POST` | Weave quick note into Wiki and stage flashcard on-the-fly |
+| `/api/wiki/pull_external` | `POST` | On-the-fly multi-discipline knowledge pull and synthesis |
+| `/api/course/import_engineering` | `POST` | Ingest and compile MIT 6.033 Distributed Systems curriculum pack |
+| `/api/course/import_manifest` | `POST` | Ingest arbitrary course curriculum from JSON manifest path |
+| `/api/course/import_hst121` | `POST` | Ingest and compile MIT HST.121 Gastroenterology curriculum pack |
+| `/api/course/import_url` | `POST` | Ingest and compile MIT OpenCourseWare syllabus from URL |
+| `/api/tutor/generate_vignette` | `POST` | Generate adaptive Socratic dilemma with optional `topic`, `guidance`, and `domain` |
 | `/api/tutor/evaluate` | `POST` | Socratic diagnosis with Jev System 1 triage & telemetry |
-| `/api/anki/cards` | `GET` | Filtered flashcards with deck retention statistics |
+| `/api/anki/cards` | `GET` | Filtered flashcards with deck retention statistics (`?course=`, `?cloze_mode=`) |
 | `/api/anki/cards/review` | `POST` | Record SuperMemo-2 review rating (`Again`, `Hard`, `Good`, `Easy`) |
 | `/api/anki/cards/grade_recall` | `POST` | Auto-grade free-text active recall with Jev System 1 & update SM-2 |
 | `/api/anki/compile_from_wiki` | `POST` | Trigger full automated compilation across wiki modules |
-| `/api/anki/export` | `GET` | Download compiled `.apkg` deck (supports `?course=`) |
+| `/api/anki/export` | `GET` | Download compiled `.apkg` deck (supports `?course=`, `?system=`) |
 | `/api/anki/sync_ankiconnect` | `POST` | 1-click sync to local Anki Desktop instance |
 
 ---

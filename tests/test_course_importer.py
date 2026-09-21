@@ -6,6 +6,11 @@ from src.wiki.course_importer import CourseImporter
 from src.api.server import app
 
 class TestCourseImporter(unittest.TestCase):
+    @classmethod
+    def tearDownClass(cls):
+        client = TestClient(app)
+        client.post("/api/wiki/reset", json={"confirm": True})
+
     def setUp(self):
         self.importer = CourseImporter()
         self.client = TestClient(app)

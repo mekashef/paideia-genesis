@@ -358,6 +358,10 @@ def reset_wiki(req: ResetWikiRequest):
     if anki_manager.cards_file.exists():
         anki_manager.cards_file.write_text("[]", encoding="utf-8")
 
+    from src.wiki.schema import INDEX_INITIAL_TEMPLATE, LOG_INITIAL_TEMPLATE
+    (WIKI_DIR / "index.md").write_text(INDEX_INITIAL_TEMPLATE, encoding="utf-8")
+    (WIKI_DIR / "log.md").write_text(LOG_INITIAL_TEMPLATE, encoding="utf-8")
+
     # 4. Reinitialize clean wiki schema and index
     init_wiki_structure(WIKI_DIR)
     indexer.reindex_all()

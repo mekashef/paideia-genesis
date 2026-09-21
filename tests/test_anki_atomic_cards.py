@@ -182,6 +182,11 @@ class TestAnkiApiEndpoints(unittest.TestCase):
         anki_mgr = AnkiManager()
         anki_mgr.recompile_from_wiki()
 
+    @classmethod
+    def tearDownClass(cls):
+        client = TestClient(app)
+        client.post("/api/wiki/reset", json={"confirm": True})
+
     def setUp(self):
         self.client = TestClient(app)
 

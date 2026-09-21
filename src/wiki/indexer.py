@@ -165,7 +165,15 @@ class WikiIndexer:
         conn.close()
 
     def reindex_all(self):
-        """Scans the wiki folder and reindexes all markdown files."""
+        """Scans the wiki folder and reindexes all markdown files, clearing deleted ones."""
+        conn = get_db_connection(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM wiki_fts")
+        cursor.execute("DELETE FROM wiki_meta")
+        cursor.execute("DELETE FROM wiki_links")
+        conn.commit()
+        conn.close()
+
         for md_file in self.wiki_dir.rglob("*.md"):
             self.index_file(md_file)
 

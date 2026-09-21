@@ -1,4 +1,4 @@
-"""Karpathy-style Knowledge Compiler for the Medical Wiki."""
+"""Karpathy-style Knowledge Compiler for the Universal Compounding LLM-Wiki."""
 import re
 import datetime
 from pathlib import Path
@@ -28,7 +28,13 @@ class WikiCompiler:
         else:
             return file_path.read_text(encoding="utf-8", errors="replace")
 
-    def ingest_source(self, filename: str, content: str, source_type: str = "lecture") -> Dict[str, Any]:
+    def ingest_source(
+        self,
+        filename: str,
+        content: str,
+        source_type: str = "lecture",
+        domain: Optional[str] = None
+    ) -> Dict[str, Any]:
         """Processes a raw source document and compiles it into the compounding LLM-Wiki."""
         # 1. Save raw immutable source
         target_dir = RAW_SOURCES_DIR / "lectures" if source_type == "lecture" else RAW_SOURCES_DIR / "exam_logs"
@@ -37,21 +43,23 @@ class WikiCompiler:
         raw_path.write_text(content, encoding="utf-8")
 
         # 2. Prompt LLM to extract and compile structured knowledge
-        prompt = f"""You are a senior medical school curriculum compiler.
-Process the following raw course material into structured, cross-linked high-yield wiki pages following Karpathy's LLM-Wiki pattern.
+        domain_hint = domain or "auto-detected technical/scientific domain"
+        prompt = f"""You are an elite academic curriculum compiler and knowledge graph architect.
+Process the following raw course or research material into structured, cross-linked high-yield wiki pages following Karpathy's LLM-Wiki pattern.
+Target Domain / Discipline: {domain_hint}
 
 Source filename: {filename}
 Source content:
 {content[:8000]}
 
 Extract and synthesize:
-1. 'concepts': array of objects with keys: slug (kebab-case), title, system (e.g. Cardiovascular), tags (list), summary, content (markdown with physiological mechanisms, pharmacotherapy, and explicit board traps).
-2. 'entities': array of high-yield drugs or pathogens with keys: slug, title, category, high_yield_notes.
-3. 'differentials': array of comparative syntheses with keys: slug, title, summary, content (tables and discriminant features).
+1. 'concepts': array of objects with keys: slug (kebab-case), title, system (or field/module), domain, tags (list), summary, content (markdown with deep mechanisms, theoretical foundations, architectural patterns, and explicit pitfalls/traps).
+2. 'entities': array of key entities (tools, libraries, hardware, algorithms, theorems, equations, drugs, pathogens, components) with keys: slug, title, category, high_yield_notes.
+3. 'differentials': array of comparative syntheses with keys: slug, title, summary, content (markdown tables and discriminant features).
 
 Respond strictly with valid JSON conforming to this structure."""
 
-        extraction = self.llm.generate_json(prompt, system_prompt="You are a medical knowledge graph compiler.")
+        extraction = self.llm.generate_json(prompt, system_prompt="You are a universal knowledge graph compiler.")
 
         created_pages = []
 
@@ -63,6 +71,7 @@ Respond strictly with valid JSON conforming to this structure."""
             tags_str = ", ".join(c.get("tags", []))
             page_content = f"""---
 title: {c.get('title')}
+domain: {c.get('domain', domain or 'General')}
 system: {c.get('system', 'General')}
 tags: [{tags_str}]
 source: {filename}
@@ -71,7 +80,7 @@ last_compiled: {datetime.date.today().isoformat()}
 
 # {c.get('title')}
 
-> **High-Yield Summary**: {c.get('summary', '')}
+> **Core Summary**: {c.get('summary', '')}
 
 {c.get('content', '')}
 
@@ -90,13 +99,14 @@ last_compiled: {datetime.date.today().isoformat()}
             page_content = f"""---
 title: {e.get('title')}
 category: {e.get('category')}
+domain: {domain or 'General'}
 source: {filename}
 last_compiled: {datetime.date.today().isoformat()}
 ---
 
 # {e.get('title')} ({e.get('category')})
 
-### High-Yield Clinical Pearls
+### Key Technical Notes & Insights
 {e.get('high_yield_notes', '')}
 
 ---
@@ -113,6 +123,7 @@ last_compiled: {datetime.date.today().isoformat()}
             page_file = self.wiki_dir / "differentials" / f"{slug}.md"
             page_content = f"""---
 title: {d.get('title')}
+domain: {domain or 'General'}
 source: {filename}
 last_compiled: {datetime.date.today().isoformat()}
 ---
@@ -159,7 +170,6 @@ last_compiled: {datetime.date.today().isoformat()}
             if folder.exists():
                 for md in sorted(folder.glob("*.md")):
                     title = md.stem.replace("-", " ").title()
-                    # read first lines for title/summary
                     lines = md.read_text(encoding="utf-8", errors="replace").splitlines()
                     for line in lines:
                         if line.startswith("title:"):
@@ -171,30 +181,30 @@ last_compiled: {datetime.date.today().isoformat()}
                     rel_link = f"{cat}/{md.name}"
                     sections[cat].append(f"- [[{rel_link}|{title}]]")
 
-        index_text = f"""# Medical Master Index
+        index_text = f"""# Universal Knowledge Master Index
 
 *Last recompiled: {datetime.date.today().isoformat()}*
 
-## MIT OCW HST.121 Lecture Sessions
-{chr(10).join(sections['course_sessions']) if sections['course_sessions'] else '- *No lecture sessions registered.*'}
+## Course & Reading Sessions
+{chr(10).join(sections['course_sessions']) if sections['course_sessions'] else '- *No course sessions registered.*'}
 
-## High-Yield Concepts
+## Core Concepts & Mechanisms
 {chr(10).join(sections['concepts']) if sections['concepts'] else '- *No concepts compiled yet.*'}
 
-## Pharmacologic Agents & Entities
+## Entities, Components & Algorithms
 {chr(10).join(sections['entities']) if sections['entities'] else '- *No entities registered yet.*'}
 
-## Differentials & Syntheses
+## Comparative Differentials & Trade-offs
 {chr(10).join(sections['differentials']) if sections['differentials'] else '- *No comparative syntheses yet.*'}
 
-## Board Traps & Misconceptions
+## Traps, Anti-Patterns & Misconceptions
 {chr(10).join(sections['exam_traps']) if sections['exam_traps'] else '- *No traps recorded yet.*'}
 """
         (self.wiki_dir / "index.md").write_text(index_text, encoding="utf-8")
         self.indexer.index_file(self.wiki_dir / "index.md")
 
     def lint_wiki(self) -> Dict[str, Any]:
-        """Health-checks the medical wiki for orphan pages, missing cross-references, or broken links."""
+        """Health-checks the wiki for orphan pages, missing cross-references, or broken links."""
         all_pages = set()
         outbound_links = {}
         inbound_links = {}

@@ -107,23 +107,53 @@ function setupEventListeners() {
         });
     }
 
+    const btnSelectEecs = document.getElementById("btnSelectEecsPreset");
+    if (btnSelectEecs) {
+        btnSelectEecs.addEventListener("click", () => {
+            const input = document.getElementById("importCourseUrlInput");
+            if (input) input.value = "demo_data/MIT_6_033_Distributed_Systems_and_Networking.json";
+            const title = document.getElementById("importPresetTitle");
+            if (title) title.textContent = "Selected: MIT 6.033 Distributed Systems & Networking";
+        });
+    }
+
+    const btnSelectHst = document.getElementById("btnSelectHstPreset");
+    if (btnSelectHst) {
+        btnSelectHst.addEventListener("click", () => {
+            const input = document.getElementById("importCourseUrlInput");
+            if (input) input.value = "https://ocw.mit.edu/courses/hst-121-gastroenterology-fall-2005/pages/lecture-notes/";
+            const title = document.getElementById("importPresetTitle");
+            if (title) title.textContent = "Selected: MIT HST.121 Gastroenterology & Hepatology";
+        });
+    }
+
     const btnSubmitImport = document.getElementById("btnSubmitImportCourse");
     if (btnSubmitImport) {
         btnSubmitImport.addEventListener("click", async () => {
             const url = document.getElementById("importCourseUrlInput").value.trim();
             closeModal("modalImportCourse");
-            showToast("Ingesting course and compiling living medical wiki...", "info");
+            showToast("Ingesting curriculum and compiling universal living wiki...", "info");
             try {
-                const resp = await fetch("/api/course/import_url", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ url: url || undefined })
-                });
+                let resp;
+                if (url.endsWith(".json")) {
+                    resp = await fetch("/api/course/import_manifest", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ manifest_path: url })
+                    });
+                } else {
+                    resp = await fetch("/api/course/import_url", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ url: url || undefined })
+                    });
+                }
                 const data = await resp.json();
                 if (data.success) {
                     showToast(`Successfully imported ${data.course}! (${data.concepts_compiled} concepts, ${data.differentials_compiled} diffs)`, "success");
                     await loadWikiTree();
-                    await loadWikiPage("concepts/peptic-ulcer-disease-and-h-pylori.md");
+                    const firstSlug = (data.compiled_concepts && data.compiled_concepts[0]) || "peptic-ulcer-disease-and-h-pylori";
+                    await loadWikiPage(`concepts/${firstSlug}.md`);
                     await loadStatus();
                     await loadCurriculum();
                     await loadAnkiCards();
@@ -238,9 +268,23 @@ function setupEventListeners() {
         }, 300);
     });
 
+    // Socratic Topic Guidance & Challenge Buttons
+    const btnTargeted = document.getElementById("btnTargetedChallenge");
+    if (btnTargeted) {
+        btnTargeted.addEventListener("click", () => {
+            const topic = (document.getElementById("vignetteTopicInput")?.value || "").trim();
+            const guidance = (document.getElementById("vignetteGuidanceInput")?.value || "").trim();
+            const domain = document.getElementById("vignetteDomainSelect")?.value || "";
+            loadVignette(topic, guidance, domain);
+        });
+    }
+
     // Next Vignette Button
     document.getElementById("btnNewVignette").addEventListener("click", () => {
-        loadVignette();
+        const topic = (document.getElementById("vignetteTopicInput")?.value || "").trim();
+        const guidance = (document.getElementById("vignetteGuidanceInput")?.value || "").trim();
+        const domain = document.getElementById("vignetteDomainSelect")?.value || "";
+        loadVignette(topic, guidance, domain);
     });
 
     // Submit Answer Button
@@ -503,7 +547,9 @@ async function loadWikiTree() {
 
         const badgeEl = document.getElementById("activeCourseCountBadge");
         if (badgeEl) {
-            if (selectedCourse === "hst121") {
+            if (selectedCourse === "eecs") {
+                badgeEl.textContent = `MIT 6.033 (${totalItems})`;
+            } else if (selectedCourse === "hst121") {
                 badgeEl.textContent = `HST.121 (${totalItems})`;
             } else if (selectedCourse === "cardio") {
                 badgeEl.textContent = `Cardio (${totalItems})`;
@@ -1115,16 +1161,17 @@ function drag(simulation) {
         .on("end", dragended);
 }
 
-// Load clinical vignette
-async function loadVignette() {
+// Load Socratic vignette or targeted problem
+async function loadVignette(customTopic, customGuidance, customDomain) {
     const stemEl = document.getElementById("vignetteStem");
     const optionsEl = document.getElementById("vignetteOptions");
     const topicEl = document.getElementById("vignetteTopic");
     const feedbackContent = document.getElementById("feedbackContent");
     const feedbackPlaceholder = document.getElementById("feedbackPlaceholder");
     const verdictBadge = document.getElementById("verdictBadge");
+    const domainBadge = document.getElementById("vignetteDomainBadge");
 
-    stemEl.textContent = "Synthesizing personalized USMLE clinical vignette from weakest organ systems...";
+    stemEl.textContent = "Synthesizing personalized Socratic challenge and diagnostic scenario...";
     optionsEl.innerHTML = "";
     feedbackContent.classList.add("hidden");
     feedbackPlaceholder.classList.remove("hidden");
@@ -1132,10 +1179,22 @@ async function loadVignette() {
     selectedOptionId = null;
 
     try {
-        const resp = await fetch("/api/tutor/generate_vignette", { method: "POST" });
+        const payload = {};
+        if (customTopic) payload.topic = customTopic;
+        if (customGuidance) payload.guidance = customGuidance;
+        if (customDomain) payload.domain = customDomain;
+
+        const resp = await fetch("/api/tutor/generate_vignette", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
         currentVignette = await resp.json();
 
-        topicEl.textContent = currentVignette.topic || "Clinical Medicine";
+        topicEl.textContent = currentVignette.topic || "Core Systems & Concepts";
+        if (domainBadge) {
+            domainBadge.textContent = currentVignette.domain || "Universal";
+        }
         stemEl.textContent = currentVignette.stem;
 
         optionsEl.innerHTML = "";

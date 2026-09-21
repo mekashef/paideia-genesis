@@ -3,6 +3,7 @@ Powered by TypeSafe AI (founded by Diogo Almeida, Erik Gafni, Sasha Sheng).
 
 Implements Kahneman Dual-Process System 1:
 Fast, typed decisions (Choice, Score, Noul) with calibrated confidence in 70ms-500ms.
+Supports Engineering, Computer Science, Research, Sciences, and Medicine.
 """
 import re
 import time
@@ -54,8 +55,8 @@ class MockJevEngine:
             if q_type == "noul":
                 prob = 0.15
                 if "trap" in q_name or "distractor" in str(q_spec):
-                    # Check if student fell for classic traps (e.g. beta-blocker in acute ADHF)
-                    if "carvedilol" in state_str or "contraindicated" in state_str:
+                    # Check if student fell for classic traps (medical or engineering)
+                    if any(k in state_str for k in ["carvedilol", "contraindicated", "4-node", "even-numbered", "split-brain", "starvation", "false-sharing", "aba-problem"]):
                         prob = 0.94
                     else:
                         prob = 0.20
@@ -71,7 +72,6 @@ class MockJevEngine:
                 }
 
             elif q_type == "choice":
-                # Evaluate choice
                 criteria = getattr(q_spec, "criteria", None)
                 if criteria is None and isinstance(q_spec, dict):
                     criteria = q_spec.get("criteria", {})
@@ -81,20 +81,28 @@ class MockJevEngine:
                 confidence = 0.92
 
                 if "error_taxonomy" in q_name:
-                    if "carvedilol" in state_str or "contraindicated" in state_str:
-                        chosen = "CLINICAL_CONTRAINDICATION"
+                    if any(k in state_str for k in ["carvedilol", "contraindicated", "even-numbered", "split-brain", "starvation"]):
+                        chosen = "CLINICAL_CONTRAINDICATION" if "CLINICAL_CONTRAINDICATION" in keys else "CRITICAL_PITFALL"
                         confidence = 0.96
-                    elif "transporter" in state_str or "nkcc2" in state_str or "proximal" in state_str:
+                    elif any(k in state_str for k in ["transporter", "nkcc2", "proximal", "quorum", "invalidation", "store buffer", "wal", "tlb"]):
                         chosen = "MECHANISM_GAP"
                         confidence = 0.89
-                    elif "crohn" in state_str or "ulcerative" in state_str or "discriminator" in state_str:
+                    elif any(k in state_str for k in ["crohn", "ulcerative", "paxos", "lsm", "b-tree", "discriminator", "occ", "2pl"]):
                         chosen = "DISCRIMINATOR_CONFUSION"
                         confidence = 0.91
                     else:
                         chosen = "READING_SLIP"
                         confidence = 0.80
 
-                elif "organ_system" in q_name:
+                elif "domain" in q_name or "discipline" in q_name:
+                    if any(k in state_str for k in ["raft", "paxos", "lsm", "distributed", "concurrency", "linux", "epoll", "tlb", "cache"]):
+                        chosen = "Computer Science"
+                    elif any(k in state_str for k in ["heart", "liver", "cirrhosis", "diuretic", "bowel"]):
+                        chosen = "Medicine"
+                    else:
+                        chosen = "General Science"
+
+                elif "organ_system" in q_name or "field" in q_name:
                     if any(k in state_str for k in ["heart", "cardio", "furosemide", "adhf"]):
                         chosen = "Cardiovascular"
                     elif any(k in state_str for k in ["liver", "cirrhosis", "hepat", "jaundice", "meld"]):
@@ -103,8 +111,14 @@ class MockJevEngine:
                         chosen = "Gastroenterology"
                     elif any(k in state_str for k in ["kidney", "renal", "nephron"]):
                         chosen = "Renal"
+                    elif any(k in state_str for k in ["raft", "paxos", "consensus", "etcd"]):
+                        chosen = "Distributed Systems"
+                    elif any(k in state_str for k in ["lsm", "btree", "storage", "rocksdb"]):
+                        chosen = "Storage Engines"
+                    elif any(k in state_str for k in ["mesi", "cache", "tlb"]):
+                        chosen = "Computer Architecture"
                     else:
-                        chosen = "Cardiovascular"
+                        chosen = keys[0] if keys else "Core"
 
                 answers[q_name] = {
                     "type": "choice",
@@ -127,7 +141,7 @@ class MockJevEngine:
                         score_val = 0
                     elif text_len < 30:
                         score_val = min(1, max_score)
-                    elif "nkcc2" in state_str or "inotropy" in state_str or "preload" in state_str:
+                    elif any(k in state_str for k in ["nkcc2", "inotropy", "preload", "quorum", "invalidation", "append-only", "cas"]):
                         score_val = max_score
                     else:
                         score_val = min(1, max_score)
@@ -142,7 +156,12 @@ class MockJevEngine:
                         words = set(re.findall(r'\b\w{3,}\b', answer))
                         target_words = set(re.findall(r'\b\w{3,}\b', pearl + " " + prompt))
                         overlap = words.intersection(target_words)
-                        if answer in pearl or pearl in answer or len(overlap) >= 2 or any(kw in answer for kw in ["nkcc2", "thick ascending limb", "furosemide", "saag", "transmural", "granuloma"]):
+                        tech_keywords = [
+                            "nkcc2", "thick ascending limb", "furosemide", "saag", "transmural", "granuloma",
+                            "raft", "candidate", "requestvote", "lsm", "memtable", "sstable", "compaction",
+                            "mesi", "invalidation", "wal", "red-black tree", "tlb", "4-level", "even-numbered", "split-brain"
+                        ]
+                        if answer in pearl or pearl in answer or len(overlap) >= 2 or any(kw in answer for kw in tech_keywords):
                             score_val = max_score
                         elif len(overlap) >= 1 or len(answer) > 20:
                             score_val = min(3, max_score)
@@ -186,7 +205,6 @@ class JevClient:
 
         if self._real_client and self.enabled:
             try:
-                # Convert questions to SDK models if needed
                 sdk_questions = {}
                 for k, v in questions.items():
                     if isinstance(v, (Choice, Score, Noul)):
@@ -203,7 +221,6 @@ class JevClient:
                 resp = self._real_client.system_one(state=state, questions=sdk_questions)
                 latency = round((time.perf_counter() - start_time) * 1000, 2)
 
-                # Format answers into clean dict
                 clean_answers = {}
                 for qk, qv in resp.answers.items():
                     if hasattr(qv, "choice"):
@@ -240,7 +257,6 @@ class JevClient:
 
         # Deterministic Mock Execution
         answers = MockJevEngine.evaluate(state, questions)
-        # Add realistic microsecond simulation (e.g. 78ms)
         simulated_latency = round(72.5 + (len(state) % 15) * 1.8, 2)
 
         return JevDiagnosticResult(
@@ -252,37 +268,45 @@ class JevClient:
         )
 
     # -------------------------------------------------------------------------
-    # High-Level Medical Domain Helpers
+    # Universal Socratic & Education Helpers
     # -------------------------------------------------------------------------
 
-    def diagnose_vignette_reasoning(
+    def diagnose_problem_reasoning(
         self,
-        vignette: Dict[str, Any],
-        selected_option: str,
-        student_reasoning: str
+        problem: Optional[Dict[str, Any]] = None,
+        selected_option: str = "",
+        student_reasoning: str = "",
+        domain: Optional[str] = None,
+        vignette: Optional[Dict[str, Any]] = None,
+        **kwargs
     ) -> JevDiagnosticResult:
-        """Evaluates student choice and free-text reasoning for a USMLE Step-1 vignette."""
+        """Evaluates student choice and reasoning for any academic or engineering problem."""
+        target_problem = problem if problem is not None else (vignette or {})
         state = {
-            "stem": vignette.get("stem", "")[:600],
-            "correct_option": vignette.get("correct_option", ""),
+            "stem": target_problem.get("stem", "")[:600],
+            "correct_option": target_problem.get("correct_option", ""),
             "selected_option": selected_option,
             "student_reasoning": student_reasoning,
-            "topic": vignette.get("topic", "")
+            "topic": target_problem.get("topic", ""),
+            "domain": domain or target_problem.get("domain", "General")
+        }
+
+        # Compatible with both medical USMLE and universal engineering taxonomies
+        criteria_map = {
+            "CLINICAL_CONTRAINDICATION": "Administered contraindicated drug/action or fatal anti-pattern",
+            "MECHANISM_GAP": "Failed to grasp or misidentified underlying mechanism or algorithm",
+            "DISCRIMINATOR_CONFUSION": "Confused two related pathologies, algorithms, or architectural trade-offs",
+            "READING_SLIP": "Overlooked a key constraint, parameter, or prompt specification"
         }
 
         if HAS_TYPESAFE_SDK and Choice:
             questions = {
                 "error_taxonomy": Choice(
-                    instructions="Identify the root pathophysiological or clinical misconception",
-                    criteria={
-                        "CLINICAL_CONTRAINDICATION": "Administered or selected a contraindicated drug or intervention",
-                        "MECHANISM_GAP": "Failed to grasp or misidentified underlying physiological mechanism",
-                        "DISCRIMINATOR_CONFUSION": "Confused two related pathologies or differential entities",
-                        "READING_SLIP": "Overlooked a key lab value, timeline, or vital sign in the vignette"
-                    }
+                    instructions="Identify the root cognitive, mechanistic, or design misconception",
+                    criteria=criteria_map
                 ),
                 "reasoning_soundness": Score(
-                    instructions="Assess the pathophysiological soundness of student's reasoning",
+                    instructions="Assess the soundness of the student's mechanistic reasoning",
                     criteria=[
                         "No reasoning or completely irrelevant rationale",
                         "Superficial buzzword recall without mechanistic grounding",
@@ -290,7 +314,7 @@ class JevClient:
                     ]
                 ),
                 "board_trap_triggered": Noul(
-                    instructions="The student fell for a primary USMLE distractor trap"
+                    instructions="The student fell for a classic distractor trap or anti-pattern"
                 )
             }
         else:
@@ -298,32 +322,44 @@ class JevClient:
                 "error_taxonomy": {
                     "type": "choice",
                     "instructions": "Identify the root misconception",
-                    "criteria": {
-                        "CLINICAL_CONTRAINDICATION": "Contraindicated drug/intervention",
-                        "MECHANISM_GAP": "Failed mechanism",
-                        "DISCRIMINATOR_CONFUSION": "Confused differentials",
-                        "READING_SLIP": "Overlooked clue"
-                    }
+                    "criteria": criteria_map
                 },
                 "reasoning_soundness": {
                     "type": "score",
-                    "instructions": "Assess reasoning",
+                    "instructions": "Assess reasoning soundness",
                     "criteria": ["No reasoning", "Superficial", "Sound mechanism"]
                 },
                 "board_trap_triggered": {
                     "type": "noul",
-                    "instructions": "Fell for board trap"
+                    "instructions": "Triggered classic trap"
                 }
             }
 
         return self.run_system_one(state, questions)
+
+    def diagnose_vignette_reasoning(
+        self,
+        vignette: Optional[Dict[str, Any]] = None,
+        selected_option: str = "",
+        student_reasoning: str = "",
+        problem: Optional[Dict[str, Any]] = None,
+        **kwargs
+    ) -> JevDiagnosticResult:
+        """Alias for backward compatibility with medical tests expecting vignette argument."""
+        target = vignette if vignette is not None else (problem or {})
+        return self.diagnose_problem_reasoning(
+            problem=target,
+            selected_option=selected_option,
+            student_reasoning=student_reasoning,
+            **kwargs
+        )
 
     def grade_free_text_recall(
         self,
         card: Dict[str, Any],
         student_answer: str
     ) -> Dict[str, Any]:
-        """Grades a student's active recall free-text attempt against the clinical pearl."""
+        """Grades a student's active recall free-text attempt against the key pearl/concept."""
         expected_front = card.get("text", card.get("front", ""))
         expected_pearl = card.get("pearl", card.get("back", ""))
 
@@ -336,17 +372,17 @@ class JevClient:
         if HAS_TYPESAFE_SDK and Score:
             questions = {
                 "recall_quality": Score(
-                    instructions="Grade the medical accuracy and physiological completeness of student recall",
+                    instructions="Grade the technical accuracy and mechanistic completeness of student recall",
                     criteria=[
                         "Level 0: Blank, irrelevant, or entirely incorrect answer",
                         "Level 1: Severe misconception or incorrect key mechanism",
                         "Level 2: Correct direction but missed critical discriminator",
                         "Level 3: Good recall with minor omission",
-                        "Level 4: Flawless active recall matching the clinical pearl"
+                        "Level 4: Flawless active recall matching the key concept/pearl"
                     ]
                 ),
                 "missed_critical_pearl": Noul(
-                    instructions="Did the student miss the core high-yield clinical discriminator or board pearl?"
+                    instructions="Did the student miss the core high-yield concept, discriminator, or pearl?"
                 )
             }
         else:
@@ -358,7 +394,7 @@ class JevClient:
                 },
                 "missed_critical_pearl": {
                     "type": "noul",
-                    "instructions": "Missed pearl"
+                    "instructions": "Missed core pearl"
                 }
             }
 
@@ -368,23 +404,18 @@ class JevClient:
         score_int = int(round(score_val)) if isinstance(score_val, (int, float)) else 0
         confidence = score_ans.get("confidence", 0.9)
 
-        # Map Level 0..4 to SuperMemo-2 rating (1: Again, 2: Hard, 3: Good, 4: Easy)
-        # Level 0, 1 -> 1 (Again)
-        # Level 2 -> 2 (Hard)
-        # Level 3 -> 3 (Good)
-        # Level 4 -> 4 (Easy)
         if score_int <= 1:
             sm2_rating = 1
             feedback_label = "Again (Needs Review)"
         elif score_int == 2:
             sm2_rating = 2
-            feedback_label = "Hard (Partial Mechanism Recalled)"
+            feedback_label = "Hard (Partial Recall)"
         elif score_int == 3:
             sm2_rating = 3
             feedback_label = "Good (Solid Recall)"
         else:
             sm2_rating = 4
-            feedback_label = "Easy (Mastered / Flawless Recall)"
+            feedback_label = "Easy (Mastered / Flawless)"
 
         return {
             "success": True,
@@ -399,8 +430,8 @@ class JevClient:
             "answers": diag.answers
         }
 
-    def classify_medical_document(self, title: str, text: str) -> Dict[str, Any]:
-        """Rapidly routes and tags incoming lecture or clinical text."""
+    def classify_document(self, title: str, text: str) -> Dict[str, Any]:
+        """Rapidly routes and tags incoming technical or scientific content."""
         state = {
             "title": title,
             "text": text[:1000]
@@ -408,53 +439,76 @@ class JevClient:
 
         if HAS_TYPESAFE_SDK and Choice:
             questions = {
-                "organ_system": Choice(
-                    instructions="Classify medical content into an organ system block",
+                "domain": Choice(
+                    instructions="Classify document into discipline domain",
                     criteria={
-                        "Cardiovascular": "Heart, hemodynamics, heart failure, arrhythmias",
-                        "Gastroenterology": "GI tract, absorption, diarrhea, IBD, stomach",
-                        "Hepatology": "Liver, hepatitis, cirrhosis, jaundice, biliary tree",
-                        "Renal": "Kidneys, nephron physiology, diuretics, acid-base"
+                        "Computer Science": "Algorithms, distributed systems, networks, architecture",
+                        "Medicine": "Clinical medicine, pathology, pharmacology, anatomy",
+                        "Physics": "Quantum mechanics, electromagnetism, thermodynamics",
+                        "Mathematics": "Linear algebra, analysis, probability, discrete math"
                     }
                 ),
-                "step1_yield": Score(
-                    instructions="Assess Step-1 board relevance",
+                "yield_score": Score(
+                    instructions="Assess technical significance and yield",
                     criteria=[
                         "Incidental detail",
-                        "General clinical interest",
-                        "Core high-yield USMLE concept",
-                        "Critical Board Trap / Essential Pearl"
+                        "General interest",
+                        "Core high-yield foundational concept",
+                        "Critical Trap / Essential Architectural Invariant"
                     ]
                 ),
-                "has_contraindication": Noul(
-                    instructions="Document contains a vital clinical contraindication or black box warning"
+                "has_critical_pitfall": Noul(
+                    instructions="Document highlights a critical anti-pattern, contraindication, or bug trap"
                 )
             }
         else:
             questions = {
-                "organ_system": {
+                "domain": {
                     "type": "choice",
-                    "instructions": "Classify organ block",
-                    "criteria": ["Cardiovascular", "Gastroenterology", "Hepatology", "Renal"]
+                    "instructions": "Classify discipline",
+                    "criteria": ["Computer Science", "Medicine", "Physics", "Mathematics"]
                 },
-                "step1_yield": {
+                "yield_score": {
                     "type": "score",
                     "instructions": "Assess yield",
-                    "criteria": ["Incidental", "General", "High Yield", "Critical Trap"]
+                    "criteria": ["Incidental", "General", "Core High Yield", "Critical Trap"]
                 },
-                "has_contraindication": {
+                "has_critical_pitfall": {
                     "type": "noul",
-                    "instructions": "Has contraindication"
+                    "instructions": "Has critical trap"
                 }
             }
 
         diag = self.run_system_one(state, questions)
+        combined_text = f"{title} {text}".lower()
+        if any(w in combined_text for w in ["cirrhosis", "portal", "liver", "hepat", "splanchnic", "biliary"]):
+            organ_system = "Hepatology"
+        elif any(w in combined_text for w in ["heart", "cardio", "furosemide", "edema", "adhf"]):
+            organ_system = "Cardiovascular"
+        elif any(w in combined_text for w in ["kidney", "renal", "nephron", "glomerul"]):
+            organ_system = "Renal"
+        elif any(w in combined_text for w in ["bowel", "crohn", "celiac", "diarrhea", "esophag"]):
+            organ_system = "Gastroenterology"
+        elif any(w in combined_text for w in ["raft", "paxos", "consensus", "quorum", "replicated"]):
+            organ_system = "Distributed Systems"
+        elif any(w in combined_text for w in ["lsm", "b-tree", "wal", "compaction", "storage"]):
+            organ_system = "Storage Engines"
+        elif any(w in combined_text for w in ["cache", "mesi", "tlb", "paging", "mmu"]):
+            organ_system = "Computer Architecture"
+        else:
+            organ_system = "General"
+
         return {
-            "organ_system": diag.answers.get("organ_system", {}).get("choice", "Cardiovascular"),
-            "yield_score": diag.answers.get("step1_yield", {}).get("score", 2),
-            "has_contraindication": diag.answers.get("has_contraindication", {}).get("noul", 0.1) > 0.5,
+            "domain": diag.answers.get("domain", {}).get("choice", "Medicine" if organ_system in ["Hepatology", "Cardiovascular", "Renal", "Gastroenterology"] else "Computer Science"),
+            "organ_system": organ_system,
+            "field": organ_system,
+            "yield_score": diag.answers.get("yield_score", {}).get("score", 2),
+            "has_critical_pitfall": diag.answers.get("has_critical_pitfall", {}).get("noul", 0.1) > 0.5,
             "latency_ms": diag.latency_ms
         }
+
+    # Backward compatibility alias
+    classify_medical_document = classify_document
 
 
 # Global singleton instance

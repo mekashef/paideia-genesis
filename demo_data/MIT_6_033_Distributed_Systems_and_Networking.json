@@ -1,0 +1,60 @@
+{
+  "course_code": "MIT 6.033",
+  "title": "MIT 6.033: Computer System Design & Distributed Systems",
+  "institution": "Massachusetts Institute of Technology (Department of Electrical Engineering & Computer Science)",
+  "url": "https://ocw.mit.edu/courses/6-033-computer-system-design-spring-2009/",
+  "domain": "Computer Science",
+  "field": "Distributed Systems & Systems Architecture",
+  "sessions": [
+    {
+      "session": 1,
+      "topic": "Enforced Modularity, Client-Server & Remote Procedure Calls (RPC)",
+      "instructors": "Prof. Robert Morris, Prof. Frans Kaashoek"
+    },
+    {
+      "session": 2,
+      "topic": "Virtual Memory Architecture, Multi-Level Page Tables & TLB",
+      "instructors": "Prof. Frans Kaashoek"
+    },
+    {
+      "session": 3,
+      "topic": "Concurrency Control, Spinlocks, Mutexes & Deadlock Prevention",
+      "instructors": "Prof. Nickolai Zeldovich"
+    },
+    {
+      "session": 4,
+      "topic": "Crash Recovery, Write-Ahead Logging (WAL) & ARIES Protocol",
+      "instructors": "Prof. Robert Morris"
+    },
+    {
+      "session": 5,
+      "topic": "Distributed Consensus: The Paxos Protocol",
+      "instructors": "Prof. Robert Morris"
+    },
+    {
+      "session": 6,
+      "topic": "The Raft Consensus Protocol: Leader Election & Log Replication",
+      "instructors": "Prof. Frans Kaashoek"
+    },
+    {
+      "session": 7,
+      "topic": "Storage Engines: B+Trees vs Log-Structured Merge (LSM) Trees",
+      "instructors": "Prof. Sam Madden"
+    },
+    {
+      "session": 8,
+      "topic": "Cache Coherence (MESI/MOESI), Memory Barriers & Consistency",
+      "instructors": "Prof. Arvind"
+    },
+    {
+      "session": 9,
+      "topic": "Scalable Event-Driven Network I/O: Select, Poll, and Epoll",
+      "instructors": "Prof. Robert Morris"
+    },
+    {
+      "session": 10,
+      "topic": "Fault-Tolerance, Byzantine Failures & The CAP / PACELC Theorem",
+      "instructors": "Prof. Frans Kaashoek"
+    }
+  ]
+}

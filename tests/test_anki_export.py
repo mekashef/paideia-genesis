@@ -8,10 +8,18 @@ from src.anki.generator import AnkiManager
 class TestAnkiExport(unittest.TestCase):
     def setUp(self):
         self.test_dir = Path(tempfile.mkdtemp())
-        self.manager = AnkiManager(export_dir=self.test_dir)
+        self.test_wiki_dir = Path(tempfile.mkdtemp())
+        from src.wiki.schema import init_wiki_structure
+        from src.wiki.course_importer import CourseImporter
+        init_wiki_structure(self.test_wiki_dir)
+        importer = CourseImporter(wiki_dir=self.test_wiki_dir)
+        importer.import_mit_ocw_course()
+        self.manager = AnkiManager(export_dir=self.test_dir, wiki_dir=self.test_wiki_dir)
+        self.manager.recompile_from_wiki()
 
     def tearDown(self):
         shutil.rmtree(self.test_dir, ignore_errors=True)
+        shutil.rmtree(self.test_wiki_dir, ignore_errors=True)
 
     def test_staged_cards_initialization(self):
         cards = self.manager.get_staged_cards()

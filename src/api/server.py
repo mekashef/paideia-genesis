@@ -11,7 +11,8 @@ from pydantic import BaseModel
 
 from src.config import (
     WIKI_DIR, RAW_SOURCES_DIR, ANKI_EXPORT_DIR, LLM_PROVIDER,
-    STATIC_DIR, DEMO_DATA_DIR, ENABLE_JEV_SYSTEM_ONE, TYPESAFE_API_KEY
+    STATIC_DIR, DEMO_DATA_DIR, ENABLE_JEV_SYSTEM_ONE, TYPESAFE_API_KEY,
+    AUTO_SEED_DEMO_DATA
 )
 from src.wiki.schema import init_wiki_structure
 from src.wiki.indexer import WikiIndexer, parse_markdown_file
@@ -24,8 +25,8 @@ from src.anki.generator import AnkiManager
 from src.wiki.course_importer import CourseImporter
 
 app = FastAPI(
-    title="Paideia Genesis - Living Medical Teacher & LLM-Wiki",
-    description="Adaptive Medical Learning System combining Karpathy's LLM-Wiki, HippoRAG, and Socratic tutoring.",
+    title="Paideia Genesis - Living Education Assistant & LLM-Wiki",
+    description="Adaptive Learning System combining Karpathy's LLM-Wiki, HippoRAG, and Socratic tutoring for any topic.",
     version="0.2.0"
 )
 
@@ -41,7 +42,9 @@ knowledge_puller = KnowledgePuller()
 course_importer = CourseImporter()
 
 def ensure_wiki_bootstrapped():
-    """Auto-seed medical curricula if running on a fresh clone or empty database."""
+    """Auto-seed starter curricula only if explicitly configured via AUTO_SEED_DEMO_DATA."""
+    if not AUTO_SEED_DEMO_DATA:
+        return
     sessions_dir = WIKI_DIR / "course_sessions"
     if not any(sessions_dir.glob("*.md")):
         demo_lecture = DEMO_DATA_DIR / "Cardiology_Block_Lecture_4_Heart_Failure_and_Diuretics.md"
@@ -67,6 +70,14 @@ class AnswerSubmission(BaseModel):
     selected_option_id: str
     student_reasoning: Optional[str] = ""
 
+class GenerateVignetteRequest(BaseModel):
+    topic: Optional[str] = None
+    guidance: Optional[str] = None
+    domain: Optional[str] = None
+
+class ImportCourseManifestRequest(BaseModel):
+    manifest_path: Optional[str] = None
+
 class IngestTextRequest(BaseModel):
     filename: str
     content: str
@@ -83,6 +94,7 @@ class QuickCaptureRequest(BaseModel):
 
 class PullExternalRequest(BaseModel):
     query: str
+    domain: Optional[str] = None
 
 class ImportCourseRequest(BaseModel):
     url: Optional[str] = "https://ocw.mit.edu/courses/hst-121-gastroenterology-fall-2005/pages/lecture-notes/"
@@ -94,6 +106,9 @@ class CardReviewRequest(BaseModel):
 class GradeRecallRequest(BaseModel):
     card_id: str
     student_answer: str
+
+class ResetWikiRequest(BaseModel):
+    confirm: bool = False
 
 class CompileCardsRequest(BaseModel):
     atomic: bool = False
@@ -139,13 +154,38 @@ def get_wiki_tree(course: Optional[str] = None):
                 title_lower = parsed["title"].lower()
                 stem_lower = f.stem.lower()
 
-                is_hst121 = (
-                    "hst.121" in src_tag.lower()
+                course_tag = (parsed.get("course") or "").lower()
+                domain_tag = (parsed.get("domain") or "").lower()
+
+                is_eecs = (
+                    "6.033" in course_tag
+                    or "6.004" in course_tag
+                    or "6.033" in src_tag.lower()
+                    or "6.033" in raw_tags.lower()
+                    or "6.004" in src_tag.lower()
+                    or "distributed" in sys_tag.lower()
+                    or "computer science" in domain_tag
+                    or "computer science" in sys_tag.lower()
+                    or "computer science" in raw_tags.lower()
+                    or "distributed systems" in title_lower
+                    or "raft" in stem_lower
+                    or "paxos" in stem_lower
+                    or "lsm" in stem_lower
+                    or "mesi" in stem_lower
+                    or "epoll" in stem_lower
+                    or "wal" in stem_lower
+                    or "tlb" in stem_lower
+                    or "consensus" in stem_lower
+                )
+
+                is_hst121 = not is_eecs and (
+                    "hst" in course_tag
+                    or "hst.121" in src_tag.lower()
                     or "hst.121" in raw_tags.lower()
                     or "gastroenterology" in sys_tag.lower()
                     or "hepatology" in sys_tag.lower()
                     or "gi" in raw_tags.lower()
-                    or cat == "course_sessions"
+                    or (cat == "course_sessions" and not is_eecs)
                     or stem_lower == "spironolactone"
                 )
                 is_cardio = (
@@ -161,11 +201,22 @@ def get_wiki_tree(course: Optional[str] = None):
                     or stem_lower == "spironolactone"
                 )
 
-                item_course = "HST.121" if is_hst121 and not is_cardio else ("Cardiopulmonary" if is_cardio and not is_hst121 else ("Both" if is_hst121 and is_cardio else "Core"))
+                if is_eecs:
+                    item_course = "MIT 6.033"
+                elif is_hst121 and not is_cardio:
+                    item_course = "HST.121"
+                elif is_cardio and not is_hst121:
+                    item_course = "Cardiopulmonary"
+                elif is_hst121 and is_cardio:
+                    item_course = "Both"
+                else:
+                    item_course = "Core"
 
                 if course_filter in ["hst121", "hst-121", "gastroenterology"] and not is_hst121:
                     continue
                 if course_filter in ["cardio", "cardiopulmonary", "renal"] and not is_cardio:
+                    continue
+                if course_filter in ["eecs", "6.033", "6-033", "cs", "distributed"] and not is_eecs:
                     continue
 
                 items.append({
@@ -278,9 +329,44 @@ last_compiled: {today}
 
     return {"success": True, "slug": slug, "rel_path": f"concepts/{slug}.md"}
 
+@app.post("/api/wiki/reset")
+def reset_wiki(req: ResetWikiRequest):
+    if not req.confirm:
+        raise HTTPException(status_code=400, detail="Confirmation required to reset wiki.")
+
+    # 1. Clear wiki markdown files in each subfolder
+    for subdir in ["concepts", "course_sessions", "differentials", "entities", "exam_traps"]:
+        target = WIKI_DIR / subdir
+        if target.exists():
+            for f in target.glob("*.md"):
+                try:
+                    f.unlink()
+                except Exception:
+                    pass
+
+    # 2. Clear raw sources
+    for subdir in ["lectures", "exam_logs"]:
+        target = RAW_SOURCES_DIR / subdir
+        if target.exists():
+            for f in target.glob("*"):
+                try:
+                    f.unlink()
+                except Exception:
+                    pass
+
+    # 3. Clear staged anki cards
+    if anki_manager.cards_file.exists():
+        anki_manager.cards_file.write_text("[]", encoding="utf-8")
+
+    # 4. Reinitialize clean wiki schema and index
+    init_wiki_structure(WIKI_DIR)
+    indexer.reindex_all()
+
+    return {"success": True, "message": "Wiki cleared to fresh pristine state."}
+
 @app.post("/api/wiki/pull_external")
 def pull_external_knowledge(req: PullExternalRequest):
-    synthesized = knowledge_puller.pull_and_synthesize(req.query)
+    synthesized = knowledge_puller.pull_and_synthesize(req.query, domain=req.domain)
     result = knowledge_puller.integrate_into_wiki(synthesized)
     return {
         "success": True,
@@ -314,6 +400,49 @@ def import_course_url(req: ImportCourseRequest):
     result = course_importer.import_hst121_course(req.url)
     return result
 
+@app.post("/api/course/import_engineering")
+def import_engineering():
+    result = course_importer.import_engineering_course()
+    anki_manager.recompile_from_wiki()
+    return result
+
+@app.post("/api/course/import_manifest")
+def import_manifest(req: ImportCourseManifestRequest):
+    result = course_importer.import_curriculum_manifest(req.manifest_path)
+    anki_manager.recompile_from_wiki()
+    return result
+
+@app.get("/api/curriculums")
+def get_curriculums():
+    return {
+        "available_curricula": [
+            {
+                "id": "all",
+                "name": "All Curricula & Cross-Discipline Concepts",
+                "domain": "Universal",
+                "code": "All"
+            },
+            {
+                "id": "hst121",
+                "name": "MIT HST.121: Gastroenterology & Hepatology",
+                "domain": "Medicine",
+                "code": "HST.121"
+            },
+            {
+                "id": "cardio",
+                "name": "Cardiopulmonary & Renal Block",
+                "domain": "Medicine",
+                "code": "Cardiopulmonary"
+            },
+            {
+                "id": "eecs",
+                "name": "MIT 6.033: Distributed Systems & Networking",
+                "domain": "Computer Science & Engineering",
+                "code": "MIT 6.033"
+            }
+        ]
+    }
+
 @app.get("/api/curriculum")
 def get_curriculum():
     return student_profile.get_schedule()
@@ -323,8 +452,11 @@ def get_student_summary():
     return student_profile.get_profile_summary()
 
 @app.post("/api/tutor/generate_vignette")
-def generate_vignette():
-    return teacher.generate_adaptive_vignette()
+def generate_vignette(req: Optional[GenerateVignetteRequest] = None):
+    topic = req.topic if req else None
+    guidance = req.guidance if req else None
+    domain = req.domain if req else None
+    return teacher.generate_adaptive_vignette(topic=topic, guidance=guidance, domain=domain)
 
 @app.post("/api/tutor/evaluate")
 def evaluate_answer(sub: AnswerSubmission):

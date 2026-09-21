@@ -142,6 +142,14 @@ class TestJevSystemOne(unittest.TestCase):
     def test_api_grade_recall_endpoint(self):
         """POST /api/anki/cards/grade_recall auto-grades recall and updates SM-2 schedule."""
         cards = self.anki.get_staged_cards()
+        if not cards:
+            sample = self.anki.add_card({
+                "type": "cloze",
+                "text": "The landmark drug class to reduce mortality in HFrEF is {{c1::ACE Inhibitors}}.",
+                "pearl": "Noncaseating granulomas and transmural inflammation in Crohn's disease",
+                "tags": ["Cardiology"]
+            })
+            cards = [sample]
         self.assertGreater(len(cards), 0)
         card = cards[0]
         card_id = card["id"]

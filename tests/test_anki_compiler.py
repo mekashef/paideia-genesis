@@ -9,13 +9,21 @@ from src.anki.generator import AnkiManager
 class TestAnkiCompilerAndManager(unittest.TestCase):
     def setUp(self):
         self.test_dir = Path(tempfile.mkdtemp())
-        self.manager = AnkiManager(export_dir=self.test_dir, wiki_dir=WIKI_DIR)
+        self.test_wiki_dir = Path(tempfile.mkdtemp())
+        from src.wiki.schema import init_wiki_structure
+        from src.wiki.course_importer import CourseImporter
+        init_wiki_structure(self.test_wiki_dir)
+        importer = CourseImporter(wiki_dir=self.test_wiki_dir)
+        importer.import_mit_ocw_course()
+        self.manager = AnkiManager(export_dir=self.test_dir, wiki_dir=self.test_wiki_dir)
+        self.manager.recompile_from_wiki()
 
     def tearDown(self):
         shutil.rmtree(self.test_dir, ignore_errors=True)
+        shutil.rmtree(self.test_wiki_dir, ignore_errors=True)
 
     def test_compile_all_cards(self):
-        compiler = WikiFlashcardCompiler(WIKI_DIR)
+        compiler = WikiFlashcardCompiler(self.test_wiki_dir)
         cards = compiler.compile_all()
         # Ensure we compiled comprehensive cards spanning wiki
         self.assertGreaterEqual(len(cards), 80)
@@ -33,7 +41,7 @@ class TestAnkiCompilerAndManager(unittest.TestCase):
             self.assertIn("mastery", card)
 
     def test_differentials_and_traps_compiled(self):
-        compiler = WikiFlashcardCompiler(WIKI_DIR)
+        compiler = WikiFlashcardCompiler(self.test_wiki_dir)
         cards = compiler.compile_all()
         types = {c.get("type") for c in cards}
         self.assertIn("differential", types)

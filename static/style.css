@@ -1,0 +1,282 @@
+/* Custom CSS styles for Paideia Genesis Medical Dashboard */
+
+/* Markdown Content Styling */
+.markdown-body {
+    font-size: 0.925rem;
+    line-height: 1.7;
+}
+
+.markdown-body h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #f8fafc;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #334155;
+}
+
+.markdown-body h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-top: 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.markdown-body h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #cbd5e1;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.markdown-body p {
+    margin-bottom: 0.85rem;
+}
+
+.markdown-body ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin-bottom: 0.85rem;
+}
+
+.markdown-body ol {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+    margin-bottom: 0.85rem;
+}
+
+.markdown-body li {
+    margin-bottom: 0.35rem;
+}
+
+.markdown-body blockquote {
+    border-left: 4px solid #6366f1;
+    padding-left: 1rem;
+    color: #94a3b8;
+    background: rgba(30, 41, 59, 0.5);
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 1rem;
+}
+
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.25rem;
+    font-size: 0.825rem;
+}
+
+.markdown-body th, .markdown-body td {
+    border: 1px solid #334155;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.markdown-body th {
+    background-color: #1e293b;
+    color: #cbd5e1;
+    font-weight: 600;
+}
+
+.markdown-body tr:nth-child(even) {
+    background-color: rgba(30, 41, 59, 0.3);
+}
+
+/* Wikilinks in markdown */
+.wikilink {
+    color: #818cf8;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.wikilink:hover {
+    color: #a5b4fc;
+}
+
+/* Cloze deletion preview in Anki cards */
+.cloze-preview {
+    background-color: #1e3a8a;
+    color: #93c5fd;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #3b82f6;
+    cursor: pointer;
+}
+
+.cloze-preview:hover {
+    background-color: #2563eb;
+    color: #ffffff;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* KaTeX Formula Display Cards & Typography */
+.katex {
+    font-size: 1.05em;
+    color: #f1f5f9;
+}
+
+.katex-display {
+    margin: 1.25rem 0 !important;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 41, 59, 0.6) 100%);
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.katex-display > .katex {
+    white-space: normal;
+    text-align: center;
+}
+
+/* Callout Alerts (USMLE Style) */
+.callout-box {
+    margin: 1.25rem 0;
+    padding: 0.85rem 1.15rem;
+    border-radius: 0.5rem;
+    border-left: 4px solid;
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+.callout-box .callout-header {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.35rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.callout-note {
+    background: rgba(30, 58, 138, 0.25);
+    border-left-color: #3b82f6;
+    color: #dbeafe;
+}
+.callout-note .callout-header { color: #60a5fa; }
+
+.callout-tip {
+    background: rgba(6, 78, 59, 0.25);
+    border-left-color: #10b981;
+    color: #d1fae5;
+}
+.callout-tip .callout-header { color: #34d399; }
+
+.callout-warning {
+    background: rgba(120, 53, 15, 0.25);
+    border-left-color: #f59e0b;
+    color: #fef3c7;
+}
+.callout-warning .callout-header { color: #fbbf24; }
+
+.callout-caution {
+    background: rgba(136, 19, 55, 0.25);
+    border-left-color: #f43f5e;
+    color: #ffe4e6;
+}
+.callout-caution .callout-header { color: #fb7185; }
+
+/* Tree Navigation & Accordions */
+.tree-section button:focus {
+    outline: none;
+}
+.tree-item-active {
+    background-color: rgba(99, 102, 241, 0.2) !important;
+    border-color: rgba(99, 102, 241, 0.5) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+.system-pill {
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    white-space: nowrap;
+}
+.system-pill-gi { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+.system-pill-cardio { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+.system-pill-renal { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
+.system-pill-pharm { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+.system-pill-micro { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.3); }
+.system-pill-core { background: rgba(100, 116, 139, 0.2); color: #cbd5e1; border: 1px solid rgba(100, 116, 139, 0.3); }
+
+/* Flashcard Mastery & Study Player Styles */
+.cloze-preview {
+    font-weight: 700;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.15);
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.cloze-hidden {
+    font-weight: 700;
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.18);
+    padding: 2px 10px;
+    border-radius: 4px;
+    border: 1px dashed rgba(245, 158, 11, 0.5);
+    letter-spacing: 0.1em;
+}
+
+.mastery-badge-mastered {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.mastery-badge-learning {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.mastery-badge-struggling {
+    background: rgba(244, 63, 94, 0.2);
+    color: #fb7185;
+    border: 1px solid rgba(244, 63, 94, 0.4);
+}
+
+.mastery-badge-unreviewed {
+    background: rgba(100, 116, 139, 0.2);
+    color: #94a3b8;
+    border: 1px solid rgba(100, 116, 139, 0.4);
+}
+
+.study-card-box {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.study-card-box:hover {
+    box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.2);
+}
+

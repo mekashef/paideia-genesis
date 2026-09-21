@@ -1,0 +1,96 @@
+name: Release Multi-Platform Binaries
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.os == 'windows-latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux-x86_64
+            binary_name: paideia-genesis
+            archive_name: paideia-genesis-linux-x86_64.tar.gz
+          - os: macos-14
+            platform: macos-arm64
+            binary_name: paideia-genesis
+            archive_name: paideia-genesis-macos-arm64.tar.gz
+          - os: windows-latest
+            platform: windows-x64
+            binary_name: paideia-genesis.exe
+            archive_name: paideia-genesis-windows-x64.zip
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Dependencies & PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+
+      - name: Build Standalone Binary
+        run: |
+          pyinstaller --clean paideia-genesis.spec
+
+      - name: Package Binary (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          tar -czvf ${{ matrix.archive_name }} -C dist ${{ matrix.binary_name }}
+
+      - name: Package Binary (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path dist\${{ matrix.binary_name }} -DestinationPath ${{ matrix.archive_name }}
+
+      - name: Upload Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}-binary
+          path: ${{ matrix.archive_name }}
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download All Platform Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: List Release Assets
+        run: |
+          ls -la release-assets/
+
+      - name: Create or Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          name: "Paideia Genesis ${{ github.ref_name }} — Universal Living Education Assistant & Compounding LLM-Wiki"
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          body_path: RELEASE_NOTES.md

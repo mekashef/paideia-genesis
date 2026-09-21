@@ -1,0 +1,28 @@
+{
+  "current_block": "MS2 Cardiopulmonary & Renal Medicine",
+  "target_exam": "Cardiovascular Block Final (USMLE Step 1 Aligned)",
+  "exam_date": "2026-09-26",
+  "exam_weight": "35% of Preclinical Grade",
+  "topics": [
+    {
+      "name": "Acute Decompensated Heart Failure & Inotropes",
+      "priority": "CRITICAL",
+      "usmle_yield": "5/5"
+    },
+    {
+      "name": "Loop & Thiazide Diuretics Electrolyte Effects",
+      "priority": "HIGH",
+      "usmle_yield": "5/5"
+    },
+    {
+      "name": "Guideline-Directed Medical Therapy (GDMT) 4 Pillars",
+      "priority": "HIGH",
+      "usmle_yield": "4/5"
+    },
+    {
+      "name": "Antiarrhythmics Classes I-IV (Vaughan-Williams)",
+      "priority": "MEDIUM",
+      "usmle_yield": "4/5"
+    }
+  ]
+}

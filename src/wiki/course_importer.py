@@ -36,6 +36,15 @@ from src.wiki.eecs_curriculum import (
     EECS_FLASHCARDS,
     EECS_CURRICULUM_TOPICS
 )
+from src.wiki.vision_curriculum import (
+    VISION_SESSIONS,
+    VISION_CONCEPTS,
+    VISION_ENTITIES,
+    VISION_DIFFERENTIALS,
+    VISION_TRAPS,
+    VISION_FLASHCARDS,
+    VISION_CURRICULUM_TOPICS
+)
 
 DEFAULT_MIT_OCW_HST121_SESSIONS = [
     {"session": 1, "topic": "Overview of Embryology & Physiology", "instructors": "Dr. Jonathan N. Glickman"},
@@ -522,6 +531,237 @@ last_compiled: {today}
 
     def _stage_eecs_flashcards(self):
         for card in EECS_FLASHCARDS:
+            self.anki_manager.add_card(card)
+
+    # -------------------------------------------------------------------------
+    # 3D Vision, DINOv2 & VIO Curriculum Helpers
+    # -------------------------------------------------------------------------
+
+    def import_vision_curriculum(self) -> Dict[str, Any]:
+        """Full automated ingestion and compilation of 3D Vision, DINOv2 Latent Representations, and VIO."""
+        meta = {
+            "course_code": "3D-VISION",
+            "title": "3D Foundation Models, DINOv2 Latent Representations & Visual-Inertial Navigation",
+            "institution": "Meta Reality Labs, CMU & MIT SPARK Lab",
+            "domain": "Computer Science & Robotics",
+            "sessions": [{"session": s["session_num"], "topic": s["title"], "instructors": s["instructors"]} for s in VISION_SESSIONS]
+        }
+
+        raw_manifest_path = RAW_SOURCES_DIR / "syllabus" / "3D_Vision_DINOv2_VIO_Curriculum.json"
+        raw_manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        raw_manifest_path.write_text(json.dumps(meta, indent=2), encoding="utf-8")
+
+        compiled_sessions = self._compile_vision_sessions()
+        compiled_concepts = self._compile_vision_concepts()
+        compiled_entities = self._compile_vision_entities()
+        compiled_diffs = self._compile_vision_differentials()
+        compiled_traps = self._compile_vision_traps()
+
+        self._refresh_master_index()
+
+        today = datetime.date.today().isoformat()
+        with open(self.wiki_dir / "log.md", "a", encoding="utf-8") as f:
+            f.write(
+                f"\n## [{today}] course_import | Imported `{meta['course_code']}: {meta['title']}` "
+                f"({len(compiled_sessions)} lectures, {len(compiled_concepts)} concepts, {len(compiled_entities)} entities, {len(compiled_diffs)} differentials)\n"
+            )
+
+        self._update_curriculum_for_vision(meta)
+        self._stage_vision_flashcards()
+
+        return {
+            "success": True,
+            "course": meta["title"],
+            "domain": meta.get("domain", "Computer Science & Robotics"),
+            "sessions_imported": len(meta["sessions"]),
+            "session_pages_compiled": len(compiled_sessions),
+            "concepts_compiled": len(compiled_concepts),
+            "entities_compiled": len(compiled_entities),
+            "differentials_compiled": len(compiled_diffs),
+            "traps_compiled": len(compiled_traps),
+            "anki_cards_staged": len(VISION_FLASHCARDS)
+        }
+
+    def _compile_vision_sessions(self) -> List[str]:
+        created = []
+        today = datetime.date.today().isoformat()
+        sessions_dir = self.wiki_dir / "course_sessions"
+        sessions_dir.mkdir(parents=True, exist_ok=True)
+        for s in VISION_SESSIONS:
+            page_file = sessions_dir / f"{s['slug']}.md"
+            content = f"""---
+title: {s['title']}
+session: {s['session_num']}
+instructors: {s['instructors']}
+domain: Computer Science
+field: 3D Vision & Robotics
+course: 3D-Vision
+source: 3D Foundation Models & Visual Navigation
+last_compiled: {today}
+---
+
+# {s['title']}
+
+**Instructors / Research Leads**: {s['instructors']}  
+**Track**: 3D Foundation Models, Latent Space Mapping & Visual-Inertial Navigation
+
+> **Lecture / Module Summary**: {s['summary']}
+
+{s['content']}
+
+---
+*Curriculum research synthesis for Paideia Genesis*
+"""
+            page_file.write_text(content, encoding="utf-8")
+            self.indexer.index_file(page_file)
+            created.append(s["slug"])
+        return created
+
+    def _compile_vision_concepts(self) -> List[str]:
+        created = []
+        today = datetime.date.today().isoformat()
+        concepts_dir = self.wiki_dir / "concepts"
+        concepts_dir.mkdir(parents=True, exist_ok=True)
+        for c in VISION_CONCEPTS:
+            page_file = concepts_dir / f"{c['slug']}.md"
+            tags_str = ", ".join(c["tags"])
+            content = f"""---
+title: {c['title']}
+domain: {c['domain']}
+system: {c['field']}
+course: {c['course']}
+tags: [{tags_str}]
+source: 3D Vision & Latent Representations
+last_compiled: {today}
+---
+
+# {c['title']}
+
+> **Core Summary**: {c['summary']}
+
+{c['content']}
+
+---
+*Synthesized for Active Research & Engineering*
+"""
+            page_file.write_text(content, encoding="utf-8")
+            self.indexer.index_file(page_file)
+            created.append(c["slug"])
+        return created
+
+    def _compile_vision_entities(self) -> List[str]:
+        created = []
+        today = datetime.date.today().isoformat()
+        entities_dir = self.wiki_dir / "entities"
+        entities_dir.mkdir(parents=True, exist_ok=True)
+        for e in VISION_ENTITIES:
+            page_file = entities_dir / f"{e['slug']}.md"
+            content = f"""---
+title: {e['title']}
+domain: {e['domain']}
+category: {e['category']}
+course: {e['course']}
+source: 3D Vision & Robotics
+last_compiled: {today}
+---
+
+# {e['title']}
+
+> **Quick Summary**: {e['summary']}
+
+{e['content']}
+
+---
+*Entity registered in Paideia Genesis*
+"""
+            page_file.write_text(content, encoding="utf-8")
+            self.indexer.index_file(page_file)
+            created.append(e["slug"])
+        return created
+
+    def _compile_vision_differentials(self) -> List[str]:
+        created = []
+        today = datetime.date.today().isoformat()
+        diff_dir = self.wiki_dir / "differentials"
+        diff_dir.mkdir(parents=True, exist_ok=True)
+        for d in VISION_DIFFERENTIALS:
+            page_file = diff_dir / f"{d['slug']}.md"
+            content = f"""---
+title: {d['title']}
+domain: {d['domain']}
+field: 3D Vision & State Estimation
+course: 3D-Vision
+source: Comparative Vision & Robotics Syntheses
+last_compiled: {today}
+---
+
+{d['content']}
+
+---
+*Comparative Trade-Off Matrix in Paideia Genesis*
+"""
+            page_file.write_text(content, encoding="utf-8")
+            self.indexer.index_file(page_file)
+            created.append(d["slug"])
+        return created
+
+    def _compile_vision_traps(self) -> List[str]:
+        created = []
+        today = datetime.date.today().isoformat()
+        traps_dir = self.wiki_dir / "exam_traps"
+        traps_dir.mkdir(parents=True, exist_ok=True)
+        for t in VISION_TRAPS:
+            page_file = traps_dir / f"{t['slug']}.md"
+            content = f"""---
+title: {t['title']}
+domain: {t['domain']}
+system: {t['system']}
+course: {t['course']}
+source: 3D Vision & Robotics Pitfalls
+last_compiled: {today}
+---
+
+# {t['title']}
+
+> **Summary**: {t['summary']}
+
+{t['content']}
+
+---
+*Critical Anti-Pattern registered in Paideia Genesis*
+"""
+            page_file.write_text(content, encoding="utf-8")
+            self.indexer.index_file(page_file)
+            created.append(t["slug"])
+        return created
+
+    def _update_curriculum_for_vision(self, meta: Dict[str, Any]):
+        mastery = self.student_profile.get_mastery()
+        if "3D Computer Vision" not in mastery:
+            mastery["3D Computer Vision"] = 65.0
+        if "Representation Learning" not in mastery:
+            mastery["Representation Learning"] = 60.0
+        if "Visual-Inertial Navigation" not in mastery:
+            mastery["Visual-Inertial Navigation"] = 55.0
+
+        self.student_profile.knowledge_file.write_text(json.dumps(mastery, indent=2), encoding="utf-8")
+
+        schedule = {
+            "student_name": "Scoozi Researcher",
+            "current_block": meta["title"],
+            "target_exam": "3D Vision, DINOv2 & Visual Navigation Research Milestone",
+            "exam_date": (datetime.date.today() + datetime.timedelta(days=21)).isoformat(),
+            "days_remaining": 21,
+            "daily_target_cards": 20,
+            "total_reviews": 0,
+            "sound_streak": 0,
+            "misconception_count": 0,
+            "topics": VISION_CURRICULUM_TOPICS
+        }
+        self.student_profile.update_schedule(schedule)
+
+    def _stage_vision_flashcards(self):
+        for card in VISION_FLASHCARDS:
             self.anki_manager.add_card(card)
 
     # -------------------------------------------------------------------------

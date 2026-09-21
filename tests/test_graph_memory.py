@@ -103,6 +103,24 @@ class TestGraphMemory(unittest.TestCase):
         node_ids = {n["id"] for n in bg_all["nodes"]}
         self.assertIn("lec-01", node_ids)
 
+    def test_entity_metadata_takes_priority_over_name_guesses(self):
+        entities = self.test_dir / "entities"
+        entities.mkdir()
+        (entities / "flow-model.md").write_text(
+            "---\ntitle: Flow Model\ndomain: Physics\ncourse: PHY 101\n"
+            "entity_type: protocol\n---\n# Flow Model\n",
+            encoding="utf-8",
+        )
+        (entities / "uav-flow.md").write_text(
+            "---\ntitle: UAV Flow\ndomain: Robotics\n---\n# UAV Flow\n",
+            encoding="utf-8",
+        )
+        _, meta = self.memory.build_graph()
+        self.assertEqual(meta["flow-model"]["entity_type"], "protocol")
+        self.assertEqual(meta["flow-model"]["course"], "PHY 101")
+        self.assertEqual(meta["uav-flow"]["entity_type"], "algorithm")
+        models = self.memory.get_brain_graph(layer="models")
+        self.assertNotIn("flow-model", {node["id"] for node in models["nodes"]})
+
 if __name__ == "__main__":
     unittest.main()
-

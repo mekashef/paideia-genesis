@@ -107,18 +107,23 @@ class AssociativeGraphMemory:
                 course = "HST.121" if is_hst and not is_cardio else ("Cardiopulmonary" if is_cardio and not is_hst else ("Both" if is_hst and is_cardio else "Core"))
 
             # Determine fine-grained entity type
-            raw_cat = (fm.get("category") or "").lower()
-            entity_type = raw_cat or category
+            raw_cat = (fm.get("category") or "").strip().lower()
+            explicit_type = (fm.get("entity_type") or "").strip().lower()
+            entity_type = explicit_type or raw_cat or category
             if category == "entities":
-                if any(k in raw_cat or k in stem_lower for k in ["foundation model", "model", "transformer", "backbone", "nerf", "splat", "dust3r", "mapanything", "droid", "uav-flow", "eventsplat", "fpv-nerf"]):
+                if explicit_type:
+                    entity_type = explicit_type
+                elif raw_cat:
+                    entity_type = raw_cat
+                elif any(k in stem_lower for k in ["foundation-model", "model", "transformer", "backbone", "nerf", "splat", "dust3r", "mapanything", "droid"]):
                     entity_type = "model-architecture"
-                elif any(k in raw_cat or k in stem_lower for k in ["algorithm", "estimator", "vio", "slam", "filter", "consensus", "msckf", "vins", "raft", "paxos", "normal-flow"]):
+                elif any(k in stem_lower for k in ["algorithm", "estimator", "vio", "slam", "filter", "consensus", "msckf", "vins", "raft", "paxos", "normal-flow", "uav-flow"]):
                     entity_type = "algorithm"
-                elif any(k in raw_cat or k in stem_lower for k in ["framework", "library", "gtsam", "conceptfusion", "etcd", "rocksdb"]):
+                elif any(k in stem_lower for k in ["framework", "library", "gtsam", "conceptfusion", "etcd", "rocksdb"]):
                     entity_type = "framework"
-                elif any(k in raw_cat or k in stem_lower for k in ["protocol", "standard", "grpc", "protobuf", "mesi"]):
+                elif any(k in stem_lower for k in ["protocol", "standard", "grpc", "protobuf", "mesi"]):
                     entity_type = "protocol"
-                elif any(k in raw_cat or k in stem_lower for k in ["kernel", "hardware", "epoll", "tlb", "wal"]):
+                elif any(k in stem_lower for k in ["kernel", "hardware", "epoll", "tlb", "wal"]):
                     entity_type = "hardware-kernel"
                 elif domain == "Medicine":
                     if any(k in stem_lower for k in ["omeprazole", "spironolactone", "octreotide", "lactulose", "rifaximin", "infliximab", "azathioprine", "mesalamine", "d-penicillamine", "bismuth", "sofosbuvir", "cholestyramine", "furosemide", "carvedilol"]):

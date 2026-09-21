@@ -27,7 +27,7 @@ from src.wiki.course_importer import CourseImporter
 app = FastAPI(
     title="Paideia Genesis - Living Education Assistant & LLM-Wiki",
     description="Adaptive Learning System combining Karpathy's LLM-Wiki, HippoRAG, and Socratic tutoring for any topic.",
-    version="0.2.0"
+    version="1.0.0"
 )
 
 # Initialize engines

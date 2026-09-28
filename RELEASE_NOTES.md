@@ -77,58 +77,65 @@ Once running, open **`http://localhost:8000`** in your browser.
 
 ---
 
+### 🏛 Paideia Genesis v0.3.1 Release 🧠
+**Clearer Multi-Domain Wiki Navigation & Reliable Math Rendering**  
+*Knowledge Graph &bull; Wiki Explorer &bull; KaTeX &bull; Active Recall*
 
-# 🏛 Paideia Genesis v1.0.0: Going Public! 🚀
-**An Autonomous Living Education Assistant & Compounding Knowledge Engine**  
-*Deep Learning / ML Research &bull; Computer Systems & Engineering &bull; Mathematics &bull; Medicine &bull; Universal Sciences*
+Paideia Genesis v0.3.1 makes the universal knowledge base easier to browse across disciplines. Wiki pages now carry their own domain and entity metadata through the API and graph, while the interface provides focused category filters and clearer labels. This release also fixes display and inline math rendering in wiki notes and keeps flashcards aligned with the current wiki.
 
-We are thrilled to officially announce the **v1.0.0 public open-source release** of Paideia Genesis!
-
-Paideia Genesis transforms static study notes, lecture decks, and research preprints into an evolving, compounding cognitive learning engine. It combines an interlinked Karpathy-style knowledge base, Kahneman dual-process AI architecture, HippoRAG associative graph memory, and objective AI-graded SuperMemo-2 (SM-2) spaced repetition into a closed, self-reinforcing learning loop.
-
----
-
-## 🌟 What's New & Included in v1.0.0
-
-### 1. 🗂 Compounding Universal LLM-Wiki
-- **Karpathy 5-Layer Knowledge Base**: Automatically structures ingested notes and documents into `course_sessions/`, `concepts/`, `entities/`, `differentials/`, and `exam_traps/`.
-- **Clean Workspace by Default**: Starts with a pristine personal workspace (`AUTO_SEED_DEMO_DATA=false`) ready for your own notes and research, with optional one-click starter packs.
-- **SQLite FTS5 Full-Text Search**: Instant lexical BM25 indexing across all compiled Markdown documents with real-time audit logging (`log.md`).
-
-### 2. ⚡ Kahneman Dual-Process Cognitive Architecture
-- **System 1 (Ultra-Fast Reflex)**: Sub-100ms machine-native decision primitives (`Choice`, `Score`, `Noul`) powered by TypeSafe AI Jev or local deterministic fallback.
-- **System 2 (Analytical Synthesis)**: Deep multi-domain Socratic dialogue and dilemma generation powered by Google Gemini or local LLMs (Ollama/vLLM).
-- **Zero Financial Risk**: Defaults to 100% offline deterministic execution. It is impossible to incur unexpected API bills without explicitly configuring paid keys.
-
-### 3. 🏛 User-Guided Socratic Tutor
-- **Custom Topic & Pedagogical Steering**: Direct problem generation with custom topic focus, pedagogical constraints, and domain hints.
-- **Cognitive Misconception Triage**: Diagnoses root errors (e.g., `CRITICAL_PITFALL`, `INVARIANT_VIOLATION`, `CLINICAL_CONTRAINDICATION`) rather than just checking binary correctness.
-- **Automated Remediation**: Instantly synthesizes and stages targeted remedial flashcards addressing diagnosed conceptual gaps.
-
-### 4. 🧠 Biomimetic Brain Graph (HippoRAG)
-- **Force-Directed Semantic Clustering**: Visualizes interdisciplinary knowledge networks with multi-domain clustering and cross-domain conceptual bridges.
-- **Interactive Spreading Activation**: Click any node to illuminate 1-hop direct pathways in white and 2-hop associative cascades in soft blue.
-
-### 5. 🎴 Objective AI-Graded Spaced Repetition (SM-2)
-- **Typed Free-Text Active Recall**: Eliminates self-assessment bias ("illusion of competence"). Students type their causal reasoning from memory.
-- **Sub-200ms Rubric Evaluation**: Grades explanations against gold-standard concepts and automatically updates SuperMemo-2 intervals and ease factors.
-- **Anki Integration**: Export course-filtered `.apkg` packages or sync directly to local Anki Desktop via AnkiConnect (`localhost:8765`).
-
-### 6. 🛡 Open-Source Governance & Community Health
-- Complete open-source readiness with MIT License, `.env.example`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, and comprehensive `THIRD_PARTY_NOTICES.md`.
-- 100% offline-verifiable test suite (84 automated tests passing in ~45s).
+The release workflow packages standalone binaries for **Linux (x86_64)**, **macOS (Apple Silicon arm64)**, and **Windows (x64)**.
 
 ---
 
-## 📦 Standalone Binary Downloads
+## 🚀 Key Highlights & Improvements in v0.3.1
 
-Standalone executables packaged with PyInstaller are available in the release assets below:
+### 1. 🗂 More Precise Wiki Navigation
+- **Metadata-Aware Pages**: The wiki index and tree API expose each page's `domain`, `course`, `category`, and `entity_type` when provided in frontmatter.
+- **Focused Filters**: Browse models, algorithms, concepts, differentials, and traps from the wiki sidebar. Entity subfilters make large collections easier to scan.
+- **Clearer Labels**: Wiki entries show type and subject badges that distinguish models, algorithms, tools, protocols, and medical topics.
 
-- **Linux (x86_64)**: `paideia-genesis-linux-x86_64.tar.gz`
-- **macOS (Apple Silicon arm64)**: `paideia-genesis-macos-arm64.tar.gz`
-- **Windows (x64)**: `paideia-genesis-windows-x64.zip`
+### 2. 🧠 A More Useful Knowledge Graph
+- **Explicit Entity Types**: Graph nodes respect `entity_type` frontmatter, with broader fallback classification for models, algorithms, frameworks, protocols, and other entities.
+- **Focused Views**: Filter graph nodes by models, algorithms, concepts, traps, or lectures. Updated colors and the legend reflect these types.
+- **Course Context**: Graph filtering recognizes 3D vision and robotics material when those subjects are present in an imported wiki.
+
+### 3. ∑ Improved Mathematical Notes
+- **Reliable KaTeX Blocks**: Display equations survive Markdown parsing and render as standalone math blocks.
+- **Cleaner LaTeX Input**: The renderer normalizes doubled backslashes in math commands and improves the fallback display when KaTeX is unavailable.
+- **General-Purpose Callouts**: Default note and warning labels now fit technical subjects beyond medicine.
+
+### 4. 🃏 Flashcards That Follow Your Wiki
+- **Stale Card Cleanup**: Recompiling cards drops cards tied to deleted wiki pages and removes legacy medical cards when that curriculum is absent.
+- **Personal Cards Preserved**: User-created cards without a removed source remain in the deck.
 
 ---
 
-## 🧪 Verification
-- **84 automated tests passed** across all cognitive engines, compilers, and APIs.
+## 📦 Binary Downloads & Quickstart
+
+Download the archive for your platform from the release assets below when the build completes:
+
+##### Linux (x86_64)
+```bash
+tar -xvf paideia-genesis-linux-x86_64.tar.gz
+chmod +x paideia-genesis
+./paideia-genesis
+```
+
+##### macOS (Apple Silicon arm64)
+```bash
+tar -xvf paideia-genesis-macos-arm64.tar.gz
+chmod +x paideia-genesis
+./paideia-genesis
+```
+
+##### Windows (x64)
+- Extract `paideia-genesis-windows-x64.zip`.
+- Double-click `paideia-genesis.exe`.
+
+Once running, open **`http://localhost:8000`** in your browser.
+
+---
+
+## 🧪 Verification & Automated Tests
+- **14 targeted tests passed** for graph memory, wiki indexing, and equation formatting.
+

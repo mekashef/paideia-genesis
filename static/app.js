@@ -143,16 +143,6 @@ function setupEventListeners() {
         });
     }
 
-    const btnSelectVision = document.getElementById("btnSelectVisionPreset");
-    if (btnSelectVision) {
-        btnSelectVision.addEventListener("click", () => {
-            const input = document.getElementById("importCourseUrlInput");
-            if (input) input.value = "demo_data/Deep_Learning_and_Computer_Vision_Foundations.json";
-            const title = document.getElementById("importPresetTitle");
-            if (title) title.textContent = "Selected: Deep Learning & Computer Vision Foundations";
-        });
-    }
-
     const btnSelectEecs = document.getElementById("btnSelectEecsPreset");
     if (btnSelectEecs) {
         btnSelectEecs.addEventListener("click", () => {

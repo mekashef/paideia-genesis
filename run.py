@@ -29,7 +29,7 @@ def main():
 
     if clean_requested:
         print("      [CLEAN] Purging existing wiki content for a clean research workspace...")
-        for subdir in ["concepts", "course_sessions", "differentials", "entities", "exam_traps"]:
+        for subdir in ["concepts", "course_sessions", "differentials", "entities", "exam_traps", "papers", "conversations"]:
             target = WIKI_DIR / subdir
             if target.exists():
                 for f in target.glob("*.md"):
@@ -37,7 +37,7 @@ def main():
                         f.unlink()
                     except Exception:
                         pass
-        for subdir in ["lectures", "exam_logs"]:
+        for subdir in ["lectures", "exam_logs", "papers", "conversations"]:
             target = RAW_SOURCES_DIR / subdir
             if target.exists():
                 for f in target.glob("*"):
@@ -62,15 +62,14 @@ def main():
     has_content = any(concepts_dir.glob("*.md"))
 
     if seed_requested and not has_content:
-        print("[2/3] Seeding Deep Learning & Computer Vision Foundations & Papers...")
+        print("[2/3] Seeding demo starter curriculum...")
         from src.wiki.course_importer import CourseImporter
         from src.anki.generator import AnkiManager
 
         importer = CourseImporter()
-        importer.import_vision_curriculum()
-        print("      ✓ Deep Learning, Vision Transformers & 3D Vision papers compiled.")
         importer.import_engineering_course()
         print("      ✓ MIT 6.033 Distributed Systems & Networking curriculum compiled.")
+
 
         anki_mgr = AnkiManager()
         anki_mgr.recompile_from_wiki()

@@ -52,7 +52,7 @@ def ensure_wiki_bootstrapped():
     sessions_dir = WIKI_DIR / "course_sessions"
     if not any(sessions_dir.glob("*.md")):
         try:
-            course_importer.import_vision_curriculum()
+            course_importer.import_engineering_course()
             anki_manager.recompile_from_wiki()
         except Exception:
             pass
@@ -447,7 +447,7 @@ def ingest_text_source(req: IngestTextRequest):
 
 @app.post("/api/wiki/ingest_demo")
 def ingest_demo_lecture():
-    result = course_importer.import_vision_curriculum()
+    result = course_importer.import_engineering_course()
     anki_manager.recompile_from_wiki()
     return result
 
@@ -577,12 +577,6 @@ async def upload_and_digest_file(
     result["extracted_text_preview"] = extracted_text[:300]
     return result
 
-@app.post("/api/course/import_vision")
-def import_vision():
-    result = course_importer.import_vision_curriculum()
-    anki_manager.recompile_from_wiki()
-    return result
-
 @app.post("/api/course/import_hst121")
 def import_hst121():
     result = course_importer.import_hst121_course()
@@ -611,15 +605,9 @@ def get_curriculums():
         "available_curricula": [
             {
                 "id": "all",
-                "name": "All Research & Foundations",
+                "name": "All Research & Disciplines",
                 "domain": "Universal",
                 "code": "All"
-            },
-            {
-                "id": "vision",
-                "name": "Deep Learning & Computer Vision Foundations",
-                "domain": "Computer Science & AI",
-                "code": "DL-CV"
             },
             {
                 "id": "eecs",

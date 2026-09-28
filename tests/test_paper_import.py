@@ -1,4 +1,4 @@
-"""Unit tests for Deep Learning & Computer Vision curriculum import and Paper Ingestion."""
+"""Unit tests for Research Paper Ingestion and Synthesis."""
 import unittest
 import tempfile
 import shutil
@@ -7,11 +7,9 @@ from fastapi.testclient import TestClient
 
 from src.wiki.schema import init_wiki_structure
 from src.wiki.course_importer import CourseImporter
-from src.wiki.indexer import WikiIndexer
-from src.anki.generator import AnkiManager
 from src.api.server import app
 
-class TestVisionAndPaperImport(unittest.TestCase):
+class TestPaperImport(unittest.TestCase):
     def setUp(self):
         self.temp_dir = Path(tempfile.mkdtemp())
         self.wiki_dir = self.temp_dir / "wiki"
@@ -22,35 +20,6 @@ class TestVisionAndPaperImport(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.temp_dir, ignore_errors=True)
-
-    def test_vision_curriculum_compilation(self):
-        """Verifies import_vision_curriculum compiles sessions, concepts, entities, differentials, and traps."""
-        res = self.importer.import_vision_curriculum()
-        self.assertTrue(res["success"])
-        self.assertEqual(res["course"], "Deep Learning & Computer Vision Foundations")
-        self.assertGreaterEqual(res["sessions_imported"], 7)
-        self.assertGreaterEqual(res["concepts_compiled"], 6)
-        self.assertGreaterEqual(res["entities_compiled"], 8)
-        self.assertGreaterEqual(res["differentials_compiled"], 3)
-        self.assertGreaterEqual(res["traps_compiled"], 2)
-
-        # Check key concept files
-        vit_file = self.wiki_dir / "concepts" / "vision-transformers-vit.md"
-        gs_file = self.wiki_dir / "concepts" / "3d-gaussian-splatting.md"
-        nerf_file = self.wiki_dir / "concepts" / "neural-radiance-fields.md"
-        dino_file = self.wiki_dir / "concepts" / "self-supervised-vision-representations.md"
-        diff_file = self.wiki_dir / "differentials" / "3dgs-vs-nerf.md"
-
-        self.assertTrue(vit_file.exists())
-        self.assertTrue(gs_file.exists())
-        self.assertTrue(nerf_file.exists())
-        self.assertTrue(dino_file.exists())
-        self.assertTrue(diff_file.exists())
-
-        # Check frontmatter and domain
-        vit_text = vit_file.read_text(encoding="utf-8")
-        self.assertIn("domain: Computer Science", vit_text)
-        self.assertIn("course: 3D-Vision", vit_text)
 
     def test_paper_import_custom_paper(self):
         """Verifies import_paper compiles a new paper, creates flashcard, and writes concept file."""

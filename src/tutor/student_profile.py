@@ -22,15 +22,15 @@ DEFAULT_SCHEDULE = {
 }
 
 DEFAULT_MASTERY = {
-    "Deep Learning": 72.0,
-    "Machine Learning": 75.0,
-    "3D Computer Vision": 68.0,
-    "Representation Learning": 70.0,
-    "Visual-Inertial Navigation": 62.0,
-    "State Estimation": 60.0,
-    "Distributed Systems": 65.0,
-    "Model Optimization": 65.0,
-    "Cardiovascular": 68.0
+    "Deep Learning & Optimization": 72.0,
+    "Vision Transformers & Attention": 75.0,
+    "3D Computer Vision & NeRF": 68.0,
+    "3D Gaussian Splatting": 70.0,
+    "Self-Supervised & Foundation Models (DINOv2)": 74.0,
+    "Generative Diffusion Models": 66.0,
+    "Visual SLAM & Spatial AI": 62.0,
+    "Distributed Training & Model Parallelism": 65.0,
+    "Cardiovascular": 65.0
 }
 
 class StudentProfile:

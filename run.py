@@ -62,29 +62,19 @@ def main():
     has_content = any(concepts_dir.glob("*.md"))
 
     if seed_requested and not has_content:
-        print("[2/3] Seeding starter curricula (MIT 6.033 Distributed Systems & HST.121)...")
-        demo_lecture = DEMO_DATA_DIR / "Cardiology_Block_Lecture_4_Heart_Failure_and_Diuretics.md"
-        if demo_lecture.exists():
-            compiler = WikiCompiler()
-            compiler.ingest_source(
-                filename="Cardiology_Lecture_4_ADHF_and_Diuretics.md",
-                content=demo_lecture.read_text(encoding="utf-8"),
-                source_type="lecture"
-            )
-            print("      ✓ Cardiology Block compiled into concepts, entities, and differentials.")
-
+        print("[2/3] Seeding Deep Learning & Computer Vision Foundations & Papers...")
         from src.wiki.course_importer import CourseImporter
         from src.anki.generator import AnkiManager
 
         importer = CourseImporter()
-        importer.import_mit_ocw_course()
-        print("      ✓ MIT HST.121 Gastroenterology & Hepatology curriculum compiled.")
+        importer.import_vision_curriculum()
+        print("      ✓ Deep Learning, Vision Transformers & 3D Vision papers compiled.")
         importer.import_engineering_course()
         print("      ✓ MIT 6.033 Distributed Systems & Networking curriculum compiled.")
 
         anki_mgr = AnkiManager()
         anki_mgr.recompile_from_wiki()
-        print("      ✓ Spaced-repetition universal master deck synthesized.")
+        print("      ✓ Spaced-repetition research deck synthesized.")
     else:
         if has_content:
             print("[2/3] Existing Wiki found. Reindexing with SQLite FTS5...")

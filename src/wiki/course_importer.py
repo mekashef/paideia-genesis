@@ -36,6 +36,15 @@ from src.wiki.eecs_curriculum import (
     EECS_FLASHCARDS,
     EECS_CURRICULUM_TOPICS
 )
+from src.wiki.vision_curriculum import (
+    VISION_CURRICULUM_TOPICS,
+    VISION_SESSIONS,
+    VISION_CONCEPTS,
+    VISION_ENTITIES,
+    VISION_DIFFERENTIALS,
+    VISION_TRAPS,
+    VISION_FLASHCARDS
+)
 
 DEFAULT_MIT_OCW_HST121_SESSIONS = [
     {"session": 1, "topic": "Overview of Embryology & Physiology", "instructors": "Dr. Jonathan N. Glickman"},
@@ -695,3 +704,262 @@ last_compiled: {today}
     def _stage_gi_flashcards(self):
         for card in HST121_FLASHCARDS:
             self.anki_manager.add_card(card)
+
+    def import_vision_curriculum(self) -> Dict[str, Any]:
+        """Compiles Deep Learning & Computer Vision Foundations curriculum into the living wiki."""
+        today = datetime.date.today().isoformat()
+        
+        # 1. Compile sessions
+        sessions_created = []
+        for s in VISION_SESSIONS:
+            page_file = self.wiki_dir / "course_sessions" / f"{s['slug']}.md"
+            file_content = f"""---
+title: {s['title']}
+system: Deep Learning & Computer Vision
+domain: Computer Science & AI
+course: 3D-Vision
+source: ArXiv Deep Learning & Computer Vision Foundation Papers
+last_compiled: {today}
+---
+
+# {s['title']}
+
+**Instructors / Authors**: {s['instructors']}  
+**Curriculum**: Deep Learning & 3D Computer Vision Research Track
+
+> **Paper Essence**: {s['summary']}
+
+{s['content']}
+
+---
+*Compiled from Deep Learning & 3D Vision Foundations*
+"""
+            page_file.write_text(file_content, encoding="utf-8")
+            self.indexer.index_file(page_file)
+            sessions_created.append(s["slug"])
+
+        # 2. Compile concepts
+        concepts_created = []
+        for c in VISION_CONCEPTS:
+            page_file = self.wiki_dir / "concepts" / f"{c['slug']}.md"
+            tags_str = ", ".join(c.get("tags", []))
+            file_content = f"""---
+title: {c['title']}
+system: {c['system']}
+domain: {c['domain']}
+course: 3D-Vision
+tags: [{tags_str}]
+source: ArXiv Deep Learning & Computer Vision Foundation Papers
+last_compiled: {today}
+---
+
+# {c['title']}
+
+> **Core Summary**: {c['summary']}
+
+{c['content']}
+
+---
+*Compiled from Deep Learning & 3D Vision Foundations*
+"""
+            page_file.write_text(file_content, encoding="utf-8")
+            self.indexer.index_file(page_file)
+            concepts_created.append(c["slug"])
+
+        # 3. Compile entities
+        entities_created = []
+        for e in VISION_ENTITIES:
+            page_file = self.wiki_dir / "entities" / f"{e['slug']}.md"
+            file_content = f"""---
+title: {e['title']}
+category: {e['category']}
+domain: Computer Science & AI
+course: 3D-Vision
+source: ArXiv Deep Learning & Computer Vision Foundation Papers
+last_compiled: {today}
+---
+
+# {e['title']}
+
+> **Entity Classification**: `{e['category']}`
+
+### High-Yield Architectural Notes
+{e['high_yield_notes']}
+
+---
+*Compiled from Deep Learning & 3D Vision Foundations*
+"""
+            page_file.write_text(file_content, encoding="utf-8")
+            self.indexer.index_file(page_file)
+            entities_created.append(e["slug"])
+
+        # 4. Compile differentials
+        diffs_created = []
+        for d in VISION_DIFFERENTIALS:
+            page_file = self.wiki_dir / "differentials" / f"{d['slug']}.md"
+            file_content = f"""---
+title: {d['title']}
+domain: Computer Science & AI
+course: 3D-Vision
+source: ArXiv Deep Learning & Computer Vision Foundation Papers
+last_compiled: {today}
+---
+
+# {d['title']}
+
+> **Architectural Trade-offs**: {d['summary']}
+
+{d['content']}
+
+---
+*Compiled from Deep Learning & 3D Vision Foundations*
+"""
+            page_file.write_text(file_content, encoding="utf-8")
+            self.indexer.index_file(page_file)
+            diffs_created.append(d["slug"])
+
+        # 5. Compile traps
+        traps_created = []
+        for t in VISION_TRAPS:
+            page_file = self.wiki_dir / "exam_traps" / f"{t['slug']}.md"
+            file_content = f"""---
+title: {t['title']}
+tags: [pitfall, deep-learning, computer-vision, failure-mode]
+domain: Computer Science & AI
+course: 3D-Vision
+source: ArXiv Deep Learning & Computer Vision Foundation Papers
+last_compiled: {today}
+---
+
+# {t['title']}
+
+> [!CAUTION]
+> **Research & Implementation Pitfall**:
+> {t['summary']}
+
+{t['content']}
+
+---
+*Compiled from Deep Learning & 3D Vision Foundations*
+"""
+            page_file.write_text(file_content, encoding="utf-8")
+            self.indexer.index_file(page_file)
+            traps_created.append(t["slug"])
+
+        # 6. Stage flashcards
+        for card in VISION_FLASHCARDS:
+            self.anki_manager.add_card(card)
+
+        # 7. Update curriculum & log
+        self._update_curriculum_for_vision()
+        self._refresh_master_index()
+
+        with open(self.wiki_dir / "log.md", "a", encoding="utf-8") as f:
+            f.write(f"\n## [{today}] curriculum_import | Compiled Deep Learning & Computer Vision Foundations\n")
+
+        return {
+            "success": True,
+            "course": "Deep Learning & Computer Vision Foundations",
+            "domain": "Computer Science & AI",
+            "sessions_imported": len(sessions_created),
+            "session_pages_compiled": len(sessions_created),
+            "concepts_compiled": len(concepts_created),
+            "entities_compiled": len(entities_created),
+            "differentials_compiled": len(diffs_created),
+            "traps_compiled": len(traps_created),
+            "anki_cards_staged": len(VISION_FLASHCARDS)
+        }
+
+    def _update_curriculum_for_vision(self):
+        mastery = self.student_profile.get_mastery()
+        for k, v in [
+            ("Vision Transformers & Attention", 75.0),
+            ("3D Computer Vision & NeRF", 68.0),
+            ("3D Gaussian Splatting", 70.0),
+            ("Self-Supervised & Foundation Models (DINOv2)", 74.0),
+            ("Generative Diffusion Models", 66.0),
+            ("Visual SLAM & Spatial AI", 62.0)
+        ]:
+            if k not in mastery:
+                mastery[k] = v
+
+        self.student_profile.knowledge_file.write_text(json.dumps(mastery, indent=2), encoding="utf-8")
+
+        schedule = {
+            "current_block": "Deep Learning & 3D Computer Vision Research Track",
+            "target_exam": "Deep Learning & Computer Vision Research Qualifying Milestone",
+            "exam_date": (datetime.date.today() + datetime.timedelta(days=14)).isoformat(),
+            "topics": VISION_CURRICULUM_TOPICS
+        }
+        self.student_profile.update_schedule(schedule)
+
+    def import_paper(
+        self,
+        title: str,
+        abstract: str = "",
+        content: str = "",
+        arxiv_id: str = "",
+        tags: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+        """Synthesizes a research preprint or published paper into the Karpathy 5-layer wiki."""
+        today = datetime.date.today().isoformat()
+        clean_slug = re.sub(r'[^\w\-]', '-', title.lower()).strip('-')[:50]
+        paper_tags = tags or ["Deep-Learning", "Computer-Vision", "Research-Paper"]
+        
+        # Save raw source into lectures/papers
+        raw_dir = RAW_SOURCES_DIR / "papers"
+        raw_dir.mkdir(parents=True, exist_ok=True)
+        raw_file = raw_dir / f"{clean_slug}.md"
+        raw_file.write_text(f"# {title}\n\nArXiv: {arxiv_id}\n\n## Abstract\n{abstract}\n\n## Content\n{content}", encoding="utf-8")
+
+        # Compile concepts into wiki
+        concepts_dir = self.wiki_dir / "concepts"
+        concepts_dir.mkdir(parents=True, exist_ok=True)
+        page_file = concepts_dir / f"{clean_slug}.md"
+        tags_str = ", ".join(paper_tags)
+        
+        summary_text = abstract.strip() if abstract.strip() else f"Research paper on {title}."
+        body_text = content.strip() if content.strip() else f"### Abstract\n{summary_text}\n\n### Key Theoretical Foundations\nFoundational principles and empirical benchmarks of {title}."
+        
+        file_content = f"""---
+title: {title}
+domain: Computer Science & AI
+system: Deep Learning & Computer Vision
+tags: [{tags_str}]
+source: {arxiv_id or title}
+last_compiled: {today}
+---
+
+# {title}
+
+> **Core Summary**: {summary_text[:300]}
+
+{body_text}
+
+---
+*Compiled from research paper preprint: `{title}` ({arxiv_id})*
+"""
+        page_file.write_text(file_content, encoding="utf-8")
+        self.indexer.index_file(page_file)
+
+        # Stage candidate active recall card
+        self.anki_manager.add_card({
+            "type": "cloze",
+            "text": f"Paper Concept ({title}): {{c1::{summary_text[:120]}...}}",
+            "pearl": f"Source: {title} ({arxiv_id})",
+            "tags": paper_tags + [clean_slug],
+            "source": f"paper: {clean_slug}"
+        })
+
+        self._refresh_master_index()
+
+        with open(self.wiki_dir / "log.md", "a", encoding="utf-8") as f:
+            f.write(f"\n## [{today}] paper_import | Compiled paper `{title}` ({clean_slug})\n")
+
+        return {
+            "success": True,
+            "title": title,
+            "slug": clean_slug,
+            "rel_path": f"concepts/{clean_slug}.md",
+            "card_staged": True
+        }

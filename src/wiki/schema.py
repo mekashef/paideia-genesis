@@ -20,6 +20,7 @@ This wiki is an evolving, compounding knowledge base designed to accompany a lea
    - `entities/`: Tools, libraries, hardware, algorithms, theorems, equations, protocols, drugs, and components.
    - `differentials/`: Side-by-side comparative analyses, benchmark contrasts, trade-off studies, and decision trees.
    - `exam_traps/`: Anti-patterns, common misconceptions, edge cases, fallacies, and classic exam/interview traps.
+   - `conversations/`: Captured meetings, advisor discussions, debate transcripts, and research dialogues.
    - `student_profile/`: Learner diagnostic profile (mastery scores, misconceptions, upcoming deadlines).
 
 ## Cross-Linking Conventions
@@ -77,13 +78,17 @@ def init_wiki_structure(
     (target_raw_dir / "lectures").mkdir(parents=True, exist_ok=True)
     (target_raw_dir / "syllabus").mkdir(parents=True, exist_ok=True)
     (target_raw_dir / "exam_logs").mkdir(parents=True, exist_ok=True)
+    (target_raw_dir / "conversations").mkdir(parents=True, exist_ok=True)
+    (target_raw_dir / "papers").mkdir(parents=True, exist_ok=True)
 
     target_wiki_dir.mkdir(parents=True, exist_ok=True)
+    (target_wiki_dir / "papers").mkdir(parents=True, exist_ok=True)
     (target_wiki_dir / "course_sessions").mkdir(parents=True, exist_ok=True)
     (target_wiki_dir / "concepts").mkdir(parents=True, exist_ok=True)
     (target_wiki_dir / "entities").mkdir(parents=True, exist_ok=True)
     (target_wiki_dir / "differentials").mkdir(parents=True, exist_ok=True)
     (target_wiki_dir / "exam_traps").mkdir(parents=True, exist_ok=True)
+    (target_wiki_dir / "conversations").mkdir(parents=True, exist_ok=True)
     (target_wiki_dir / "student_profile").mkdir(parents=True, exist_ok=True)
     target_anki_dir.mkdir(parents=True, exist_ok=True)
 

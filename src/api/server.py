@@ -3,7 +3,7 @@ import os
 import re
 import datetime
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Union
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
@@ -23,11 +23,13 @@ from src.tutor.student_profile import StudentProfile
 from src.tutor.socratic_engine import SocraticTeacher
 from src.anki.generator import AnkiManager
 from src.wiki.course_importer import CourseImporter
+from src.wiki.conversation_digester import ConversationDigester
+from src.wiki.paper_digester import PaperDigester
 
 app = FastAPI(
     title="Paideia Genesis - Living Education Assistant & LLM-Wiki",
-    description="Adaptive Learning System combining Karpathy's LLM-Wiki, HippoRAG, and Socratic tutoring for any topic.",
-    version="1.0.0"
+    description="Adaptive Learning System combining Karpathy's LLM-Wiki, HippoRAG, Contextual Retrieval, and Socratic tutoring for any topic.",
+    version="1.1.0"
 )
 
 # Initialize engines
@@ -40,6 +42,8 @@ anki_manager = AnkiManager()
 graph_memory = AssociativeGraphMemory()
 knowledge_puller = KnowledgePuller()
 course_importer = CourseImporter()
+conversation_digester = ConversationDigester(wiki_dir=WIKI_DIR)
+paper_digester = PaperDigester(wiki_dir=WIKI_DIR)
 
 def ensure_wiki_bootstrapped():
     """Auto-seed starter curricula only if explicitly configured via AUTO_SEED_DEMO_DATA."""
@@ -47,18 +51,8 @@ def ensure_wiki_bootstrapped():
         return
     sessions_dir = WIKI_DIR / "course_sessions"
     if not any(sessions_dir.glob("*.md")):
-        demo_lecture = DEMO_DATA_DIR / "Cardiology_Block_Lecture_4_Heart_Failure_and_Diuretics.md"
-        if demo_lecture.exists():
-            try:
-                compiler.ingest_source(
-                    filename="Cardiology_Block_Lecture_4_Heart_Failure_and_Diuretics.md",
-                    content=demo_lecture.read_text(encoding="utf-8"),
-                    source_type="lecture"
-                )
-            except Exception:
-                pass
         try:
-            course_importer.import_mit_ocw_course()
+            course_importer.import_vision_curriculum()
             anki_manager.recompile_from_wiki()
         except Exception:
             pass
@@ -77,6 +71,22 @@ class GenerateVignetteRequest(BaseModel):
 
 class ImportCourseManifestRequest(BaseModel):
     manifest_path: Optional[str] = None
+
+class ImportPaperRequest(BaseModel):
+    title: Optional[str] = ""
+    abstract: Optional[str] = ""
+    content: Optional[str] = ""
+    arxiv_id: Optional[str] = ""
+    tags: Optional[List[str]] = []
+
+class DigestConversationRequest(BaseModel):
+    title: str
+    content: Optional[str] = None
+    raw_text: Optional[str] = None
+    participants: Optional[Union[List[str], str]] = []
+    tags: Optional[Union[List[str], str]] = []
+    date: Optional[str] = None
+    domain: Optional[str] = "Computer Science & AI"
 
 class IngestTextRequest(BaseModel):
     filename: str
@@ -97,7 +107,7 @@ class PullExternalRequest(BaseModel):
     domain: Optional[str] = None
 
 class ImportCourseRequest(BaseModel):
-    url: Optional[str] = "https://ocw.mit.edu/courses/hst-121-gastroenterology-fall-2005/pages/lecture-notes/"
+    url: Optional[str] = "https://arxiv.org/abs/2010.11929"
 
 class CardReviewRequest(BaseModel):
     card_id: str
@@ -129,13 +139,13 @@ def get_status():
         },
         "total_wiki_pages": len(all_pages),
         "days_to_exam": schedule.get("days_remaining", 0),
-        "target_exam": schedule.get("target_exam", "Medical Board"),
+        "target_exam": schedule.get("target_exam", "Deep Learning & Computer Vision Milestone"),
         "staged_flashcards": len(staged)
     }
 
 @app.get("/api/wiki/tree")
 def get_wiki_tree(course: Optional[str] = None):
-    categories = ["course_sessions", "concepts", "entities", "differentials", "exam_traps", "student_profile"]
+    categories = ["papers", "course_sessions", "concepts", "entities", "differentials", "exam_traps", "conversations", "student_profile"]
     tree: Dict[str, Any] = {}
     
     course_filter = (course or "all").lower().strip()
@@ -156,8 +166,33 @@ def get_wiki_tree(course: Optional[str] = None):
 
                 course_tag = (parsed.get("course") or "").lower()
                 domain_tag = (parsed.get("domain") or "").lower()
+                is_vision = (
+                    "vision" in course_tag
+                    or "cv" in course_tag
+                    or "deep learning" in course_tag
+                    or "dl" in course_tag
+                    or "vision" in domain_tag
+                    or "deep learning" in domain_tag
+                    or "vision" in sys_tag.lower()
+                    or "vision" in src_tag.lower()
+                    or "vision" in raw_tags.lower()
+                    or "deep learning" in raw_tags.lower()
+                    or "transformer" in stem_lower
+                    or "gaussian" in stem_lower
+                    or "nerf" in stem_lower
+                    or "dinov2" in stem_lower
+                    or "diffusion" in stem_lower
+                    or "clip" in stem_lower
+                    or "dust3r" in stem_lower
+                    or "sam" in stem_lower
+                    or "vit" in stem_lower
+                    or "paper" in src_tag.lower()
+                    or "paper" in raw_tags.lower()
+                )
+                if cat == "papers":
+                    is_vision = True
 
-                is_eecs = (
+                is_eecs = not is_vision and (
                     "6.033" in course_tag
                     or "6.004" in course_tag
                     or "6.033" in src_tag.lower()
@@ -180,7 +215,7 @@ def get_wiki_tree(course: Optional[str] = None):
 
                 tag_tokens = [t.strip().lower() for t in raw_tags.replace("[", "").replace("]", "").split(",")] if raw_tags else []
 
-                is_hst121 = not is_eecs and (
+                is_hst121 = not is_eecs and not is_vision and (
                     "hst" in course_tag
                     or "hst.121" in src_tag.lower()
                     or "hst.121" in raw_tags.lower()
@@ -189,7 +224,7 @@ def get_wiki_tree(course: Optional[str] = None):
                     or "gi" in tag_tokens
                     or stem_lower == "spironolactone"
                 )
-                is_cardio = (
+                is_cardio = not is_vision and (
                     "cardio" in raw_tags.lower()
                     or "renal" in raw_tags.lower()
                     or "cardio" in sys_tag.lower()
@@ -202,7 +237,13 @@ def get_wiki_tree(course: Optional[str] = None):
                     or stem_lower == "spironolactone"
                 )
 
-                if is_eecs:
+                is_conversation = (cat == "conversations" or "conversation" in course_tag or "conversation" in raw_tags.lower() or "discourse" in sys_tag.lower())
+
+                if is_conversation:
+                    item_course = "Conversations"
+                elif is_vision:
+                    item_course = "Deep Learning & Vision"
+                elif is_eecs:
                     item_course = "MIT 6.033"
                 elif is_hst121 and not is_cardio:
                     item_course = "HST.121"
@@ -213,6 +254,10 @@ def get_wiki_tree(course: Optional[str] = None):
                 else:
                     item_course = parsed.get("course") or "General"
 
+                if course_filter in ["conversation", "conversations"] and not is_conversation:
+                    continue
+                if course_filter in ["vision", "cv", "dl", "deep learning"] and not is_vision and not (is_conversation and "vision" in domain_tag):
+                    continue
                 if course_filter in ["hst121", "hst-121", "gastroenterology"] and not is_hst121:
                     continue
                 if course_filter in ["cardio", "cardiopulmonary", "renal"] and not is_cardio:
@@ -220,7 +265,7 @@ def get_wiki_tree(course: Optional[str] = None):
                 if course_filter in ["eecs", "6.033", "6-033", "cs", "distributed"] and not is_eecs:
                     continue
 
-                domain_val = parsed.get("domain") or ("Computer Science" if is_eecs else ("Medicine" if is_hst121 or is_cardio else "General"))
+                domain_val = parsed.get("domain") or ("Computer Science" if (is_eecs or is_vision) else ("Medicine" if is_hst121 or is_cardio else "General"))
                 cat_val = parsed.get("category") or cat
                 entity_type_val = parsed.get("entity_type") or cat
 
@@ -234,7 +279,8 @@ def get_wiki_tree(course: Optional[str] = None):
                     "course": parsed.get("course") or item_course,
                     "domain": domain_val,
                     "category": cat_val,
-                    "entity_type": entity_type_val
+                    "entity_type": entity_type_val,
+                    "is_conversation": is_conversation
                 })
         tree[cat] = items
     return tree
@@ -254,9 +300,15 @@ def get_wiki_page(path: str):
     }
 
 @app.get("/api/wiki/search")
-def search_wiki(q: str):
-    results = indexer.search(q, limit=15)
-    return {"query": q, "results": results}
+def search_wiki(q: str, mode: Optional[str] = "contextual", limit: int = 15):
+    results = indexer.search(q, limit=limit, mode=mode or "contextual")
+    return {"query": q, "mode": mode or "contextual", "results": results}
+
+@app.get("/api/wiki/contextual_search")
+def contextual_search_wiki(q: str, limit: int = 15, rerank: bool = True):
+    """Anthropic Contextual Retrieval: hybrid Contextual BM25 + dense vectors + reranking."""
+    results = indexer.contextual_search(q, limit=limit, use_rerank=rerank)
+    return {"query": q, "mode": "contextual_retrieval", "rerank": rerank, "results": results}
 
 @app.get("/api/wiki/graph")
 def get_wiki_graph():
@@ -395,11 +447,140 @@ def ingest_text_source(req: IngestTextRequest):
 
 @app.post("/api/wiki/ingest_demo")
 def ingest_demo_lecture():
-    demo_file = Path(__file__).resolve().parent.parent.parent / "demo_data" / "Cardiology_Block_Lecture_4_Heart_Failure_and_Diuretics.md"
-    if not demo_file.exists():
-        raise HTTPException(status_code=404, detail="Demo lecture file not found")
-    content = demo_file.read_text(encoding="utf-8")
-    result = compiler.ingest_source("Cardiology_Lecture_4_ADHF_and_Diuretics.md", content, "lecture")
+    result = course_importer.import_vision_curriculum()
+    anki_manager.recompile_from_wiki()
+    return result
+
+@app.get("/api/paper/fetch_arxiv")
+def fetch_paper_arxiv(url: str):
+    return paper_digester.fetch_arxiv_metadata(url)
+
+@app.post("/api/wiki/import_paper")
+def import_paper(req: ImportPaperRequest):
+    result = paper_digester.digest_paper(
+        title=req.title,
+        abstract=req.abstract or "",
+        content=req.content or "",
+        arxiv_id=req.arxiv_id or "",
+        tags=req.tags or []
+    )
+    anki_manager.recompile_from_wiki()
+    return result
+
+@app.post("/api/paper/upload_and_digest")
+async def upload_and_digest_paper(
+    file: UploadFile = File(...),
+    title: Optional[str] = Form(None),
+    arxiv_id: Optional[str] = Form(""),
+    tags: Optional[str] = Form(""),
+    domain: Optional[str] = Form("Deep Learning & Computer Vision")
+):
+    file_bytes = await file.read()
+    filename = file.filename or "paper.pdf"
+    clean_title = title.strip() if (title and title.strip()) else Path(filename).stem.replace("_", " ").replace("-", " ").title()
+    clean_slug = re.sub(r'[^\w\-]', '-', clean_title.lower()).strip('-')[:50]
+    
+    tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else ["Deep-Learning", "Computer-Vision", "Research-Paper"]
+
+    figures = []
+    if filename.lower().endswith(".pdf"):
+        extracted_text, figures = paper_digester.extract_text_and_figures_from_pdf(file_bytes, clean_slug)
+    else:
+        extracted_text = paper_digester.extract_text_from_file(file_bytes, filename)
+
+    result = paper_digester.digest_paper(
+        title=clean_title,
+        abstract=extracted_text[:1500],
+        content=extracted_text,
+        arxiv_id=arxiv_id or "",
+        tags=tag_list,
+        domain=domain or "Deep Learning & Computer Vision",
+        figures=figures
+    )
+    anki_manager.recompile_from_wiki()
+    result["extracted_figures_count"] = len(figures)
+    return result
+
+@app.get("/api/paper/figures")
+def get_paper_figures(slug: str):
+    paper_dir = WIKI_DIR / "assets" / "papers" / slug
+    if not paper_dir.exists():
+        return {"slug": slug, "figures": []}
+    figs = []
+    for f in paper_dir.glob("figure_*.*"):
+        figs.append({
+            "name": f.name,
+            "url": f"/assets/papers/{slug}/{f.name}",
+            "size_bytes": f.stat().st_size
+        })
+    return {"slug": slug, "figures": sorted(figs, key=lambda x: x["name"])}
+
+@app.post("/api/conversation/digest")
+def digest_conversation(req: DigestConversationRequest):
+    result = conversation_digester.digest_conversation(
+        title=req.title,
+        content=req.content,
+        raw_text=req.raw_text,
+        participants=req.participants,
+        tags=req.tags,
+        date=req.date,
+        domain=req.domain
+    )
+    anki_manager.recompile_from_wiki()
+    return result
+
+@app.post("/api/conversation/transcribe")
+async def transcribe_audio_file(
+    file: Optional[UploadFile] = File(None),
+    audio_file: Optional[UploadFile] = File(None)
+):
+    upload = audio_file or file
+    if not upload:
+        return {"success": False, "message": "No audio file provided."}
+    audio_bytes = await upload.read()
+    filename = upload.filename or "recording.wav"
+    mime_type = upload.content_type or "audio/wav"
+    transcript = conversation_digester.transcribe_audio(audio_bytes, filename=filename, mime_type=mime_type)
+    return {
+        "success": True,
+        "filename": filename,
+        "transcript": transcript,
+        "text": transcript,
+        "word_count": len(transcript.split()),
+        "bytes_received": len(audio_bytes)
+    }
+
+@app.post("/api/conversation/upload_and_digest")
+async def upload_and_digest_file(
+    file: UploadFile = File(...),
+    title: Optional[str] = Form(None),
+    participants: Optional[str] = Form(""),
+    tags: Optional[str] = Form(""),
+    domain: Optional[str] = Form("Computer Science & AI")
+):
+    file_bytes = await file.read()
+    filename = file.filename or "uploaded_note.txt"
+    extracted_text = conversation_digester.extract_text_from_document(file_bytes, filename)
+
+    inferred_title = title.strip() if (title and title.strip()) else Path(filename).stem.replace("_", " ").replace("-", " ").title()
+    part_list = [p.strip() for p in participants.split(",") if p.strip()] if participants else ["Collaborators"]
+    tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else ["Document-Upload"]
+
+    result = conversation_digester.digest_conversation(
+        title=inferred_title,
+        content=extracted_text,
+        participants=part_list,
+        tags=tag_list,
+        domain=domain
+    )
+    anki_manager.recompile_from_wiki()
+    result["extracted_text_preview"] = extracted_text[:300]
+    return result
+
+@app.post("/api/course/import_vision")
+def import_vision():
+    result = course_importer.import_vision_curriculum()
+    anki_manager.recompile_from_wiki()
     return result
 
 @app.post("/api/course/import_hst121")
@@ -430,21 +611,15 @@ def get_curriculums():
         "available_curricula": [
             {
                 "id": "all",
-                "name": "All Curricula & Cross-Discipline Concepts",
+                "name": "All Research & Foundations",
                 "domain": "Universal",
                 "code": "All"
             },
             {
-                "id": "hst121",
-                "name": "MIT HST.121: Gastroenterology & Hepatology",
-                "domain": "Medicine",
-                "code": "HST.121"
-            },
-            {
-                "id": "cardio",
-                "name": "Cardiopulmonary & Renal Block",
-                "domain": "Medicine",
-                "code": "Cardiopulmonary"
+                "id": "vision",
+                "name": "Deep Learning & Computer Vision Foundations",
+                "domain": "Computer Science & AI",
+                "code": "DL-CV"
             },
             {
                 "id": "eecs",
@@ -480,7 +655,7 @@ def evaluate_answer(sub: AnswerSubmission):
             "type": "cloze",
             "text": card_cand.get("front", ""),
             "pearl": card_cand.get("back", ""),
-            "tags": ["PaideiaGenesis", "Board-Trap", sub.vignette.get("topic", "Cardiology")],
+            "tags": ["PaideiaGenesis", "Research-Trap", sub.vignette.get("topic", "Computer Vision")],
             "source": f"Diagnostic drill: {sub.vignette.get('vignette_id')}"
         })
     return result
@@ -510,7 +685,7 @@ def review_anki_card(req: CardReviewRequest):
         raise HTTPException(status_code=404, detail="Flashcard not found")
 
     # Sync mastery to student profile
-    system_tag = updated_card.get("system", "Pharmacology")
+    system_tag = updated_card.get("system", "Computer Vision & Foundations")
     is_correct = (req.rating >= 3)
     student_profile.record_attempt(
         topic=system_tag,
@@ -536,7 +711,7 @@ def grade_anki_recall(req: GradeRecallRequest):
     sm2_rating = result["grading"]["sm2_rating"]
 
     # Sync mastery to student profile
-    system_tag = updated_card.get("system", "Pharmacology")
+    system_tag = updated_card.get("system", "Computer Vision & Foundations")
     is_correct = (sm2_rating >= 3)
     student_profile.record_attempt(
         topic=system_tag,

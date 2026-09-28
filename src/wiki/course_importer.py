@@ -37,6 +37,7 @@ from src.wiki.eecs_curriculum import (
     EECS_CURRICULUM_TOPICS
 )
 
+
 DEFAULT_MIT_OCW_HST121_SESSIONS = [
     {"session": 1, "topic": "Overview of Embryology & Physiology", "instructors": "Dr. Jonathan N. Glickman"},
     {"session": 2, "topic": "Gastroduodenal Pathophysiology and Disorders; Pathology of Esophagus and Stomach", "instructors": "Dr. Helen Shields, Dr. Jonathan N. Glickman"},
@@ -695,3 +696,74 @@ last_compiled: {today}
     def _stage_gi_flashcards(self):
         for card in HST121_FLASHCARDS:
             self.anki_manager.add_card(card)
+
+    def import_paper(
+        self,
+        title: str,
+        abstract: str = "",
+        content: str = "",
+        arxiv_id: str = "",
+        tags: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+        """Synthesizes a research preprint or published paper into the Karpathy 5-layer wiki."""
+        today = datetime.date.today().isoformat()
+        clean_slug = re.sub(r'[^\w\-]', '-', title.lower()).strip('-')[:50]
+        paper_tags = tags or ["Deep-Learning", "Computer-Vision", "Research-Paper"]
+        
+        # Save raw source into lectures/papers
+        raw_dir = RAW_SOURCES_DIR / "papers"
+        raw_dir.mkdir(parents=True, exist_ok=True)
+        raw_file = raw_dir / f"{clean_slug}.md"
+        raw_file.write_text(f"# {title}\n\nArXiv: {arxiv_id}\n\n## Abstract\n{abstract}\n\n## Content\n{content}", encoding="utf-8")
+
+        # Compile concepts into wiki
+        concepts_dir = self.wiki_dir / "concepts"
+        concepts_dir.mkdir(parents=True, exist_ok=True)
+        page_file = concepts_dir / f"{clean_slug}.md"
+        tags_str = ", ".join(paper_tags)
+        
+        summary_text = abstract.strip() if abstract.strip() else f"Research paper on {title}."
+        body_text = content.strip() if content.strip() else f"### Abstract\n{summary_text}\n\n### Key Theoretical Foundations\nFoundational principles and empirical benchmarks of {title}."
+        
+        file_content = f"""---
+title: {title}
+domain: Computer Science & AI
+system: Deep Learning & Computer Vision
+tags: [{tags_str}]
+source: {arxiv_id or title}
+last_compiled: {today}
+---
+
+# {title}
+
+> **Core Summary**: {summary_text[:300]}
+
+{body_text}
+
+---
+*Compiled from research paper preprint: `{title}` ({arxiv_id})*
+"""
+        page_file.write_text(file_content, encoding="utf-8")
+        self.indexer.index_file(page_file)
+
+        # Stage candidate active recall card
+        self.anki_manager.add_card({
+            "type": "cloze",
+            "text": f"Paper Concept ({title}): {{c1::{summary_text[:120]}...}}",
+            "pearl": f"Source: {title} ({arxiv_id})",
+            "tags": paper_tags + [clean_slug],
+            "source": f"paper: {clean_slug}"
+        })
+
+        self._refresh_master_index()
+
+        with open(self.wiki_dir / "log.md", "a", encoding="utf-8") as f:
+            f.write(f"\n## [{today}] paper_import | Compiled paper `{title}` ({clean_slug})\n")
+
+        return {
+            "success": True,
+            "title": title,
+            "slug": clean_slug,
+            "rel_path": f"concepts/{clean_slug}.md",
+            "card_staged": True
+        }

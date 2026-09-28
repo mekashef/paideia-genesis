@@ -32,5 +32,5 @@ Instead, please report security issues by emailing the repository owner or by us
 
 | Version | Supported |
 |---------|-----------|
-| 0.3.x   | ✅ Current |
-| < 0.3   | ❌ No longer supported |
+| 1.0.x   | ✅ Current |
+| < 1.0   | ❌ No longer supported |

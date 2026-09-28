@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Marked.js for Markdown parsing -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Mermaid.js for Interactive Visual Architecture Diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <!-- KaTeX for High-Precision Math & Science Formulas -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
@@ -27,42 +29,31 @@
                 <div>
                     <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
                         Paideia Genesis
-                        <span class="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30">Living Education Assistant</span>
                     </h1>
-                    <p class="text-xs text-slate-400">Compounding LLM-Wiki, Multi-Domain HippoRAG & Socratic Tutor</p>
                 </div>
             </div>
 
-            <!-- Header Quick Stats & Actions -->
-            <div class="flex items-center space-x-3">
-                <div class="hidden lg:flex items-center bg-slate-900/60 border border-slate-700 px-3 py-1.5 rounded-lg text-xs space-x-3">
-                    <div>
-                        <span class="text-slate-400">Milestone:</span>
-                        <span id="headerExamTitle" class="font-semibold text-amber-300 ml-1">Curriculum Assessment</span>
-                    </div>
-                    <div class="h-4 w-px bg-slate-700"></div>
-                    <div>
-                        <span class="text-slate-400">Countdown:</span>
-                        <span id="headerDaysLeft" class="font-bold text-rose-400 ml-1">8 days</span>
-                    </div>
-                    <div class="h-4 w-px bg-slate-700"></div>
-                    <div>
-                        <span class="text-slate-400">Readiness:</span>
-                        <span id="headerReadiness" class="font-bold text-emerald-400 ml-1">65%</span>
-                    </div>
-                </div>
-
-                <!-- On-The-Fly Quick Action Buttons -->
-                <button id="btnOpenImportCourse" class="bg-amber-600/80 hover:bg-amber-500 text-amber-100 text-xs font-semibold px-3 py-2 rounded-lg transition border border-amber-500/40 flex items-center gap-1.5 shadow-sm">
-                    <span>📥</span> Import Curriculum
+            <!-- Header Actions -->
+            <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1">
+                <button id="btnStartWalkthrough" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 shadow-sm whitespace-nowrap cursor-pointer">
+                    <span>🎓</span> Walkthrough
                 </button>
-                <button id="btnOpenQuickCapture" class="bg-indigo-700/80 hover:bg-indigo-600 text-indigo-100 text-xs font-semibold px-3 py-2 rounded-lg transition border border-indigo-500/40 flex items-center gap-1.5 shadow-sm">
+                <button id="btnOpenCaptureConversation" class="bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 shadow-sm whitespace-nowrap cursor-pointer">
+                    <span>🗣️</span> Capture Discourse
+                </button>
+                <button id="btnOpenImportPaper" class="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 shadow-sm whitespace-nowrap cursor-pointer">
+                    <span>📄</span> Import Paper
+                </button>
+                <button id="btnOpenImportCourse" class="bg-amber-600/80 hover:bg-amber-500 text-amber-100 text-xs font-semibold px-3 py-1.5 rounded-lg transition border border-amber-500/40 flex items-center gap-1.5 shadow-sm whitespace-nowrap cursor-pointer">
+                    <span>📥</span> Curriculum
+                </button>
+                <button id="btnOpenQuickCapture" class="bg-indigo-700/80 hover:bg-indigo-600 text-indigo-100 text-xs font-semibold px-3 py-1.5 rounded-lg transition border border-indigo-500/40 flex items-center gap-1.5 shadow-sm whitespace-nowrap cursor-pointer">
                     <span>📝</span> Quick Capture
                 </button>
-                <button id="btnOpenPullKnowledge" class="bg-sky-700/80 hover:bg-sky-600 text-sky-100 text-xs font-semibold px-3 py-2 rounded-lg transition border border-sky-500/40 flex items-center gap-1.5 shadow-sm">
-                    <span>🌐</span> Pull-In Subject Concept
+                <button id="btnOpenPullKnowledge" class="bg-sky-700/80 hover:bg-sky-600 text-sky-100 text-xs font-semibold px-3 py-1.5 rounded-lg transition border border-sky-500/40 flex items-center gap-1.5 shadow-sm whitespace-nowrap cursor-pointer">
+                    <span>🌐</span> Pull Concept
                 </button>
-                <button id="btnDownloadApkg" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1.5 shadow-sm">
+                <button id="btnDownloadApkg" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 shadow-sm whitespace-nowrap cursor-pointer">
                     <span>⬇️</span> .apkg Deck
                 </button>
             </div>
@@ -102,11 +93,8 @@
                         <span id="activeCourseCountBadge" class="text-[10px] font-mono bg-indigo-900/60 text-indigo-300 border border-indigo-700/50 px-1.5 py-0.5 rounded">All</span>
                     </div>
                     <select id="wikiCourseFilter" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 font-medium cursor-pointer">
-                        <option value="all">🌐 All Curricula & Disciplines</option>
-                        <option value="vision" selected>🤖 3D Vision, Foundation Models & UAVs</option>
+                        <option value="all" selected>🌐 All Topics & Curricula</option>
                         <option value="eecs">💻 MIT 6.033: Distributed Systems & Networking</option>
-                        <option value="hst121">🩺 MIT HST.121: Gastroenterology & Hepatology</option>
-                        <option value="cardio">❤️ Cardiopulmonary & Renal Block</option>
                     </select>
                 </div>
 
@@ -116,11 +104,20 @@
                         <input id="wikiSearchInput" type="text" placeholder="Search concepts, algorithms, models, formulas..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
                         <span class="absolute right-3 top-2.5 text-slate-500 text-xs">🔍</span>
                     </div>
+                    <div class="flex items-center justify-between mt-1.5 px-0.5 text-[11px] text-slate-400">
+                        <label class="flex items-center gap-1.5 cursor-pointer text-indigo-300 hover:text-indigo-200 transition">
+                            <input type="checkbox" id="chkContextualSearch" class="accent-indigo-500 rounded cursor-pointer" checked>
+                            <span class="font-medium">✨ Anthropic Contextual</span>
+                        </label>
+                        <span id="searchResultModeBadge" class="text-[10px] text-emerald-400/90 font-mono bg-emerald-950/40 border border-emerald-800/40 px-1.5 py-0.2 rounded">Hybrid BM25+Vector</span>
+                    </div>
                 </div>
 
                 <!-- Quick Discovery Filter Bar -->
                 <div class="flex items-center gap-1 mb-2 overflow-x-auto pb-1 text-[11px] no-scrollbar">
                     <button id="btnCatFilterAll" class="wiki-cat-pill bg-indigo-600 text-white px-2 py-0.5 rounded-full font-medium transition" onclick="filterWikiSection('all')">All</button>
+                    <button id="btnCatFilterPapers" class="wiki-cat-pill bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-cyan-300 px-2 py-0.5 rounded-full font-medium transition" onclick="filterWikiSection('papers')">Papers</button>
+                    <button id="btnCatFilterConvs" class="wiki-cat-pill bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-teal-300 px-2 py-0.5 rounded-full font-medium transition" onclick="filterWikiSection('conversations')">Discourse</button>
                     <button id="btnCatFilterModels" class="wiki-cat-pill bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-purple-300 px-2 py-0.5 rounded-full font-medium transition" onclick="filterWikiSection('models')">Models</button>
                     <button id="btnCatFilterAlgos" class="wiki-cat-pill bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-cyan-300 px-2 py-0.5 rounded-full font-medium transition" onclick="filterWikiSection('algorithms')">Algorithms</button>
                     <button id="btnCatFilterConcepts" class="wiki-cat-pill bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-indigo-300 px-2 py-0.5 rounded-full font-medium transition" onclick="filterWikiSection('concepts')">Concepts</button>
@@ -146,6 +143,18 @@
                         </ul>
                     </div>
 
+                    <!-- Research Papers Section -->
+                    <div id="treeSecPapers" class="tree-section border-b border-slate-700/40 pb-2">
+                        <button class="w-full text-xs font-bold text-cyan-400 uppercase tracking-wider mb-1 flex items-center justify-between hover:text-cyan-300 transition py-1 text-left" onclick="toggleTreeSection('listPapers')">
+                            <span class="flex items-center gap-1.5">
+                                <span id="icon-listPapers" class="text-[10px] transform transition-transform">▼</span>
+                                <span>📄 Research Papers</span>
+                            </span>
+                            <span id="countPapers" class="text-[10px] bg-cyan-900/50 text-cyan-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                        </button>
+                        <ul id="listPapers" class="space-y-1 pl-1"></ul>
+                    </div>
+
                     <!-- Sessions & Lectures Section -->
                     <div id="treeSecLectures" class="tree-section border-b border-slate-700/40 pb-2">
                         <button class="w-full text-xs font-bold text-amber-400 uppercase tracking-wider mb-1 flex items-center justify-between hover:text-amber-300 transition py-1 text-left" onclick="toggleTreeSection('listLectures')">
@@ -156,6 +165,18 @@
                             <span id="countLectures" class="text-[10px] bg-amber-900/50 text-amber-300 px-1.5 py-0.5 rounded font-mono">0</span>
                         </button>
                         <ul id="listLectures" class="space-y-1 pl-1"></ul>
+                    </div>
+
+                    <!-- Conversations & Discourse Section -->
+                    <div id="treeSecConversations" class="tree-section border-b border-slate-700/40 pb-2">
+                        <button class="w-full text-xs font-bold text-teal-400 uppercase tracking-wider mb-1 flex items-center justify-between hover:text-teal-300 transition py-1 text-left" onclick="toggleTreeSection('listConversations')">
+                            <span class="flex items-center gap-1.5">
+                                <span id="icon-listConversations" class="text-[10px] transform transition-transform">▼</span>
+                                <span>🗣️ Discourse & Conversations</span>
+                            </span>
+                            <span id="countConversations" class="text-[10px] bg-teal-900/50 text-teal-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                        </button>
+                        <ul id="listConversations" class="space-y-1 pl-1"></ul>
                     </div>
 
                     <!-- Concepts Section -->
@@ -183,7 +204,7 @@
                             <!-- Discovery Filter Tabs for Entities -->
                             <div class="flex items-center gap-1 py-1 px-1 overflow-x-auto text-[10px] border-b border-slate-700/30 mb-1">
                                 <button id="filterEntAll" class="entity-subfilter bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded font-medium transition" onclick="filterEntities('all')">All</button>
-                                <button id="filterEntModels" class="entity-subfilter text-slate-400 hover:text-purple-300 hover:bg-slate-800 px-1.5 py-0.5 rounded font-medium transition" onclick="filterEntities('models')">Models</button>
+                                <button id="filterEntArchs" class="entity-subfilter text-slate-400 hover:text-purple-300 hover:bg-slate-800 px-1.5 py-0.5 rounded font-medium transition" onclick="filterEntities('architectures')">Architectures</button>
                                 <button id="filterEntAlgos" class="entity-subfilter text-slate-400 hover:text-cyan-300 hover:bg-slate-800 px-1.5 py-0.5 rounded font-medium transition" onclick="filterEntities('algorithms')">Algorithms</button>
                                 <button id="filterEntFrameworks" class="entity-subfilter text-slate-400 hover:text-amber-300 hover:bg-slate-800 px-1.5 py-0.5 rounded font-medium transition" onclick="filterEntities('frameworks')">Frameworks</button>
                             </div>
@@ -752,23 +773,23 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Upcoming Milestone -->
                 <div class="bg-slate-800 border border-slate-700 rounded-xl p-5">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Curriculum Block Milestone</h3>
-                    <div class="text-lg font-bold text-amber-300" id="currTargetExam">Cardiovascular Block Final</div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Curriculum Research Milestone</h3>
+                    <div class="text-lg font-bold text-amber-300" id="currTargetExam">Deep Learning & Computer Vision Milestone</div>
                     <div class="text-2xl font-black text-rose-400 mt-2 flex items-baseline gap-2">
-                        <span id="currDaysLeft">8</span>
+                        <span id="currDaysLeft">14</span>
                         <span class="text-xs font-normal text-slate-400">Days Remaining</span>
                     </div>
-                    <p class="text-xs text-slate-400 mt-2" id="currBlockName">MS2 Cardiopulmonary & Renal Medicine</p>
+                    <p class="text-xs text-slate-400 mt-2" id="currBlockName">3D Vision & Foundation Models</p>
                 </div>
 
                 <!-- Readiness Index -->
                 <div class="bg-slate-800 border border-slate-700 rounded-xl p-5">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Overall Board Readiness Index</h3>
-                    <div class="text-3xl font-black text-emerald-400" id="currReadiness">65.2%</div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Technical Mastery Index</h3>
+                    <div class="text-3xl font-black text-emerald-400" id="currReadiness">70.0%</div>
                     <div class="w-full bg-slate-700 h-2 rounded-full mt-3 overflow-hidden">
-                        <div id="currReadinessBar" class="bg-gradient-to-r from-amber-400 to-emerald-400 h-full rounded-full" style="width: 65%;"></div>
+                        <div id="currReadinessBar" class="bg-gradient-to-r from-amber-400 to-emerald-400 h-full rounded-full" style="width: 70%;"></div>
                     </div>
-                    <p class="text-[11px] text-slate-400 mt-2">Weighted average across organ systems.</p>
+                    <p class="text-[11px] text-slate-400 mt-2">Weighted average across technical domains.</p>
                 </div>
 
                 <!-- Priority Topics -->
@@ -780,9 +801,9 @@
                 </div>
             </div>
 
-            <!-- Organ System Mastery Breakdown -->
+            <!-- Technical Domain Mastery Breakdown -->
             <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
-                <h3 class="text-sm font-bold uppercase tracking-wider text-white mb-4">Organ System Mastery Scores</h3>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-white mb-4">Core Domain Mastery Scores</h3>
                 <div id="masteryBreakdown" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     <!-- mastery items -->
                 </div>
@@ -862,14 +883,10 @@
             
             <div>
                 <label class="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Choose Curriculum Preset</label>
-                <div class="grid grid-cols-2 gap-2 mb-3">
-                    <button type="button" id="btnSelectEecsPreset" class="bg-indigo-900/40 hover:bg-indigo-900/70 border border-indigo-700/60 p-2.5 rounded-lg text-left text-xs transition cursor-pointer">
-                        <div class="font-bold text-indigo-300">💻 MIT 6.033 Systems</div>
+                <div class="mb-3">
+                    <button type="button" id="btnSelectEecsPreset" class="w-full bg-indigo-900/40 hover:bg-indigo-900/70 border border-indigo-700/60 p-2.5 rounded-lg text-left text-xs transition cursor-pointer">
+                        <div class="font-bold text-indigo-300">💻 MIT 6.033 Distributed Systems</div>
                         <div class="text-[10px] text-slate-400 mt-0.5">Distributed Consensus, Raft, Paxos, LSM, WAL</div>
-                    </button>
-                    <button type="button" id="btnSelectHstPreset" class="bg-amber-900/40 hover:bg-amber-900/70 border border-amber-700/60 p-2.5 rounded-lg text-left text-xs transition cursor-pointer">
-                        <div class="font-bold text-amber-300">🎓 MIT HST.121 Medicine</div>
-                        <div class="text-[10px] text-slate-400 mt-0.5">Gastroenterology, Hepatology, Cirrhosis</div>
                     </button>
                 </div>
             </div>
@@ -881,16 +898,276 @@
 
             <div id="importCourseDetailsBox" class="p-3 bg-slate-900/60 border border-slate-700/60 rounded-lg text-xs space-y-1 text-slate-300">
                 <div class="font-semibold text-indigo-300" id="importPresetTitle">Selected: MIT 6.033 Distributed Systems & Networking</div>
-                <div class="text-slate-400">• 10 lecture sessions (RPC, Consensus, WAL, Epoll, Virtual Memory)</div>
-                <div class="text-slate-400">• 8 core concept pages, 8 technical entities, 5 trade-off differentials & traps</div>
-                <div class="text-slate-400">• Connects distributed systems graphs with HippoRAG associative memory</div>
+                <div class="text-slate-400">• Core sessions: Modularity, RPC, Virtual Memory, Concurrency, Raft, Paxos, LSM-Trees</div>
+                <div class="text-slate-400">• Technical entities, invariant differentials, failure modes & anti-pattern traps</div>
             </div>
 
             <div class="flex items-center justify-end space-x-3 pt-2">
                 <button class="text-xs px-3 py-2 text-slate-400 hover:text-slate-200" onclick="closeModal('modalImportCourse')">Cancel</button>
-                <button id="btnSubmitImportCourse" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow flex items-center gap-1.5">
+                <button id="btnSubmitImportCourse" class="bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow flex items-center gap-1.5 cursor-pointer">
                     <span>🚀</span> Ingest & Weave into Brain
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: IMPORT RESEARCH PAPER (LINK-ONLY) ================= -->
+    <div id="modalImportPaper" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">📄</span>
+                    <div>
+                        <h3 class="font-bold text-white text-base">Deep Research Paper Digestion & Visual Synthesis</h3>
+                        <p class="text-xs text-slate-400">Supply an arXiv link or preprint URL to automatically pull metadata and synthesize architecture schematics.</p>
+                    </div>
+                </div>
+                <button class="text-slate-400 hover:text-white text-lg p-1 cursor-pointer" onclick="closeModal('modalImportPaper')">✕</button>
+            </div>
+
+            <div class="overflow-y-auto space-y-3.5 pr-1 flex-1">
+                <!-- arXiv / Preprint URL with Fetch Button -->
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Paper Link / arXiv URL / ID *</label>
+                    <div class="flex gap-2">
+                        <input id="paperArxivInput" type="text" placeholder="e.g. https://arxiv.org/abs/2308.04079 or 2308.04079" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-mono">
+                        <button id="btnFetchPaperLink" type="button" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-semibold flex items-center gap-1.5 transition shadow-sm whitespace-nowrap cursor-pointer">
+                            <span>⚡</span> Fetch Details
+                        </button>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-1">Accepts arXiv URLs, preprint links, or arXiv IDs. Automatically retrieves title and abstract.</p>
+                </div>
+
+                <!-- Metadata Fields -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Paper Title *</label>
+                        <input id="paperTitleInput" type="text" placeholder="e.g. 3D Gaussian Splatting for Real-Time Radiance Field Rendering" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Domain Tags (comma-separated)</label>
+                        <input id="paperTagsInput" type="text" placeholder="3DGS, Radiance Fields, SOTA, Real-Time" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+                    </div>
+                </div>
+
+                <!-- Abstract / Contributions -->
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Abstract / Key Contributions</label>
+                    <textarea id="paperAbstractInput" rows="3.5" placeholder="Auto-populated when fetching arXiv details, or paste paper abstract..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"></textarea>
+                </div>
+
+                <!-- Methodology / Notes -->
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Key Methodological Notes / Equations (Optional)</label>
+                    <textarea id="paperContentInput" rows="3" placeholder="Optional notes on architectural innovations, loss formulations, training regimes, or baseline comparisons..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"></textarea>
+                </div>
+
+                <!-- Visual Digestion Callout -->
+                <div class="p-3 bg-cyan-950/30 border border-cyan-800/40 rounded-xl text-xs space-y-1 text-slate-300">
+                    <div class="font-semibold text-cyan-300 flex items-center gap-1.5">
+                        <span>✨</span> Automated Visual & Mathematical Synthesis
+                    </div>
+                    <div class="text-[11px] text-slate-400">• Synthesizes interactive Mermaid architectural dataflow diagrams.</div>
+                    <div class="text-[11px] text-slate-400">• Formulates rigorous KaTeX loss functions and parameter explanations.</div>
+                    <div class="text-[11px] text-slate-400">• Compiles empirical SOTA benchmark comparison tables (PSNR, SSIM, FPS).</div>
+                    <div class="text-[11px] text-slate-400">• Compounds concepts, entities, differentials & active recall flashcards.</div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-between border-t border-slate-700 pt-3 mt-1">
+                <div class="text-[11px] text-slate-400">
+                    <span id="paperStatusNote">Saved directly to your research papers library (<code>papers/</code>).</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button type="button" class="text-xs px-3 py-2 text-slate-400 hover:text-slate-200 cursor-pointer" onclick="closeModal('modalImportPaper')">Cancel</button>
+                    <button id="btnSubmitImportPaper" type="button" class="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow-md shadow-cyan-500/20 flex items-center gap-1.5 cursor-pointer">
+                        <span>🚀</span> Ingest & Deeply Digest Paper
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: CAPTURE CONVERSATION & DISCOURSE DIGESTION ================= -->
+    <div id="modalCaptureConversation" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🗣️</span>
+                    <div>
+                        <h3 class="font-bold text-white text-base">Capture Conversation & Discourse Digestion</h3>
+                        <p class="text-xs text-slate-400">Capture mentor syncs, lab meetings, or audio memos. Transcribe, digest concepts, and stage flashcards.</p>
+                    </div>
+                </div>
+                <button class="text-slate-400 hover:text-white text-lg p-1 cursor-pointer" onclick="closeModal('modalCaptureConversation')">✕</button>
+            </div>
+
+            <!-- Modality Switcher Tabs -->
+            <div class="flex space-x-2 border-b border-slate-700/60 pb-2">
+                <button id="convTabBtnPaste" type="button" class="conv-tab-btn active bg-teal-600/30 text-teal-300 border border-teal-500/50 text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 cursor-pointer">
+                    <span>📋</span> Paste Text / Transcript
+                </button>
+                <button id="convTabBtnFile" type="button" class="conv-tab-btn text-slate-400 hover:text-slate-200 border border-transparent text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 cursor-pointer">
+                    <span>📁</span> Upload Document (.pdf, .txt, .md)
+                </button>
+                <button id="convTabBtnAudio" type="button" class="conv-tab-btn text-slate-400 hover:text-slate-200 border border-transparent text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 cursor-pointer">
+                    <span>🎙️</span> Audio / Voice Memo
+                </button>
+            </div>
+
+            <div class="overflow-y-auto space-y-3.5 pr-1 flex-1">
+                <!-- Metadata Fields -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Conversation Title / Meeting Name *</label>
+                        <input id="convTitleInput" type="text" placeholder="e.g. Sync on 3DGS vs NeRF Rendering with Prof. Sutton" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Participants / Speaker(s)</label>
+                        <input id="convParticipantsInput" type="text" placeholder="e.g. Dr. Sutton, Alex, Self" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Topic Domain</label>
+                        <input id="convDomainInput" type="text" value="Deep Learning & Computer Vision" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Tags (comma-separated)</label>
+                        <input id="convTagsInput" type="text" placeholder="3DGS, Radiance Fields, Mentorship, Action Items" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <!-- Tab 1: Paste Text -->
+                <div id="convPanelPaste" class="conv-panel space-y-2">
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Conversation Text / Transcript / Chat Log *</label>
+                    <textarea id="convTextInput" rows="7" placeholder="Paste dialogue, meeting minutes, Slack transcript, interview notes, or advisor brainstorm here...
+
+Example:
+Dr. Sutton: Have you compared 3D Gaussian Splatting with NeRF on unbounded scenes?
+Self: In our benchmarks, 3DGS achieves 120 FPS vs NeRF's 0.2 FPS, but needle-thin floaters appear in high specular regions.
+Dr. Sutton: You should penalize anisotropic covariance elongation and add an SSIM structural term." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono"></textarea>
+                </div>
+
+                <!-- Tab 2: Document Upload -->
+                <div id="convPanelFile" class="conv-panel hidden space-y-2">
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Upload Document (.pdf, .txt, .md, .json)</label>
+                    <div class="border-2 border-dashed border-slate-700 hover:border-slate-500 rounded-xl p-5 text-center cursor-pointer bg-slate-900/50 transition" onclick="document.getElementById('convFileInput').click()">
+                        <input id="convFileInput" type="file" accept=".pdf,.txt,.md,.markdown,.json" class="hidden">
+                        <div class="text-3xl mb-2">📄</div>
+                        <div class="text-xs font-semibold text-slate-300" id="convFileStatusLabel">Click to select document or drag & drop</div>
+                        <div class="text-[10px] text-slate-500 mt-1">Supports PDF meeting notes, Markdown transcripts, and text files.</div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Audio Recording / Upload -->
+                <div id="convPanelAudio" class="conv-panel hidden space-y-3">
+                    <div class="bg-slate-900/70 border border-slate-700/60 rounded-xl p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-slate-300">🎙️ Live Voice Memo Recording</span>
+                            <span id="convRecordTimer" class="font-mono text-xs text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">00:00</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button id="btnRecordToggle" type="button" class="bg-rose-600/80 hover:bg-rose-600 text-white text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-2 cursor-pointer shadow-sm">
+                                <span id="recordDot" class="w-2.5 h-2.5 rounded-full bg-white animate-pulse hidden"></span>
+                                <span id="recordLabel">🔴 Start Recording</span>
+                            </button>
+                            <span id="recordStatusMsg" class="text-[11px] text-slate-400">Click to record speech from your microphone</span>
+                        </div>
+                        <audio id="convAudioPreview" controls class="hidden w-full mt-2"></audio>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <div class="h-px bg-slate-700 flex-1"></div>
+                        <span class="text-[10px] text-slate-500 uppercase tracking-widest font-mono">OR ATTACH AUDIO FILE</span>
+                        <div class="h-px bg-slate-700 flex-1"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Upload Audio (.mp3, .wav, .m4a, .webm, .ogg)</label>
+                        <input id="convAudioFileInput" type="file" accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg,.flac" class="w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-700 file:text-slate-200 hover:file:bg-slate-600 cursor-pointer">
+                    </div>
+
+                    <div class="flex items-center justify-between pt-1">
+                        <button id="btnTranscribeAudio" type="button" class="bg-teal-700/80 hover:bg-teal-600 text-teal-100 text-xs font-semibold px-3 py-1.5 rounded-lg transition border border-teal-500/40 flex items-center gap-1.5 cursor-pointer">
+                            <span>🪄</span> Transcribe Audio to Text
+                        </button>
+                        <span id="transcribeProgress" class="text-[11px] text-teal-400 hidden">Transcribing speech...</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Transcribed / Editable Speech Text</label>
+                        <textarea id="convAudioTranscribedText" rows="4" placeholder="Speech transcription will populate here. You can edit or append notes before submitting..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-between border-t border-slate-700 pt-3 mt-1">
+                <div class="text-[11px] text-slate-400">
+                    <span id="convStatusNote">Extracts summary, concepts, action items, differentials & flashcards.</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button type="button" class="text-xs px-3 py-2 text-slate-400 hover:text-slate-200 cursor-pointer" onclick="closeModal('modalCaptureConversation')">Cancel</button>
+                    <button id="btnSubmitDigestConversation" type="button" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow-md shadow-emerald-500/20 flex items-center gap-1.5 cursor-pointer">
+                        <span>🚀</span> Digest Topics & Compound into Brain
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: INTERACTIVE UI WALKTHROUGH ================= -->
+    <div id="walkthroughOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-all duration-300">
+        <div class="bg-slate-800 border border-indigo-500/60 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4 relative overflow-hidden">
+            <!-- Background accent gradient glow -->
+            <div class="absolute -top-16 -right-16 w-44 h-44 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-16 -left-16 w-44 h-44 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+            <!-- Header with Step Indicator -->
+            <div class="flex items-center justify-between border-b border-slate-700/80 pb-3">
+                <div class="flex items-center space-x-2.5">
+                    <span id="walkthroughIcon" class="text-2xl p-1.5 bg-indigo-900/40 rounded-lg border border-indigo-700/40">🏛</span>
+                    <div>
+                        <span id="walkthroughStepBadge" class="text-[10px] font-mono uppercase bg-indigo-900/70 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-600/40 font-semibold">Step 1 of 7</span>
+                        <h3 id="walkthroughTitle" class="text-base font-bold text-white tracking-tight mt-0.5">Welcome to Paideia Genesis</h3>
+                    </div>
+                </div>
+                <button id="btnWalkthroughClose" class="text-slate-400 hover:text-white p-1 text-sm rounded-lg hover:bg-slate-700/50 transition cursor-pointer" title="Exit Walkthrough">✕</button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="space-y-3 py-1">
+                <p id="walkthroughDescription" class="text-xs text-slate-300 leading-relaxed">
+                    Paideia Genesis turns static lecture notes and research papers into an evolving, compounding cognitive learning engine. Let's take a quick guided tour of your mission control.
+                </p>
+
+                <!-- Step Key Highlights Callout -->
+                <div id="walkthroughHighlights" class="bg-slate-900/80 border border-slate-700/70 rounded-xl p-3 text-xs space-y-1.5 text-slate-300">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Step Progress Dots -->
+            <div class="flex items-center justify-center space-x-2 pt-1" id="walkthroughDots">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- Action Controls -->
+            <div class="flex items-center justify-between border-t border-slate-700/80 pt-3">
+                <button id="btnWalkthroughSkip" class="text-xs text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded transition cursor-pointer">
+                    Skip Tour
+                </button>
+                <div class="flex items-center space-x-2">
+                    <button id="btnWalkthroughPrev" class="text-xs text-slate-300 bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg transition font-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer">
+                        ← Back
+                    </button>
+                    <button id="btnWalkthroughNext" class="text-xs text-white bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 px-4 py-1.5 rounded-lg font-semibold shadow-md transition cursor-pointer">
+                        Next →
+                    </button>
+                </div>
             </div>
         </div>
     </div>

@@ -199,7 +199,7 @@ Related: [[concepts/raft-distributed-consensus]].
         data = resp.json()
         curricula_ids = [c["id"] for c in data.get("available_curricula", [])]
         self.assertIn("eecs", curricula_ids)
-        self.assertIn("hst121", curricula_ids)
+        self.assertIn("all", curricula_ids)
 
         # 2. Test /api/tutor/generate_vignette with user guidance
         payload = {

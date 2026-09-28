@@ -280,3 +280,63 @@
     box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.2);
 }
 
+/* Interactive UI Walkthrough Styles */
+#walkthroughOverlay {
+    animation: fadeInOverlay 0.25s ease-out forwards;
+}
+
+@keyframes fadeInOverlay {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+    to {
+        opacity: 1;
+        backdrop-filter: blur(8px);
+    }
+}
+
+#walkthroughOverlay > div {
+    animation: scaleInModal 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scaleInModal {
+    from {
+        transform: scale(0.95) translateY(8px);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Mermaid Diagram Styling */
+.mermaid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+}
+
+.mermaid svg {
+    max-width: 100% !important;
+    height: auto !important;
+    font-family: ui-sans-serif, system-ui, sans-serif !important;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+

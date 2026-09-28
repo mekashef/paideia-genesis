@@ -1,85 +1,82 @@
-# 🏛 Paideia Genesis v1.2.0: Deep Learning & Vision Engine, Contextual Retrieval & Paper Digestion 🚀
-**An Autonomous Living Education Assistant & Compounding Knowledge Engine**  
-*Deep Learning & Vision Research &bull; Anthropic Contextual Retrieval &bull; Link-Only arXiv Digestion &bull; Discourse Capture &bull; Multi-Layer Entity Decomposition*
+### 🏛 Paideia Genesis v0.4.0 Release 🚀
+**Anthropic Contextual Retrieval, Link-Only arXiv Paper Digestion & Conversational Discourse Capture**  
+*Contextual Retrieval &bull; Paper Digestion &bull; Discourse Capture &bull; Multi-Layer Entity Decomposition &bull; Clean-Slate Architecture*
 
-We are thrilled to announce **Paideia Genesis v1.2.0**, a major release that pivots Paideia Genesis into an advanced research environment for **Deep Learning and Computer Vision**, integrates Anthropic's breakthrough **Contextual Retrieval** architecture, and introduces automated **Link-Only Paper Digestion** and **Discourse Capture**!
+Paideia Genesis v0.4.0 introduces breakthrough Anthropic Contextual Retrieval, automated link-only arXiv preprint digestion, conversational discourse capture, and multi-layer concept & entity decomposition. This release delivers a pure clean-slate foundation with zero pre-seeded coursework, allowing any learner or researcher to build their own compounding knowledge base across any domain.
 
----
-
-## 🌟 What's New in v1.2.0
-
-### 1. 📑 Dedicated Papers Sidebar & Streamlined arXiv Ingestion
-- **Dedicated Papers Section**: Browse all ingested research papers directly in the left navigation sidebar under `📑 Papers`, with one-click full-screen reading.
-- **Link-Only Paper Ingestion**: No manual PDF uploads required. Simply paste an arXiv URL or ID (e.g., `2308.04079` or `https://arxiv.org/abs/2112.10752`) to auto-fetch title, authors, and abstract via the arXiv Atom API.
-- **Deep Visual & Mathematical Synthesis**: Ingested papers automatically generate:
-  - Interactive **Mermaid architectural dataflow schematics** rendered in real time.
-  - Rigorous **KaTeX mathematical formulas** for loss objectives and attention equations.
-  - SOTA **empirical benchmark comparison tables** (PSNR, SSIM, mIoU, Top-1 accuracy, throughput).
-  - Architectural tensor inventories, failure modes, and auto-staged SM-2 Anki flashcards.
-
-### 2. 🧩 Multi-Layer Paper Decomposition (Architectures, Algorithms, Frameworks, Theories & Formulations)
-- Research papers are automatically decomposed and compounded into specialized wiki files:
-  - **Architectures** (`data/wiki/entities/`): Neural backbones, encoders, decoders, and representation layers.
-  - **Algorithms** (`data/wiki/entities/`): Density control algorithms, rasterization kernels, self-distillation loops, and sampling schedules.
-  - **Frameworks** (`data/wiki/entities/`): Hardware/CUDA engines, pretraining frameworks, and data pipelines.
-  - **Theoretical Concepts** (`data/wiki/concepts/`): High-level inductive biases and foundational principles.
-  - **Mathematical Formulations** (`data/wiki/concepts/`): Formal KaTeX derivations with complete parameter inventories.
-- **UI Subfilters & Distinct Badges**: One-click subfilter buttons (`All`, `Architectures`, `Algorithms`, `Frameworks`) and color-coded badges (`Arch`, `Algo`, `Framework`, `Theory`, `Formula`, `Paper`, `Discourse`).
-- **Knowledge Graph Synapses**: Bidirectional cross-links between master papers and all extracted components.
-
-### 3. 🗣️ Conversational Discourse Capture & Audio Transcription
-- Capture unstructured conversations from lab discussions, mentor meetings, or study groups.
-- Supports copy-pasting raw text notes, uploading documents (`.txt`, `.md`, `.pdf`), or attaching audio recordings (`.mp3`, `.wav`, `.m4a`, `.webm`).
-- Autonomous speech-to-text transcription powered by OpenAI Whisper / local speech models (with deterministic offline fallback).
-- Automatically synthesizes master discourse logs, compiles distinct concepts and flashcards, and archives raw source backups.
-
-### 4. ✨ Anthropic Contextual Retrieval Architecture
-- **Situational Chunk Prepending**: Synthesizes document-level explanatory context for each chunk before indexing.
-- **Contextual BM25 (SQLite FTS5)**: Lexical full-text index with exact terminology matching.
-- **Contextual Embeddings**: High-dimensional semantic vectors situated by high-level context.
-- **Hybrid Reciprocal Rank Fusion (RRF)**: Merges lexical and vector ranks ($RRF = \frac{1}{60 + r_{bm25}} + \frac{1}{60 + r_{embed}}$), reducing retrieval failure by **49%**.
-- **Cross-Encoder Reranking**: Re-scores top candidate chunks against queries, cutting retrieval failure by up to **67%**.
-
-### 5. 🎯 Deep Learning & Computer Vision Foundation & UI Polish
-- **Complete Medical Purge**: Purged all legacy medical data and curricula; 100% focused on Deep Learning and Computer Vision (3DGS, ViT, NeRF, Latent Diffusion, DINOv2, SAM).
-- **Clean Mission Control Header**: Removed cluttered readiness boxes, standardized action button geometry, and fixed event listener lifecycles.
-- **Interactive UI Walkthrough**: Persistent 7-step guided onboarding tour accessible anytime via `"🎓 UI Walkthrough"`.
+The release workflow packages standalone binaries for **Linux (x86_64)**, **macOS (Apple Silicon arm64)**, and **Windows (x64)**.
 
 ---
 
-# 🏛 Paideia Genesis v1.1.0: Contextual Retrieval & Guided UI Walkthrough 🚀
-**An Autonomous Living Education Assistant & Compounding Knowledge Engine**  
-*Anthropic Contextual Retrieval &bull; Interactive UI Onboarding &bull; Dual-Process AI &bull; Biomimetic Memory*
-
-We are excited to announce **Paideia Genesis v1.1.0**, incorporating Anthropic's breakthrough **Contextual Retrieval** architecture ([Anthropic Engineering Guide](https://www.anthropic.com/engineering/contextual-retrieval)) and a comprehensive **Interactive UI Walkthrough** directly inside the Web Mission Control!
-
----
-
-## 🌟 What's New in v1.1.0
+## 🚀 Key Highlights & Improvements in v0.4.0
 
 ### 1. ✨ Anthropic Contextual Retrieval Architecture
-Traditional RAG breaks documents into isolated text chunks, stripping away higher-level context (e.g. an isolated chunk discussing *"the revenue grew 3% over previous quarter"* lacks entity, quarter, or document identity). Paideia Genesis v1.1.0 implements Anthropic's multi-stage Contextual Retrieval framework:
-- **Situational Chunk Prepending**: Automatically synthesizes succinct, chunk-specific explanatory context situating each section within the broader document before indexing.
-- **Contextual BM25 (SQLite FTS5)**: Lexical full-text index built on situational chunks, enabling exact matching on domain terminology and technical identifiers that would otherwise be missed.
-- **Contextual Embeddings**: Semantic vector representations generated for situated chunks (supports Google Gemini `text-embedding-004`, local OpenAI-compatible GPU endpoints, and deterministic offline vectors).
-- **Hybrid Reciprocal Rank Fusion (RRF)**: Merges lexical BM25 ranks with semantic embedding similarity ranks ($RRF = \frac{1}{60 + r_{bm25}} + \frac{1}{60 + r_{embed}}$), reducing retrieval failure rates by **49%**.
-- **Cross-Encoder Reranking**: Re-scores top candidate chunks against the user query, filtering to the top-K highest-precision chunks and reducing retrieval failure by up to **67%**.
-- **New API Endpoint**: `GET /api/wiki/contextual_search?q={query}&limit=15&rerank=true` returns rich situational metadata, section titles, RRF ranks, and cross-encoder scores.
+- **Situational Chunk Prepending**: Synthesizes document-level explanatory context for each chunk prior to indexing.
+- **Contextual BM25 (SQLite FTS5)**: Lexical full-text index with exact domain terminology matching.
+- **Contextual Embeddings**: Semantic vector representations situated by high-level context.
+- **Hybrid Reciprocal Rank Fusion (RRF)**: Merges lexical and vector ranks ($RRF = \frac{1}{60 + r_{bm25}} + \frac{1}{60 + r_{embed}}$), reducing retrieval failure by 49%.
+- **Cross-Encoder Reranking**: Re-scores candidate chunks against queries, cutting retrieval failure by up to 67%.
+- **New API Endpoint**: `GET /api/wiki/contextual_search?q={query}&limit=15&rerank=true`.
 
-### 2. 🎓 Interactive UI Walkthrough & Onboarding Tour
-- **First-Time Guided Tour**: Automatically introduces new users to the closed cognitive learning loop with a clean 7-step guided modal overlay.
-- **Step-by-Step Exploration**:
-  1. *Welcome & System Overview*: Closed cognitive loop and Kahneman dual-process architecture.
-  2. *Compounding Wiki & Contextual Search*: Browsing Karpathy 5-layer notes, hybrid search, and live editing.
-  3. *Brain Graph (HippoRAG)*: Spreading activation and associative multi-hop memory cascades.
-  4. *Socratic Living Tutor*: Steerable dilemmas, guidance constraints, and root misconception triage.
-  5. *Anki Flashcard Center & Jev AI*: Free-text active recall and sub-200ms objective AI grading.
-  6. *Curriculum Milestones & Diagnostics*: Exam countdowns, topic mastery heatmaps, and diagnostic logs.
-  7. *Quick Capture & Ingestion*: Capturing pearls and pulling in external literature on-the-fly.
-- **Persistent Header Access**: Click the new `"🎓 UI Walkthrough"` button in the navigation header anytime to re-launch the tour.
-- **Keyboard & Tab Sync**: Supports `← Back`, `Next →`, keyboard arrows, and automatically switches tabs to display the relevant interface live.
+### 2. 📑 Dedicated Papers Sidebar & Streamlined arXiv Digestion
+- **Dedicated Left Sidebar Section**: Browse and view all ingested research preprints directly under `📑 Papers` with quick-filter support.
+- **Link-Only Ingestion**: Ingest papers simply by supplying an arXiv URL or ID (`2308.04079`); metadata is retrieved automatically via the arXiv Atom API (with offline fallbacks).
+- **Deep Visual & Mathematical Synthesis**: Ingested papers automatically generate real-time Mermaid dataflow schematics, KaTeX loss formulations, and SOTA benchmark comparison tables.
+
+### 3. 🧩 Multi-Layer Concept & Entity Decomposition
+- Automatically extracts and compiles research papers into five distinct technical layers:
+  - **Architectures** (`data/wiki/entities/`): Neural backbones, encoders, decoders, and representation layers (`badge: Arch`).
+  - **Algorithms** (`data/wiki/entities/`): Density control algorithms, rasterization kernels, self-distillation loops, and sampling schedules (`badge: Algo`).
+  - **Frameworks** (`data/wiki/entities/`): Hardware/CUDA engines, pretraining frameworks, and data pipelines (`badge: Framework`).
+  - **Theoretical Concepts** (`data/wiki/concepts/`): High-level inductive biases and foundational principles (`badge: Theory`).
+  - **Mathematical Formulations** (`data/wiki/concepts/`): Formal KaTeX derivations with complete parameter inventories (`badge: Formula`).
+- **Interactive Sidebar Subfilters**: Quick-filter buttons for `All`, `Architectures`, `Algorithms`, and `Frameworks`.
+- **Knowledge Graph Synapses**: Bidirectional links between master papers and all extracted components.
+
+### 4. 🗣️ Conversational Discourse Capture & Audio Transcription
+- Ingest unstructured conversations from mentor meetings, lab discussions, or study sessions via `src/wiki/conversation_digester.py`.
+- Supports text paste, document upload (`.txt`, `.md`, `.pdf`), or audio memo attachment (`.mp3`, `.wav`, `.m4a`, `.webm`) with Whisper / local speech transcription.
+- Automatically compiles master discourse logs, concept pages, and Anki flashcards.
+
+### 5. 🎯 Clean-Slate Research Architecture & UI Refinements
+- **Clean Slate Tool**: Contains zero pre-seeded papers or coursework material; ready for any discipline.
+- **Clean Mission Control Header**: Removed cluttered countdown/milestone/readiness boxes, standardized action button geometry, and fixed event listener lifecycles.
+- **Interactive UI Walkthrough**: 7-step guided onboarding tour accessible anytime via `"🎓 UI Walkthrough"`.
 
 ---
+
+## 📦 Binary Downloads & Quickstart
+
+Download the archive for your platform from the release assets below when the build completes:
+
+##### Linux (x86_64)
+```bash
+tar -xvf paideia-genesis-linux-x86_64.tar.gz
+chmod +x paideia-genesis
+./paideia-genesis
+```
+
+##### macOS (Apple Silicon arm64)
+```bash
+tar -xvf paideia-genesis-macos-arm64.tar.gz
+chmod +x paideia-genesis
+./paideia-genesis
+```
+
+##### Windows (x64)
+- Extract `paideia-genesis-windows-x64.zip`.
+- Double-click `paideia-genesis.exe`.
+
+Once running, open **`http://localhost:8000`** in your browser.
+
+---
+
+## 🧪 Verification & Automated Tests
+
+- **105 automated unit tests** passing across Python 3.11 and 3.12 in GitHub Actions CI.
+
+---
+
 
 # 🏛 Paideia Genesis v1.0.0: Going Public! 🚀
 **An Autonomous Living Education Assistant & Compounding Knowledge Engine**  
